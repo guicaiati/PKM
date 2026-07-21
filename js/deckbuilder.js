@@ -160,8 +160,9 @@ const DeckBuilder = (() => {
   }
 
   async function openCardModal(row) {
-    const name = row.querySelector('.dc-name').textContent;
-    const set = row.querySelector('.dc-set').textContent;
+    const nameEl = row.querySelector('.dc-name');
+    const name = nameEl ? nameEl.childNodes[0].textContent.trim() : '';
+    const set = row.querySelector('.dc-set')?.textContent || '';
 
     const allCards = [
       ...(currentResult?.deck?.pokemon || []),
@@ -179,6 +180,7 @@ const DeckBuilder = (() => {
       hp: card?.hp || '',
       rarity: card?.rarity || '',
       evolvesFrom: card?.evolvesFrom || '',
+      evolvesTo: card?.evolvesTo || [],
       attacks: card?.attacks || [],
       abilities: card?.abilities || [],
       text: card?.text || [],
@@ -193,8 +195,8 @@ const DeckBuilder = (() => {
     };
 
     UI.showLoading(UI.cardNamePlain(name));
-    const html = await UI.getCardExplanationAsync(modalCard);
-    if (html) UI.showModal(UI.cardNamePlain(name), html);
+    const explanation = await UI.getCardExplanationAsync(modalCard);
+    if (explanation) UI.showModal(UI.cardNamePlain(name), explanation);
     else UI.showModal(UI.cardNamePlain(name), card?.explanation || 'Carta incluida en el mazo recomendado.');
   }
 
@@ -296,24 +298,27 @@ const DeckBuilder = (() => {
 
   async function getSelectedCollection() {
     const merged = {};
+    const sourceMap = {};
     if (selectedCollections.has('current')) {
+      const currentName = Collection.getCurrentName() || 'Colección actual';
       const current = Collection.getMap();
-      Object.entries(current).forEach(([k, v]) => { merged[k] = { ...v }; });
+      Object.entries(current).forEach(([k, v]) => { merged[k] = { ...v }; sourceMap[k] = currentName; });
     }
     const saved = await Storage.loadNamedCollections();
     for (const c of saved) {
       if (selectedCollections.has(c.id)) {
         c.data.forEach(card => {
-          const key = Storage.generateId(card.name, card.setId);
+          const key = Storage.generateId(card.name, card.setId, card.number);
           if (merged[key]) {
             merged[key].count = (merged[key].count || 0) + (card.count || 0);
           } else {
             merged[key] = { ...card };
           }
+          if (!sourceMap[key]) sourceMap[key] = c.name;
         });
       }
     }
-    return merged;
+    return { merged, sourceMap };
   }
 
   let deckAutocompleteTimer = null;
@@ -408,7 +413,7 @@ const DeckBuilder = (() => {
   mod.regenerateWithVariant = async function(variant) {
     try {
     const statusEl = document.getElementById('deckStatus');
-    const collection = await getSelectedCollection();
+    const { merged: collection, sourceMap } = await getSelectedCollection();
     if (Object.keys(collection).length === 0) {
       UI.setStatus(statusEl, 'Tu colección está vacía.', true);
       return;
@@ -441,14 +446,14 @@ const DeckBuilder = (() => {
     const w = getWorker();
     w.postMessage({
       type: 'analyze',
-      payload: { collection, archetypes, meta, staples, userPokemon: [], variant }
+      payload: { collection, archetypes, meta, staples, userPokemon: [], variant, sourceMap }
     });
     } catch(err) { console.error('regenerateWithVariant error:', err); }
   };
 
   mod.autoBuild = async function() {
     const statusEl = document.getElementById('deckStatus');
-    const collection = await getSelectedCollection();
+    const { merged: collection, sourceMap } = await getSelectedCollection();
 
     if (Object.keys(collection).length === 0) {
       UI.setStatus(statusEl, 'Tu colección está vacía. Agregá cartas desde "Buscar".', true);
@@ -482,7 +487,7 @@ const DeckBuilder = (() => {
     const w = getWorker();
     w.postMessage({
       type: 'analyze',
-      payload: { collection, archetypes, meta, staples, userPokemon: [], variant: 'auto' }
+      payload: { collection, archetypes, meta, staples, userPokemon: [], variant: 'auto', sourceMap }
     });
   };
 
@@ -492,7 +497,7 @@ const DeckBuilder = (() => {
     const rawInput = input.value.trim();
 
     const userPokemon = rawInput ? rawInput.split(',').map(s => s.trim()).filter(Boolean) : [];
-    const collection = await getSelectedCollection();
+    const { merged: collection, sourceMap } = await getSelectedCollection();
 
     if (Object.keys(collection).length === 0) {
       UI.setStatus(statusEl, 'Tu colección está vacía. Agregá cartas desde "Buscar".', true);
@@ -530,7 +535,7 @@ const DeckBuilder = (() => {
     const w = getWorker();
     w.postMessage({
       type: 'analyze',
-      payload: { collection, archetypes, meta, staples, userPokemon, variant: 'auto' }
+      payload: { collection, archetypes, meta, staples, userPokemon, variant: 'auto', sourceMap }
     });
   };
 

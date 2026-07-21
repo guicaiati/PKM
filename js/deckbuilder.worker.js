@@ -2,12 +2,12 @@ self.onmessage = async function(e) {
   const { type, payload } = e.data;
 
   if (type === 'analyze') {
-    const { collection, archetypes, meta, staples, userPokemon, variant } = payload;
+    const { collection, archetypes, meta, staples, userPokemon, variant, sourceMap } = payload;
     try {
       const safeArchetypes = Array.isArray(archetypes) ? archetypes : [];
       const safeStaples = Array.isArray(staples) ? staples : (staples?.cards || []);
       const safeUserPokemon = Array.isArray(userPokemon) ? userPokemon : [];
-      const result = analyzeCollection(collection, safeArchetypes, meta, safeStaples, safeUserPokemon, variant || 'auto');
+      const result = analyzeCollection(collection, safeArchetypes, meta, safeStaples, safeUserPokemon, variant || 'auto', sourceMap || {});
       self.postMessage({ type: 'result', payload: result });
     } catch (err) {
       self.postMessage({ type: 'error', payload: err.message || String(err) });
@@ -19,7 +19,7 @@ function sendProgress(pct, task) {
   self.postMessage({ type: 'progress', payload: { percent: pct, task } });
 }
 
-function analyzeCollection(collection, archetypes, meta, staples, userPokemon, variant) {
+function analyzeCollection(collection, archetypes, meta, staples, userPokemon, variant, sourceMap) {
   sendProgress(0, 'Iniciando análisis...');
 
   const allCards = Object.values(collection);
@@ -72,7 +72,7 @@ function analyzeCollection(collection, archetypes, meta, staples, userPokemon, v
   let pokemonSuggestions = [];
   let trainerSuggestions = [];
 
-  const buildResult = buildDeckFromCollection(targetPokemon, collection, staples, trainers, energies, bestArchetype, variant);
+  const buildResult = buildDeckFromCollection(targetPokemon, collection, staples, trainers, energies, bestArchetype, variant, sourceMap);
   deck = buildResult.deck;
   pokemonSuggestions = buildResult.suggestions.filter(s => s.type === 'pokemon');
   trainerSuggestions = buildResult.suggestions.filter(s => s.type === 'trainer');
@@ -139,7 +139,7 @@ function analyzeCollection(collection, archetypes, meta, staples, userPokemon, v
   };
 }
 
-function buildDeckFromCollection(targetPokemon, collection, staples, trainers, energies, bestArchetype, variant) {
+function buildDeckFromCollection(targetPokemon, collection, staples, trainers, energies, bestArchetype, variant, sourceMap) {
   const deck = [];
   const usedNames = new Set();
   let totalCards = 0;
@@ -169,6 +169,11 @@ function buildDeckFromCollection(targetPokemon, collection, staples, trainers, e
     if (supertype === 'Energy' && currentOfType >= maxEnergy) return false;
     if (supertype === 'Trainer' && currentOfType >= maxTrainers) return false;
     const qty = Math.min(need, 60 - totalCards);
+    let collectionName = '';
+    const cardLower = cardData.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    for (const [k, v] of Object.entries(sourceMap)) {
+      if (k.startsWith(cardLower + '|')) { collectionName = v; break; }
+    }
     deck.push({
       id: cardData.id || cardData.name,
       name: cardData.name,
@@ -179,7 +184,8 @@ function buildDeckFromCollection(targetPokemon, collection, staples, trainers, e
       image: cardData.image || '',
       set: cardData.set || '',
       explanation: explanation || getExplanation(cardData.name, supertype, need),
-      category: category || guessCategory(cardData.name)
+      category: category || guessCategory(cardData.name),
+      collectionName: collectionName
     });
     usedNames.add(cardData.name.toLowerCase());
     totalCards += qty;

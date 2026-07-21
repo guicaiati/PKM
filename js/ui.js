@@ -213,6 +213,7 @@ const UI = (() => {
       const needed = card.need || card.qty || 1;
       const missing = Math.max(0, needed - owned);
       const explainBtn = card.explanation ? `<button class="dc-explain" title="Por qué esta carta">ⓘ</button>` : '';
+      const collectionLabel = card.collectionName ? `<span class="dc-collection" title="Colección de origen">${card.collectionName}</span>` : '';
       const rowEl = document.createElement('div');
       rowEl.className = 'deck-card-row';
       const typeColor = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
@@ -222,7 +223,7 @@ const UI = (() => {
       rowEl.innerHTML = `
         ${card.image ? `<img src="" alt="${card.name}" loading="lazy"/>` : placeholder}
         <div class="dc-info">
-          <div class="dc-name">${cardNameDisplay(card.name)}</div>
+          <div class="dc-name">${cardNameDisplay(card.name)}${collectionLabel}</div>
           <div class="dc-set">${card.set || ''}</div>
         </div>
         <div class="dc-qty">x${needed}</div>

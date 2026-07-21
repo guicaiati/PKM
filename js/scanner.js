@@ -69,7 +69,7 @@ const Scanner = (() => {
     grid.innerHTML = '';
     const collection = Collection.getData();
     cards.forEach(c => {
-      const key = Storage.generateId(c.name, c.set?.id || '');
+      const key = Storage.generateId(c.name, c.set?.id || '', c.number);
       const owned = collection[key]?.count || 0;
       const el = UI.renderCard({
         id: c.id, name: c.name, image: c.images?.small || '', set: c.set?.name || '',

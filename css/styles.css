@@ -285,8 +285,14 @@ button.ghost:hover { color: var(--text); border-color: var(--holo-b); }
 .deck-card-row img { width: 40px; border-radius: 4px; background: #0d0f1e; }
 .deck-card-row .card-placeholder { width: 40px; min-height: 56px; border-radius: 4px; }
 .pkcard .card-placeholder { width: 100%; }
-.deck-card-row .dc-info { flex: 1; }
-.deck-card-row .dc-name { font-family: var(--display); font-size: 13px; font-weight: 600; }
+.deck-card-row .dc-info { flex: 1; min-width: 0; }
+.deck-card-row .dc-name { font-family: var(--display); font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.dc-collection {
+  font-family: var(--mono); font-size: 10px; font-weight: 200;
+  color: #ffffff7a; background: #ffffff1c; border: none;
+  border-radius: 4px; padding: 2px 8px; margin-left: 12px;
+  vertical-align: middle; white-space: nowrap; text-transform: uppercase;
+}
 .deck-card-row .dc-set { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
 .deck-card-row .dc-qty { font-family: var(--mono); font-size: 13px; color: var(--holo-a); min-width: 20px; text-align: center; }
 .deck-card-row .dc-owned { font-family: var(--mono); font-size: 11px; }

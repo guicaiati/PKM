@@ -67,8 +67,8 @@ const Collection = (() => {
       try {
         const el = UI.renderCard(c, { showQty: true });
         el.querySelector('.inc').addEventListener('click', () => { c.count++; save(); render(); });
-        el.querySelector('.dec').addEventListener('click', () => { c.count = Math.max(0, c.count - 1); if (c.count === 0) delete data[Storage.generateId(c.name, c.setId)]; save(); render(); });
-        el.querySelector('.remove-btn').addEventListener('click', () => { delete data[Storage.generateId(c.name, c.setId)]; save(); render(); });
+        el.querySelector('.dec').addEventListener('click', () => { c.count = Math.max(0, c.count - 1); if (c.count === 0) delete data[Storage.generateId(c.name, c.setId, c.number)]; save(); render(); });
+        el.querySelector('.remove-btn').addEventListener('click', () => { delete data[Storage.generateId(c.name, c.setId, c.number)]; save(); render(); });
         el.querySelector('.photo-btn')?.addEventListener('click', () => {
           const input = document.createElement('input');
           input.type = 'file';
@@ -79,7 +79,7 @@ const Collection = (() => {
             const reader = new FileReader();
             reader.onload = async () => {
               const dataUrl = reader.result;
-              const cardId = c.id || Storage.generateId(c.name, c.setId);
+              const cardId = c.id || Storage.generateId(c.name, c.setId, c.number);
               await Storage.cacheImage(cardId, dataUrl);
               c.image = dataUrl;
               const dbCardId = c.id;
@@ -109,7 +109,7 @@ const Collection = (() => {
         el.querySelector('.card-info-btn')?.addEventListener('contextmenu', (e) => {
           e.preventDefault();
           try {
-            const key = Storage.generateId(c.name, c.setId);
+            const key = Storage.generateId(c.name, c.setId, c.number);
             UI.showEditableModal(UI.cardNamePlain(c.name), c, async (updated) => {
               Object.assign(data[key] || c, {
                 hp: updated.hp, rarity: updated.rarity,
@@ -427,7 +427,7 @@ const Collection = (() => {
           if (!Array.isArray(cards)) { UI.toast('Formato inválido', 'error'); return; }
           let imported = 0;
           cards.forEach(c => {
-            const key = Storage.generateId(c.name, c.setId || '');
+            const key = Storage.generateId(c.name, c.setId || '', c.number || '');
             data[key] = {
               id: c.id || key, name: c.name, image: c.image || '', set: c.set || '',
               setId: c.setId || '', number: c.number || '', count: c.count || 1,
@@ -458,7 +458,7 @@ const Collection = (() => {
 
     addFromAPI(apiCard) {
       const setId = apiCard.set?.id || '';
-      const key = Storage.generateId(apiCard.name, setId);
+      const key = Storage.generateId(apiCard.name, setId, apiCard.number);
       const prevCount = data[key] ? data[key].count : 0;
       data[key] = {
         id: apiCard.id || key, name: apiCard.name, image: apiCard.images?.small || '',

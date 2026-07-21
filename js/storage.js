@@ -99,8 +99,8 @@ const Storage = (() => {
     });
   }
 
-  function generateId(name, setId) {
-    return (name || '').toLowerCase().replace(/[^a-z0-9]/g, '') + '|' + (setId || '');
+  function generateId(name, setId, number) {
+    return (name || '').toLowerCase().replace(/[^a-z0-9]/g, '') + '|' + (setId || '') + '|' + (number || '');
   }
 
   return {
@@ -110,7 +110,7 @@ const Storage = (() => {
     },
 
     async saveCollection(collectionMap) {
-      const items = Object.values(collectionMap).map(c => ({ ...c, id: generateId(c.name, c.setId) }));
+      const items = Object.values(collectionMap).map(c => ({ ...c, id: generateId(c.name, c.setId, c.number) }));
       await open();
       return new Promise((resolve, reject) => {
         const store = db.transaction(STORES.collection, 'readwrite').objectStore(STORES.collection);
@@ -124,7 +124,7 @@ const Storage = (() => {
     async loadCollection() {
       const items = await getAll(STORES.collection);
       const map = {};
-      items.forEach(c => { map[generateId(c.name, c.setId)] = c; });
+      items.forEach(c => { map[generateId(c.name, c.setId, c.number)] = c; });
       return map;
     },
 
@@ -292,7 +292,7 @@ const Storage = (() => {
       const item = await this.loadNamedCollection(id);
       if (!item) return null;
       const map = {};
-      item.data.forEach(c => { map[generateId(c.name, c.setId)] = c; });
+      item.data.forEach(c => { map[generateId(c.name, c.setId, c.number)] = c; });
       return map;
     },
 
