@@ -204,6 +204,12 @@
       <div class="card-box">
         <h2>Mis colecciones</h2>
         <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminpalas.</p>
+        <div style="margin-bottom:12px;">
+          <div class="search-wrap">
+            <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..." autocomplete="off" />
+            <div class="autocomplete-list" id="savedSearchAutocomplete"></div>
+          </div>
+        </div>
         <div id="savedCollectionsFull"></div>
         <div class="empty" id="savedCollectionsEmpty">No tenés colecciones guardadas. Andá a "Mi colección" y guardá una.</div>
       </div>

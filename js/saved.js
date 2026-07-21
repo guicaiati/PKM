@@ -1,5 +1,47 @@
 const Saved = (() => {
-  async function renderCollections() {
+  let _allCollections = [];
+
+  function setupSearch() {
+    const input = document.getElementById('savedCollectionSearch');
+    const list = document.getElementById('savedSearchAutocomplete');
+    if (!input || input._bound) return;
+    input._bound = true;
+
+    let timer = null;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      const val = input.value.trim();
+      timer = setTimeout(() => {
+        renderCollections(val);
+        if (val.length < 2) { list.classList.remove('show'); return; }
+        const q = val.toLowerCase();
+        const allNames = new Set();
+        _allCollections.forEach(c => {
+          c.data.forEach(card => {
+            if (card.name.toLowerCase().includes(q)) allNames.add(card.name);
+          });
+        });
+        const matches = [...allNames].sort().slice(0, 8);
+        if (matches.length === 0) { list.classList.remove('show'); return; }
+        list.innerHTML = matches.map(n => '<div class="autocomplete-item">' + n + '</div>').join('');
+        list.classList.add('show');
+        list.querySelectorAll('.autocomplete-item').forEach(el => {
+          el.addEventListener('click', () => {
+            input.value = el.textContent;
+            list.classList.remove('show');
+            renderCollections(el.textContent);
+          });
+        });
+      }, 150);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-wrap')) list.classList.remove('show');
+    });
+  }
+
+  async function renderCollections(searchQuery) {
+    setupSearch();
     const container = document.getElementById('savedCollectionsFull');
     const empty = document.getElementById('savedCollectionsEmpty');
     const saved = await Storage.loadNamedCollections();
@@ -22,9 +64,26 @@ const Saved = (() => {
     const others = liveName ? saved.filter(c => c.name !== liveName) : saved;
     const all = currentEntry ? [currentEntry, ...others] : others;
 
+    _allCollections = all;
+
+    let filtered = all;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = all.filter(c => c.data.some(card => card.name.toLowerCase().includes(q)));
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = '';
+      empty.style.display = 'block';
+      empty.textContent = searchQuery
+        ? 'No se encontraron colecciones con "' + searchQuery + '".'
+        : 'No tenés colecciones guardadas. Andá a "Mi colección" y guardá una.';
+      return;
+    }
+
     empty.style.display = 'none';
 
-    container.innerHTML = all.map(c => {
+    container.innerHTML = filtered.map(c => {
       const total = c.data.reduce((s, x) => s + (x.count || 0), 0);
       const unique = c.data.length;
       const pokemon = c.data.filter(x => x.supertype === 'Pokémon').reduce((s, x) => s + (x.count || 0), 0);
@@ -108,7 +167,7 @@ const Saved = (() => {
         const newName = prompt('Nuevo nombre:', oldName);
         if (newName && newName.trim()) {
           await Storage.renameNamedCollection(id, newName.trim());
-          renderCollections();
+          renderCollections(document.getElementById('savedCollectionSearch')?.value?.trim() || '');
           UI.toast('Renombrada', 'success');
         }
       });
@@ -121,7 +180,7 @@ const Saved = (() => {
         const name = card.querySelector('.saved-card-name').textContent;
         if (confirm('¿Eliminar "' + name + '"?')) {
           await Storage.deleteNamedCollection(id);
-          renderCollections();
+          renderCollections(document.getElementById('savedCollectionSearch')?.value?.trim() || '');
           UI.toast('Eliminada', 'success');
         }
       });
@@ -234,7 +293,8 @@ const Saved = (() => {
 
   return {
     async render() {
-      await renderCollections();
+      const searchInput = document.getElementById('savedCollectionSearch');
+      await renderCollections(searchInput?.value?.trim() || '');
       await renderDecks();
     }
   };

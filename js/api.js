@@ -481,6 +481,13 @@ const API = (() => {
       const n = await downloadHardcodedSet(setId);
       if (n > 0) dbReady = true;
       return n;
+    },
+
+    async fetchFromAPI(name) {
+      try {
+        const data = await fetchJSON(`${BASE}/cards?q=name:"${name}"&pageSize=3`);
+        return data.data || [];
+      } catch { return []; }
     }
   };
 })();

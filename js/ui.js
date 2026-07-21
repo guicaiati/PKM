@@ -7,48 +7,84 @@ const UI = (() => {
 
   const TYPE_ES = { Fire: 'Fuego', Water: 'Agua', Grass: 'Planta', Lightning: 'Rayo', Psychic: 'Psíquico', Fighting: 'Lucha', Darkness: 'Oscuridad', Metal: 'Metal', Colorless: 'Incoloro', Dragon: 'Dragón', Fairy: 'Hada' };
 
-  const TCG_KEEP_EN = [
-    'Supporter', 'Item', 'Stadium', 'Tool',
-    'Prize card', 'Prize cards', 'Prize',
-    'Active Pokémon', 'Benched Pokémon', 'Defending Pokémon', 'Active',
-    'Bench', 'Knocked Out',
-    'Fire', 'Water', 'Grass', 'Lightning', 'Psychic', 'Fighting', 'Darkness', 'Metal', 'Colorless', 'Dragon', 'Fairy',
-    'Energy', 'Energy card', 'Energy cards',
-    'Pokémon', 'EX', '-ex', 'VMAX', 'VSTAR', 'GX',
-    'ACE SPEC', 'Technical Machine',
-    'Confused', 'Asleep', 'Paralyzed', 'Poisoned', 'Burned',
-    'Weakness', 'Resistance', 'Retreat',
-    'Basic', 'Stage 1', 'Stage 2',
-    'HP',
-  ];
-  const _sortedTCG = TCG_KEEP_EN.sort((a, b) => b.length - a.length);
+  const TCG_EN_TO_ES = {
+    'Active Pokémon': 'Pokémon Activo',
+    'Benched Pokémon': 'Pokémon en Banca',
+    'Defending Pokémon': 'Pokémon Defensor',
+    'Prize card': 'Carta de Premio',
+    'Prize cards': 'Cartas de Premio',
+    'Stage 1': 'Nivel 1',
+    'Stage 2': 'Nivel 2',
+    'Technical Machine': 'Máquina Técnica',
+    'Knocked Out': 'Fuera de Juego',
+    'Energy card': 'Carta de Energía',
+    'Energy cards': 'Cartas de Energía',
+    'Supporter': 'Soporte',
+    'Stadium': 'Estadio',
+    'Prize': 'Premio',
+    'Active': 'Activo',
+    'Item': 'Objeto',
+    'Tool': 'Herramienta',
+    'Fire': 'Fuego',
+    'Water': 'Agua',
+    'Grass': 'Planta',
+    'Lightning': 'Rayo',
+    'Psychic': 'Psíquico',
+    'Fighting': 'Lucha',
+    'Darkness': 'Oscuridad',
+    'Metal': 'Metal',
+    'Colorless': 'Incoloro',
+    'Dragon': 'Dragón',
+    'Fairy': 'Hada',
+    'Energy': 'Energía',
+    'Pokémon': 'Pokémon',
+    'ACE SPEC': 'ACE SPEC',
+    'Confused': 'Confuso',
+    'Asleep': 'Dormido',
+    'Paralyzed': 'Paralizado',
+    'Poisoned': 'Envenenado',
+    'Burned': 'Quemado',
+    'Weakness': 'Debilidad',
+    'Resistance': 'Resistencia',
+    'Retreat': 'Retirada',
+    'Basic': 'Básica',
+    'Bench': 'Banca',
+  };
+  const _tcgSorted = Object.keys(TCG_EN_TO_ES).sort((a, b) => b.length - a.length);
+  const _tcgKeep = new Set(['EX', '-ex', 'VMAX', 'VSTAR', 'GX', 'HP']);
 
   const _transCache = {};
   async function translateText(text) {
     if (!text || !text.trim()) return text;
     if (_transCache[text]) return _transCache[text];
     let wip = text;
-    const placeholders = [];
-    for (let i = 0; i < _sortedTCG.length; i++) {
-      const term = _sortedTCG[i];
+    for (const term of _tcgSorted) {
+      const es = TCG_EN_TO_ES[term];
+      if (!es) continue;
       const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-      if (re.test(wip)) {
-        const ph = `§${i}§`;
-        wip = wip.replace(re, ph);
-        placeholders.push([ph, term]);
-      }
+      wip = wip.replace(re, es);
+    }
+    for (const keep of _tcgKeep) {
+      const re = new RegExp(keep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+      wip = wip.replace(re, `\u200B${keep}\u200B`);
     }
     try {
       const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(wip)}&langpair=en|es`);
       const data = await res.json();
       if (data.responseStatus === 200 && data.responseData?.translatedText) {
         let t = data.responseData.translatedText;
-        for (const [ph, term] of placeholders) t = t.split(ph).join(term);
+        for (const keep of _tcgKeep) {
+          const re = new RegExp(`[\u200B\\s\\S]{0,5}${keep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\u200B\\s\\S]{0,5}`, 'g');
+          t = t.replace(re, keep);
+        }
         _transCache[text] = t;
         return t;
       }
     } catch (e) { console.warn('Translation failed:', e); }
-    for (const [ph, term] of placeholders) wip = wip.split(ph).join(term);
+    for (const keep of _tcgKeep) {
+      const ph = `\u200B${keep}\u200B`;
+      while (wip.includes(ph)) wip = wip.replace(ph, keep);
+    }
     return wip;
   }
 
@@ -397,26 +433,59 @@ const UI = (() => {
       const hasRealData = attacks.length > 0 || abilities.length > 0 || cardText.length > 0;
       if (hasRealData) return await this.getCardExplanation(card);
       if (!card.id && !card.name) return await this.getCardExplanation(card);
+
+      function enrichCard(source) {
+        card.attacks = source.attacks || [];
+        card.abilities = source.abilities || [];
+        card.text = source.text && source.text.length > 0 ? source.text : (source.rules || []);
+        card.weaknesses = source.weaknesses || [];
+        card.resistances = source.resistances || [];
+        card.retreatCost = source.retreatCost || [];
+        card.convertedRetreatCost = source.convertedRetreatCost || 0;
+        if (source.hp) card.hp = parseInt(source.hp, 10);
+        if (source.types) card.types = source.types;
+        if (source.subtypes) card.subtypes = source.subtypes;
+        if (source.evolvesFrom) card.evolvesFrom = source.evolvesFrom;
+        if (source.rarity) card.rarity = source.rarity;
+        if (!card.number && source.number) card.number = source.number;
+        if (source.images?.small && !card.image) card.image = source.images.small;
+      }
+
+      function hasCardData(c) {
+        return (c.attacks && c.attacks.length > 0) || (c.abilities && c.abilities.length > 0) ||
+          (c.text && c.text.length > 0) || (c.rules && c.rules.length > 0);
+      }
+
       try {
-        const query = card.name;
-        const results = await API.searchCards(query, 1);
-        if (results.length > 0) {
-          const full = results[0];
-          card.attacks = full.attacks || [];
-          card.abilities = full.abilities || [];
-          card.text = full.text && full.text.length > 0 ? full.text : (full.rules || []);
-          card.weaknesses = full.weaknesses || [];
-          card.resistances = full.resistances || [];
-          card.retreatCost = full.retreatCost || [];
-          card.convertedRetreatCost = full.convertedRetreatCost || 0;
-          if (full.hp) card.hp = parseInt(full.hp, 10);
-          if (full.types) card.types = full.types;
-          if (full.subtypes) card.subtypes = full.subtypes;
-          if (full.evolvesFrom) card.evolvesFrom = full.evolvesFrom;
-          if (full.rarity) card.rarity = full.rarity;
-          if (!card.number && full.number) card.number = full.number;
-          if (full.images?.small && !card.image) card.image = full.images.small;
+        let full = null;
+
+        if (card.id && !card.id.includes('|')) {
+          const byId = await API.searchCards(card.id, 1);
+          if (byId.length > 0 && hasCardData(byId[0])) full = byId[0];
         }
+
+        if (!full) {
+          const query = card.number ? card.name + ' ' + card.number : card.name;
+          const results = await API.searchCards(query, 5);
+          const match = results.find(r => {
+            const rName = (r.name || '').toLowerCase();
+            const cName = (card.name || '').toLowerCase();
+            return (rName === cName || rName.includes(cName) || cName.includes(rName)) && hasCardData(r);
+          });
+          if (match) full = match;
+        }
+
+        if (!full && card.name) {
+          const apiResults = await API.fetchFromAPI(card.name);
+          const match = apiResults.find(r => {
+            const rName = (r.name || '').toLowerCase();
+            const cName = (card.name || '').toLowerCase();
+            return rName === cName || rName.includes(cName) || cName.includes(rName);
+          });
+          if (match) full = match;
+        }
+
+        if (full) enrichCard(full);
       } catch (e) { console.warn('getCardExplanationAsync fetch failed:', e); }
       return await this.getCardExplanation(card);
     },
