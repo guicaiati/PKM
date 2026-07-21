@@ -1,0 +1,671 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  @font-face {
+    font-family: 'EssentiarumTCG';
+    src: url('fonts/EssentiarumTCG-SVG.otf') format('svg'),
+         url('fonts/EssentiarumTCG.otf') format('opentype');
+    font-weight: normal; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'ThraexMagnus';
+    src: url('fonts/ThraexMagnus.woff2') format('woff2'),
+         url('fonts/ThraexMagnus.otf') format('opentype');
+    font-weight: normal; font-style: normal; font-display: swap;
+  }
+
+  :root{
+    --bg: #14172B;
+    --surface: #1D2140;
+    --surface-2: #262B52;
+    --line: #383F72;
+    --text: #EDEBFF;
+    --text-dim: #A8ADD6;
+    --holo-a: #7DD3FC;
+    --holo-b: #C084FC;
+    --holo-c: #FDBA74;
+    --fire: #F87171;
+    --water: #38BDF8;
+    --grass: #4ADE80;
+    --electric: #FACC15;
+    --psychic: #E879F9;
+    --fighting: #FB923C;
+    --colorless: #D4D4D8;
+    --darkness: #A78BFA;
+    --metal: #94A3B8;
+    --dragon: #FDE68A;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+    --tcg: 'EssentiarumTCG', sans-serif;
+    --poke: 'ThraexMagnus', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);}
+  #app{max-width:1000px;margin:0 auto;padding:28px 20px 60px;}
+
+  .ledger-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:22px;border-bottom:1px solid var(--line);padding-bottom:16px;}
+  .ledger-head h1{font-family:var(--display);font-weight:700;font-size:26px;margin:0;letter-spacing:0.2px;}
+  .thraex-title{font-family:var(--poke);letter-spacing:2px;}
+  .ledger-head .tag{font-family:var(--mono);font-size:12px;color:var(--text-dim);}
+
+  nav.tabs{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;}
+  nav.tabs button{
+    font-family:var(--mono);font-size:13px;letter-spacing:0.3px;
+    background:var(--surface);color:var(--text-dim);border:1px solid var(--line);
+    padding:9px 14px;border-radius:8px;cursor:pointer;transition:all .15s ease;
+  }
+  nav.tabs button:hover{color:var(--text);border-color:var(--holo-b);}
+  nav.tabs button.active{
+    color:var(--bg);font-weight:600;border-color:transparent;
+    background:linear-gradient(100deg,var(--holo-a),var(--holo-b) 55%,var(--holo-c));
+  }
+
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .card-box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;}
+  .card-box h2{font-family:var(--display);font-size:16px;margin:0 0 12px;font-weight:700;}
+  .hint{color:var(--text-dim);font-size:13px;line-height:1.5;margin:0 0 14px;}
+
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  input[type=text], textarea{
+    background:var(--surface-2);border:1px solid var(--line);color:var(--text);
+    padding:10px 12px;border-radius:8px;font-family:var(--body);font-size:14px;flex:1;min-width:180px;
+  }
+  input[type=text]:focus, textarea:focus{outline:2px solid var(--holo-b);outline-offset:1px;}
+  textarea{width:100%;min-height:90px;resize:vertical;font-family:var(--mono);font-size:13px;}
+
+  button.action{
+    font-family:var(--body);font-weight:600;font-size:14px;color:var(--bg);
+    background:linear-gradient(100deg,var(--holo-a),var(--holo-b) 55%,var(--holo-c));
+    border:none;padding:10px 18px;border-radius:8px;cursor:pointer;
+  }
+  button.action:hover{filter:brightness(1.08);}
+  button.action:disabled{opacity:0.5;cursor:not-allowed;filter:none;}
+  button.ghost{
+    font-family:var(--mono);font-size:12px;color:var(--text-dim);background:transparent;
+    border:1px solid var(--line);padding:6px 10px;border-radius:6px;cursor:pointer;
+  }
+  button.ghost:hover{color:var(--text);border-color:var(--holo-b);}
+
+  label.filebtn{
+    font-family:var(--body);font-weight:600;font-size:14px;color:var(--text);
+    background:var(--surface-2);border:1px dashed var(--line);padding:10px 16px;border-radius:8px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  }
+  label.filebtn:hover{border-color:var(--holo-b);}
+  input[type=file]{display:none;}
+
+  .status{font-family:var(--mono);font-size:12.5px;color:var(--holo-a);margin-top:10px;min-height:16px;}
+  .status.err{color:var(--fire);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:14px;}
+  .pkcard{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;border-top:3px solid var(--line);}
+  .pkcard img{width:100%;display:block;background:#0d0f1e;}
+  .pkcard .meta{padding:10px;display:flex;flex-direction:column;gap:6px;}
+  .pkcard .name{font-family:var(--display);font-size:13px;font-weight:700;line-height:1.2;}
+  .pkcard .set{font-family:var(--mono);font-size:11px;color:var(--text-dim);}
+  .qty-row{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+  .qty-controls{display:flex;align-items:center;gap:6px;}
+  .qty-controls button{
+    width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:var(--surface);
+    color:var(--text);cursor:pointer;font-family:var(--mono);
+  }
+  .qty-controls span{font-family:var(--mono);min-width:16px;text-align:center;}
+
+  .empty{border:1px dashed var(--line);border-radius:10px;padding:30px 16px;text-align:center;color:var(--text-dim);font-size:13px;font-family:var(--mono);}
+
+  .arch-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;}
+  .arch-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .arch-name{font-family:var(--display);font-weight:700;font-size:15px;}
+  .arch-score{font-family:var(--mono);font-size:13px;padding:4px 10px;border-radius:20px;background:var(--surface-2);border:1px solid var(--line);}
+  .bar{height:8px;border-radius:6px;background:var(--surface-2);margin:10px 0;overflow:hidden;border:1px solid var(--line);}
+  .bar-fill{height:100%;background:linear-gradient(100deg,var(--holo-a),var(--holo-b) 55%,var(--holo-c));}
+  .need-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .need-chip{font-family:var(--mono);font-size:11.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--text-dim);}
+  .need-chip.missing{color:var(--fire);border-color:var(--fire);}
+
+  .thumb-row{display:flex;flex-wrap:wrap;gap:10px;}
+  .mini-thumb{width:88px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;overflow:hidden;text-align:center;}
+  .mini-thumb img{width:100%;display:block;background:#0d0f1e;min-height:60px;}
+  .mini-thumb .mini-label{font-family:var(--mono);font-size:10px;line-height:1.3;color:var(--text-dim);padding:5px 4px;}
+  .mini-thumb .mini-count{display:block;margin-top:2px;color:var(--text-dim);}
+  .mini-thumb .mini-count.missing{color:var(--fire);}
+  .deck-sub-h{font-family:var(--mono);font-size:12px;color:var(--text-dim);margin:12px 0 8px;text-transform:uppercase;letter-spacing:0.4px;}
+
+  ::selection{background:var(--holo-b);color:var(--bg);}
+
+  .tcg-sym{font-family:var(--tcg);display:inline-block;vertical-align:middle;line-height:1;}
+  .tcg-sym.type-icon{width:1.2em;height:1.2em;text-align:center;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:inherit;}
+  .tcg-sym.type-icon.fire{color:var(--fire);} .tcg-sym.type-icon.water{color:var(--water);}
+  .tcg-sym.type-icon.grass{color:var(--grass);} .tcg-sym.type-icon.lightning{color:var(--electric);}
+  .tcg-sym.type-icon.psychic{color:var(--psychic);} .tcg-sym.type-icon.fighting{color:var(--fighting);}
+  .tcg-sym.type-icon.darkness{color:var(--darkness);} .tcg-sym.type-icon.metal{color:var(--metal);}
+  .tcg-sym.type-icon.colorless{color:var(--colorless);} .tcg-sym.type-icon.dragon{color:var(--dragon);}
+  .tcg-sym.rarity{font-size:11px;letter-spacing:1px;}
+</style>
+
+<div id="app">
+  <div class="ledger-head">
+    <h1><span class="thraex-title" style="font-size:20px;opacity:0.7;vertical-align:middle;margin-right:4px;">PKM</span> Trainer's Ledger</h1>
+    <div class="tag">escaneá · catalogá · armá tu mazo</div>
+  </div>
+
+  <nav class="tabs">
+    <button data-tab="scan" class="active">📷 Escanear / Buscar</button>
+    <button data-tab="collection">🃏 Mi colección</button>
+    <button data-tab="decks">⚡ Sugerencias de mazo</button>
+  </nav>
+
+  <!-- SCAN / SEARCH -->
+  <section class="panel active" id="panel-scan">
+    <div class="card-box">
+      <h2>Buscar carta por nombre</h2>
+      <p class="hint">Escribí el nombre (en inglés funciona mejor, la base de datos es de TCG en inglés) y buscá en la base de datos de Pokémon TCG. Si agregás el número de la carta al final (ej: "Tapu Koko 67"), filtra directo esa versión exacta dentro del set.</p>
+      <div class="row">
+        <input type="text" id="searchInput" placeholder="ej: Tapu Koko 67" />
+        <button class="action" id="searchBtn">Buscar</button>
+      </div>
+      <div class="status" id="searchStatus"></div>
+      <div class="grid" id="searchResults"></div>
+    </div>
+
+    <div class="card-box">
+      <h2>Escanear una foto</h2>
+      <p class="hint">Subí una foto de tu carta. Se usa un modelo de visión para identificarla y luego se busca en la base de datos oficial. Funciona mejor con buena luz y la carta bien encuadrada.</p>
+      <label class="filebtn">
+        📸 Elegir foto
+        <input type="file" id="fileInput" accept="image/*" />
+      </label>
+      <div class="status" id="scanStatus"></div>
+    </div>
+  </section>
+
+  <!-- COLLECTION -->
+  <section class="panel" id="panel-collection">
+    <div class="card-box">
+      <h2>Mi colección</h2>
+      <p class="hint">Cartas que agregaste desde la búsqueda o el escáner. Ajustá cantidades o quitalas.</p>
+      <div id="collectionGrid" class="grid"></div>
+      <div class="empty" id="collectionEmpty">Todavía no agregaste cartas. Andá a "Escanear / Buscar".</div>
+    </div>
+  </section>
+
+  <!-- DECKS -->
+  <section class="panel" id="panel-decks">
+    <div class="card-box">
+      <h2>🎲 Mazos automáticos desde tu colección</h2>
+      <p class="hint">
+        Genera dos mazos posibles usando tus Pokémon con más copias (o mejor tipo) como núcleo, sumando su preevolución si la tenés,
+        y completando con cartas de soporte típicas (Ultra Ball, Professor's Research, Switch, energía básica del tipo correspondiente, etc).<br><br>
+        <strong>Aviso:</strong> como no tengo el meta competitivo actualizado de julio 2026, esto usa una lógica genérica
+        (tu Pokémon con más copias/mejor tipo como atacante + su preevolución si tiene + soporte estándar), no son listas de torneo.
+        Para eso, seguí usando <a href="https://limitlesstcg.com" target="_blank" style="color:var(--holo-a)">Limitless TCG</a>.
+      </p>
+      <button class="action" id="autoDeckBtn">Generar 2 mazos sugeridos</button>
+      <div class="status" id="autoDeckStatus"></div>
+      <div id="autoDeckRender"></div>
+    </div>
+
+    <div class="card-box">
+      <h2>Arquetipos a comparar</h2>
+      <p class="hint">
+        Esto es una plantilla editable, no una lista oficial del meta actual (el meta cambia con cada set nuevo).
+        Dejé un ejemplo cargado — reemplazalo o agregá los arquetipos que quieras seguir, con las cartas clave y cuántas copias necesita cada uno.
+        Para las listas del meta competitivo real y actualizado, <a href="https://limitlesstcg.com" target="_blank" style="color:var(--holo-a)">Limitless TCG</a> es la referencia.
+      </p>
+      <div class="row">
+        <input type="text" id="archName" placeholder="Nombre del arquetipo (ej: Charizard ex)" />
+      </div>
+      <textarea id="archList" placeholder="Una carta por línea, formato: Nombre de la carta x4
+ej:
+Charizard ex x2
+Pidgeot ex x1
+Rare Candy x4"></textarea>
+      <div class="row" style="margin-top:10px;">
+        <button class="action" id="addArchBtn">Agregar arquetipo</button>
+      </div>
+    </div>
+
+    <div id="archList-render"></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const collection = {}; // key: card name (lowercase) -> {name, image, set, count}
+  const archetypes = [
+    {
+      name: "Ejemplo: Arquetipo genérico de ataque rápido",
+      cards: [
+        { name: "Carta atacante principal", need: 2 },
+        { name: "Carta de soporte/búsqueda", need: 4 },
+        { name: "Energía básica", need: 8 }
+      ]
+    }
+  ];
+
+  // ---------- TABS ----------
+  document.querySelectorAll('nav.tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+      if(btn.dataset.tab==='collection') renderCollection();
+      if(btn.dataset.tab==='decks') renderArchetypes();
+    });
+  });
+
+  // ---------- CARD API SEARCH ----------
+  async function searchCards(rawQuery){
+    // Detect a trailing card number, e.g. "Tapu Koko 67" -> name "Tapu Koko", number 67
+    const match = rawQuery.trim().match(/^(.*\S)\s+(\d+)([a-zA-Z]?)$/);
+    let q;
+    if(match){
+      const name = match[1];
+      const number = match[2] + match[3]; // keep suffix letters like "67a" if present
+      q = 'name:"' + name + '" number:' + number;
+    } else {
+      q = 'name:"' + rawQuery.trim() + '"';
+    }
+    const url = 'https://api.pokemontcg.io/v2/cards?q=' + encodeURIComponent(q) + '&pageSize=8';
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('Error consultando la base de datos de cartas');
+    const data = await res.json();
+    let results = data.data || [];
+    // Fallback: if the number filter returned nothing, retry with name only
+    if(results.length === 0 && match){
+      const res2 = await fetch('https://api.pokemontcg.io/v2/cards?q=' + encodeURIComponent('name:"'+match[1]+'"') + '&pageSize=8');
+      if(res2.ok){
+        const data2 = await res2.json();
+        results = data2.data || [];
+      }
+    }
+    return results;
+  }
+
+  function renderSearchResults(cards, statusEl, gridEl){
+    gridEl.innerHTML = '';
+    if(cards.length === 0){
+      statusEl.textContent = 'No se encontraron cartas con ese nombre.';
+      statusEl.classList.add('err');
+      return;
+    }
+    statusEl.classList.remove('err');
+    statusEl.textContent = cards.length + ' resultado(s).';
+    cards.forEach(card=>{
+      const div = document.createElement('div');
+      div.className = 'pkcard';
+      div.style.borderTopColor = typeBorderColor(card.types);
+      div.innerHTML = `
+        <img src="${card.images && card.images.small ? card.images.small : ''}" alt="${card.name}" loading="lazy"/>
+        <div class="meta">
+          <div class="name">${card.name}</div>
+          <div class="set">${card.set ? card.set.name : ''}</div>
+          <button class="ghost add-btn" style="width:100%;">+ Agregar</button>
+        </div>`;
+      div.querySelector('.add-btn').addEventListener('click', ()=>{
+        addToCollection(card);
+      });
+      gridEl.appendChild(div);
+    });
+  }
+
+  function addToCollection(card){
+    const key = card.name.toLowerCase() + '|' + (card.set ? card.set.id : '');
+    if(collection[key]){
+      collection[key].count += 1;
+    } else {
+      collection[key] = {
+        name: card.name,
+        image: card.images ? card.images.small : '',
+        set: card.set ? card.set.name : '',
+        count: 1,
+        supertype: card.supertype || '',
+        types: card.types || [],
+        subtypes: card.subtypes || [],
+        evolvesFrom: card.evolvesFrom || null,
+        hp: card.hp ? parseInt(card.hp, 10) : null
+      };
+    }
+    renderCollection();
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', async ()=>{
+    const input = document.getElementById('searchInput');
+    const statusEl = document.getElementById('searchStatus');
+    const gridEl = document.getElementById('searchResults');
+    const name = input.value.trim();
+    if(!name) return;
+    statusEl.classList.remove('err');
+    statusEl.textContent = 'Buscando...';
+    try{
+      const cards = await searchCards(name);
+      renderSearchResults(cards, statusEl, gridEl);
+    }catch(e){
+      statusEl.classList.add('err');
+      statusEl.textContent = 'No se pudo buscar: ' + e.message;
+    }
+  });
+  document.getElementById('searchInput').addEventListener('keydown', e=>{
+    if(e.key === 'Enter') document.getElementById('searchBtn').click();
+  });
+
+  // ---------- PHOTO SCAN (Claude vision) ----------
+  function fileToBase64(file){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = ()=> resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  document.getElementById('fileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const statusEl = document.getElementById('scanStatus');
+    statusEl.classList.remove('err');
+    statusEl.textContent = 'Leyendo imagen...';
+    try{
+      const base64 = await fileToBase64(file);
+      statusEl.textContent = 'Identificando la carta...';
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 300,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 } },
+              { type: 'text', text: 'Esta es una foto de una carta de Pokémon TCG. Identificá el nombre exacto de la carta en inglés (como aparece en la base de datos oficial de pokemontcg.io) y, si podés distinguirlo, el nombre del set. Respondé ÚNICAMENTE con un objeto JSON, sin texto adicional ni markdown, con este formato exacto: {"name": "...", "set": "..."}. Si no podés identificarla con confianza, usá {"name": null, "set": null}.' }
+            ]
+          }]
+        })
+      });
+      const data = await response.json();
+      const textBlock = (data.content || []).find(b=>b.type==='text');
+      if(!textBlock) throw new Error('Respuesta inesperada del modelo');
+      const clean = textBlock.text.replace(/```json|```/g,'').trim();
+      const parsed = JSON.parse(clean);
+      if(!parsed.name){
+        statusEl.classList.add('err');
+        statusEl.textContent = 'No se pudo identificar la carta con confianza. Probá con otra foto o buscá el nombre manualmente.';
+        return;
+      }
+      statusEl.textContent = 'Carta identificada como "' + parsed.name + '". Buscando en la base de datos...';
+      const cards = await searchCards(parsed.name);
+      if(cards.length === 0){
+        statusEl.classList.add('err');
+        statusEl.textContent = 'Se identificó como "' + parsed.name + '" pero no se encontró en la base de datos. Probá buscarla manualmente.';
+        return;
+      }
+      // Prefer exact set match if we got one
+      let chosen = cards[0];
+      if(parsed.set){
+        const match = cards.find(c => c.set && c.set.name.toLowerCase().includes(parsed.set.toLowerCase()));
+        if(match) chosen = match;
+      }
+      addToCollection(chosen);
+      statusEl.textContent = '✔ Agregada: ' + chosen.name + ' (' + (chosen.set ? chosen.set.name : 'set desconocido') + '). Revisá "Mi colección".';
+    }catch(err){
+      statusEl.classList.add('err');
+      statusEl.textContent = 'Error al escanear: ' + err.message;
+    } finally {
+      e.target.value = '';
+    }
+  });
+
+  // ---------- COLLECTION RENDER ----------
+  function renderCollection(){
+    const grid = document.getElementById('collectionGrid');
+    const empty = document.getElementById('collectionEmpty');
+    const keys = Object.keys(collection);
+    grid.innerHTML = '';
+    empty.style.display = keys.length ? 'none' : 'block';
+    keys.forEach(key=>{
+      const c = collection[key];
+      const div = document.createElement('div');
+      div.className = 'pkcard';
+      div.style.borderTopColor = typeBorderColor(c.types);
+      div.innerHTML = `
+        <img src="${c.image}" alt="${c.name}" loading="lazy"/>
+        <div class="meta">
+          <div class="name">${c.name}</div>
+          <div class="set">${c.set}</div>
+          <div class="qty-row">
+            <div class="qty-controls">
+              <button class="dec">−</button>
+              <span>${c.count}</span>
+              <button class="inc">+</button>
+            </div>
+            <button class="ghost remove-btn">Quitar</button>
+          </div>
+        </div>`;
+      div.querySelector('.inc').addEventListener('click', ()=>{ c.count++; renderCollection(); });
+      div.querySelector('.dec').addEventListener('click', ()=>{ c.count = Math.max(1,c.count-1); renderCollection(); });
+      div.querySelector('.remove-btn').addEventListener('click', ()=>{ delete collection[key]; renderCollection(); });
+      grid.appendChild(div);
+    });
+  }
+
+  // ---------- AUTO DECK SUGGESTIONS ----------
+  const TYPE_ENERGY = {
+    Fire: 'Fire Energy', Water: 'Water Energy', Grass: 'Grass Energy', Lightning: 'Lightning Energy',
+    Psychic: 'Psychic Energy', Fighting: 'Fighting Energy', Darkness: 'Darkness Energy',
+    Metal: 'Metal Energy', Fairy: 'Fairy Energy'
+  };
+  const TYPE_COLOR_VAR = {
+    Fire:'--fire', Water:'--water', Grass:'--grass', Lightning:'--electric', Psychic:'--psychic',
+    Fighting:'--fighting', Colorless:'--colorless', Darkness:'--darkness', Metal:'--metal', Dragon:'--dragon'
+  };
+  const thumbCache = {}; // lowercase name -> image url or null
+
+  function typeBorderColor(types){
+    const t = types && types[0];
+    const varName = TYPE_COLOR_VAR[t] || '--line';
+    return 'var(' + varName + ')';
+  }
+
+  async function fetchThumb(cardName){
+    const key = cardName.toLowerCase();
+    if(thumbCache[key] !== undefined) return thumbCache[key];
+    try{
+      const results = await searchCards(cardName);
+      const img = (results[0] && results[0].images) ? results[0].images.small : null;
+      thumbCache[key] = img;
+      return img;
+    }catch(e){
+      thumbCache[key] = null;
+      return null;
+    }
+  }
+
+  function ownedPokemonList(){
+    return Object.values(collection).filter(c=>c.supertype === 'Pokémon');
+  }
+
+  function findOwnedByName(name){
+    const target = (name || '').toLowerCase();
+    return Object.values(collection).find(c=>c.name.toLowerCase() === target);
+  }
+
+  function scorePokemon(c){
+    let score = c.count * 10;
+    if(c.subtypes && c.subtypes.some(s=>/\bex\b|\bgx\b|^v$|vmax|vstar/i.test(s))) score += 6;
+    if(c.hp) score += Math.min(c.hp / 100, 3);
+    return score;
+  }
+
+  function buildEvolutionLine(core){
+    const line = [core];
+    let current = core;
+    let guard = 0;
+    while(current.evolvesFrom && guard < 4){
+      const prev = findOwnedByName(current.evolvesFrom);
+      if(!prev) break;
+      line.unshift(prev);
+      current = prev;
+      guard++;
+    }
+    return line;
+  }
+
+  function buildSupportList(core){
+    const list = [
+      { name: "Professor's Research", need: 1 },
+      { name: 'Ultra Ball', need: 4 },
+      { name: 'Nest Ball', need: 2 },
+      { name: 'Switch', need: 2 },
+      { name: "Boss's Orders", need: 1 }
+    ];
+    if(core.subtypes && core.subtypes.some(s=>/stage ?2/i.test(s))){
+      list.push({ name: 'Rare Candy', need: 4 });
+    }
+    const type = (core.types && core.types[0]) || 'Colorless';
+    const energyName = TYPE_ENERGY[type];
+    if(energyName){
+      list.push({ name: energyName, need: 9 });
+    } else {
+      list.push({ name: 'Double Colorless Energy', need: 4 });
+    }
+    return list;
+  }
+
+  async function generateSuggestedDecks(){
+    const statusEl = document.getElementById('autoDeckStatus');
+    const container = document.getElementById('autoDeckRender');
+    const btn = document.getElementById('autoDeckBtn');
+    const pokes = ownedPokemonList();
+    container.innerHTML = '';
+    statusEl.classList.remove('err');
+
+    if(pokes.length === 0){
+      statusEl.classList.add('err');
+      statusEl.textContent = 'Todavía no tenés Pokémon en tu colección. Agregá cartas desde "Escanear / Buscar" primero.';
+      return;
+    }
+
+    btn.disabled = true;
+    statusEl.textContent = 'Armando mazos...';
+
+    const ranked = [...pokes].sort((a,b)=>scorePokemon(b) - scorePokemon(a));
+    const core1 = ranked[0];
+    let core2 = ranked.find(p => p !== core1 && (!core1.types.length || !p.types.length || p.types[0] !== core1.types[0]));
+    if(!core2) core2 = ranked.find(p => p !== core1);
+    const cores = [core1, core2].filter(Boolean);
+
+    for(let i = 0; i < cores.length; i++){
+      const core = cores[i];
+      const line = buildEvolutionLine(core);
+      const type = (core.types && core.types[0]) || 'Colorless';
+      const supportCards = buildSupportList(core);
+
+      const supportWithThumb = [];
+      for(const s of supportCards){
+        const owned = findOwnedByName(s.name);
+        const image = owned ? owned.image : await fetchThumb(s.name);
+        supportWithThumb.push({ name: s.name, need: s.need, image, ownedCount: owned ? owned.count : 0 });
+      }
+
+      renderSuggestedDeck(container, {
+        title: 'Mazo sugerido ' + (i + 1) + ': ' + core.name + (type !== 'Colorless' ? ' (' + type + ')' : ''),
+        line, support: supportWithThumb
+      });
+    }
+
+    statusEl.textContent = 'Listo — recordá que es una lógica genérica, no una lista de torneo.';
+    btn.disabled = false;
+  }
+
+  function renderSuggestedDeck(container, data){
+    const div = document.createElement('div');
+    div.className = 'arch-card';
+    const lineThumbs = data.line.map(c=>`
+      <div class="mini-thumb" style="border-top:3px solid ${typeBorderColor(c.types)};">
+        <img src="${c.image || ''}" alt="${c.name}" loading="lazy"/>
+        <div class="mini-label">${c.name}<br><span class="mini-count">tenés ${c.count}</span></div>
+      </div>`).join('');
+    const supportThumbs = data.support.map(s=>`
+      <div class="mini-thumb">
+        <img src="${s.image || ''}" alt="${s.name}" loading="lazy"/>
+        <div class="mini-label">${s.name} x${s.need}<br><span class="mini-count ${s.ownedCount < s.need ? 'missing' : ''}">tenés ${s.ownedCount}/${s.need}</span></div>
+      </div>`).join('');
+    div.innerHTML = `
+      <div class="arch-top"><div class="arch-name">${data.title}</div></div>
+      <div class="deck-sub-h">Núcleo (de tu colección)</div>
+      <div class="thumb-row">${lineThumbs}</div>
+      <div class="deck-sub-h">Soporte típico sugerido</div>
+      <div class="thumb-row">${supportThumbs}</div>
+    `;
+    container.appendChild(div);
+  }
+
+  document.getElementById('autoDeckBtn').addEventListener('click', generateSuggestedDecks);
+
+  // ---------- ARCHETYPES / DECK SUGGESTIONS ----------
+  document.getElementById('addArchBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('archName').value.trim();
+    const raw = document.getElementById('archList').value.trim();
+    if(!name || !raw) return;
+    const cards = raw.split('\n').map(line=>{
+      const m = line.match(/^(.*?)\s*x(\d+)\s*$/i);
+      if(m) return { name: m[1].trim(), need: parseInt(m[2],10) };
+      return { name: line.trim(), need: 1 };
+    }).filter(c=>c.name);
+    archetypes.push({ name, cards });
+    document.getElementById('archName').value = '';
+    document.getElementById('archList').value = '';
+    renderArchetypes();
+  });
+
+  function ownedCountFor(cardName){
+    const target = cardName.toLowerCase();
+    let total = 0;
+    Object.values(collection).forEach(c=>{
+      if(c.name.toLowerCase() === target) total += c.count;
+    });
+    return total;
+  }
+
+  function renderArchetypes(){
+    const container = document.getElementById('archList-render');
+    container.innerHTML = '';
+    archetypes.forEach(arch=>{
+      let haveTotal = 0, needTotal = 0;
+      const chips = arch.cards.map(c=>{
+        const have = ownedCountFor(c.name);
+        haveTotal += Math.min(have, c.need);
+        needTotal += c.need;
+        const missing = c.need - have;
+        return { name: c.name, need: c.need, have, missing };
+      });
+      const pct = needTotal ? Math.round((haveTotal/needTotal)*100) : 0;
+
+      const div = document.createElement('div');
+      div.className = 'arch-card';
+      div.innerHTML = `
+        <div class="arch-top">
+          <div class="arch-name">${arch.name}</div>
+          <div class="arch-score">${pct}% completo</div>
+        </div>
+        <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="need-list">
+          ${chips.map(c=>`<span class="need-chip ${c.missing>0?'missing':''}">${c.name} — tenés ${c.have}/${c.need}${c.missing>0 ? ' (faltan '+c.missing+')' : ''}</span>`).join('')}
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  renderArchetypes();
+})();
+</script>

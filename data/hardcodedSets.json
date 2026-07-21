@@ -1,0 +1,28 @@
+{
+  "sets": [
+    {
+      "id": "mcd23",
+      "name": "McDonald's Collection 2023",
+      "series": "Other",
+      "total": 15,
+      "legalities": {},
+      "cards": [
+        { "id": "mcd23-1", "name": "Sprigatito", "number": "1", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Grass"], "subtypes": ["Basic"], "rarity": "Holo", "hp": "70", "evolvesFrom": "" },
+        { "id": "mcd23-2", "name": "Fuecoco", "number": "2", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Fire"], "subtypes": ["Basic"], "rarity": "", "hp": "70", "evolvesFrom": "" },
+        { "id": "mcd23-3", "name": "Quaxly", "number": "3", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Water"], "subtypes": ["Basic"], "rarity": "", "hp": "70", "evolvesFrom": "" },
+        { "id": "mcd23-4", "name": "Cetoddle", "number": "4", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Water"], "subtypes": ["Basic"], "rarity": "", "hp": "80", "evolvesFrom": "" },
+        { "id": "mcd23-5", "name": "Cetitan", "number": "5", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Water"], "subtypes": ["Stage 1"], "rarity": "Holo", "hp": "140", "evolvesFrom": "Cetoddle" },
+        { "id": "mcd23-6", "name": "Pikachu", "number": "6", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Lightning"], "subtypes": ["Basic"], "rarity": "Holo", "hp": "70", "evolvesFrom": "" },
+        { "id": "mcd23-7", "name": "Pawmi", "number": "7", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Lightning"], "subtypes": ["Basic"], "rarity": "", "hp": "70", "evolvesFrom": "" },
+        { "id": "mcd23-8", "name": "Kilowattrel", "number": "8", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Lightning"], "subtypes": ["Stage 1"], "rarity": "", "hp": "90", "evolvesFrom": "Wattrel" },
+        { "id": "mcd23-9", "name": "Flittle", "number": "9", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Psychic"], "subtypes": ["Basic"], "rarity": "", "hp": "60", "evolvesFrom": "" },
+        { "id": "mcd23-10", "name": "Sandaconda", "number": "10", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Fighting"], "subtypes": ["Stage 1"], "rarity": "", "hp": "120", "evolvesFrom": "Sandygast" },
+        { "id": "mcd23-11", "name": "Klawf", "number": "11", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Fighting"], "subtypes": ["Basic"], "rarity": "", "hp": "90", "evolvesFrom": "" },
+        { "id": "mcd23-12", "name": "Blissey", "number": "12", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Colorless"], "subtypes": ["Stage 1"], "rarity": "", "hp": "130", "evolvesFrom": "Chansey" },
+        { "id": "mcd23-13", "name": "Tandemaus", "number": "13", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Colorless"], "subtypes": ["Basic"], "rarity": "", "hp": "60", "evolvesFrom": "" },
+        { "id": "mcd23-14", "name": "Cyclizar", "number": "14", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Dragon"], "subtypes": ["Basic"], "rarity": "", "hp": "90", "evolvesFrom": "" },
+        { "id": "mcd23-15", "name": "Kirlia", "number": "15", "setId": "mcd23", "set": { "id": "mcd23", "name": "McDonald's Collection 2023" }, "images": null, "supertype": "Pokémon", "types": ["Psychic"], "subtypes": ["Stage 1"], "rarity": "", "hp": "80", "evolvesFrom": "Ralts" }
+      ]
+    }
+  ]
+}

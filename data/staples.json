@@ -1,0 +1,20 @@
+{
+  "lastUpdated": "2026-07-15",
+  "format": "Standard",
+  "cards": [
+    { "name": "Ultra Ball", "recommended": 4, "supertype": "Trainer", "category": "staple", "explanation": "Busca cualquier Pokémon descartando 2 cartas. Fundamental en todo mazo competitivo." },
+    { "name": "Professor's Research", "recommended": 4, "supertype": "Trainer", "category": "staple", "explanation": "Descarta tu mano y roba 7 cartas. La mejor carta de robo del juego." },
+    { "name": "Iono", "recommended": 3, "supertype": "Trainer", "category": "staple", "explanation": "Ambos jugadores barajan y roban según Pokémon en banca. Disrupta y refresca." },
+    { "name": "Boss's Orders", "recommended": 2, "supertype": "Trainer", "category": "staple", "explanation": "Cambia el Pokémon activo del rival por uno de su banca. Para configurar knockouts." },
+    { "name": "Switch", "recommended": 2, "supertype": "Trainer", "category": "staple", "explanation": "Cambia tu Pokémon activo por uno de la banca sin costo de energía." },
+    { "name": "Nest Ball", "recommended": 2, "supertype": "Trainer", "category": "staple", "explanation": "Busca un Pokémon básico y lo pone en la banca." },
+    { "name": "Buddy-Buddy Poffin", "recommended": 3, "supertype": "Trainer", "category": "staple", "explanation": "Busca 2 Pokémon básicos de 70 HP o menos. Excelente para llenar la banca." },
+    { "name": "Rare Candy", "recommended": 4, "supertype": "Trainer", "category": "staple", "explanation": "Evoluciona directamente a Stage 2 sin pasar por Stage 1. Clave para mazos de Stage 2." },
+    { "name": "Capturing Aroma", "recommended": 2, "supertype": "Trainer", "category": "staple", "explanation": "Busca Pokémon. Volteá una moneda: cara = básico, cuesta = evolución." },
+    { "name": "Energy Search", "recommended": 1, "supertype": "Trainer", "category": "staple", "explanation": "Busca una energía básica del mazo y ponla en tu mano." },
+    { "name": "Pal Pad", "recommended": 1, "supertype": "Trainer", "category": "staple", "explanation": "Recupera 2 cartas de Trainer ( Supporter ) del descarte a tu mazo." },
+    { "name": "Super Rod", "recommended": 1, "supertype": "Trainer", "category": "staple", "explanation": "Recupera 3 cartas (Pokémon o energías) del descarte al mazo." },
+    { "name": "Choice Belt", "recommended": 2, "supertype": "Trainer", "category": "staple", "explanation": "El Pokémon con esta carta hace 30 más de daño a Pokémon ex del rival." },
+    { "name": "Defending Band", "recommended": 1, "supertype": "Trainer", "category": "staple", "explanation": "Reduce 30 de daño recibido por el Pokémon que la equipa." }
+  ]
+}

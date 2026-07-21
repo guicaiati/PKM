@@ -1,0 +1,2559 @@
+[
+  {
+    "id": "xy6-1",
+    "name": "Exeggcute",
+    "number": "1",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/1.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "40",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-2",
+    "name": "Exeggutor",
+    "number": "2",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/2.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "120",
+    "evolvesFrom": "Exeggcute"
+  },
+  {
+    "id": "xy6-3",
+    "name": "Wurmple",
+    "number": "3",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/3.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-4",
+    "name": "Silcoon",
+    "number": "4",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/4.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "80",
+    "evolvesFrom": "Wurmple"
+  },
+  {
+    "id": "xy6-5",
+    "name": "Beautifly",
+    "number": "5",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/5.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "130",
+    "evolvesFrom": "Silcoon"
+  },
+  {
+    "id": "xy6-6",
+    "name": "Cascoon",
+    "number": "6",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/6.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Common",
+    "hp": "80",
+    "evolvesFrom": "Wurmple"
+  },
+  {
+    "id": "xy6-7",
+    "name": "Dustox",
+    "number": "7",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/7.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Uncommon",
+    "hp": "140",
+    "evolvesFrom": "Cascoon"
+  },
+  {
+    "id": "xy6-8",
+    "name": "Dustox",
+    "number": "8",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/8.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare",
+    "hp": "130",
+    "evolvesFrom": "Cascoon"
+  },
+  {
+    "id": "xy6-9",
+    "name": "Nincada",
+    "number": "9",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/9.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "40",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-10",
+    "name": "Ninjask",
+    "number": "10",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/10.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "70",
+    "evolvesFrom": "Nincada"
+  },
+  {
+    "id": "xy6-11",
+    "name": "Shedinja",
+    "number": "11",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/11.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Rare",
+    "hp": "30",
+    "evolvesFrom": "Nincada"
+  },
+  {
+    "id": "xy6-12",
+    "name": "Tropius",
+    "number": "12",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/12.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Uncommon",
+    "hp": "110",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-13",
+    "name": "Victini",
+    "number": "13",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/13.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare",
+    "hp": "70",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-14",
+    "name": "Fletchinder",
+    "number": "14",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/14.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "70",
+    "evolvesFrom": "Fletchling"
+  },
+  {
+    "id": "xy6-15",
+    "name": "Talonflame",
+    "number": "15",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/15.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare",
+    "hp": "130",
+    "evolvesFrom": "Fletchinder"
+  },
+  {
+    "id": "xy6-16",
+    "name": "Articuno",
+    "number": "16",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/16.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare",
+    "hp": "120",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-17",
+    "name": "Articuno",
+    "number": "17",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/17.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare",
+    "hp": "120",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-18",
+    "name": "Wingull",
+    "number": "18",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/18.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-19",
+    "name": "Pelipper",
+    "number": "19",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/19.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "100",
+    "evolvesFrom": "Wingull"
+  },
+  {
+    "id": "xy6-20",
+    "name": "Pikachu",
+    "number": "20",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/20.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-21",
+    "name": "Voltorb",
+    "number": "21",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/21.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-22",
+    "name": "Electrode",
+    "number": "22",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/22.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "90",
+    "evolvesFrom": "Voltorb"
+  },
+  {
+    "id": "xy6-23",
+    "name": "Zapdos",
+    "number": "23",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/23.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare",
+    "hp": "120",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-24",
+    "name": "Electrike",
+    "number": "24",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/24.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-25",
+    "name": "Manectric",
+    "number": "25",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/25.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "90",
+    "evolvesFrom": "Electrike"
+  },
+  {
+    "id": "xy6-26",
+    "name": "Thundurus-EX",
+    "number": "26",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/26.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "170",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-27",
+    "name": "Natu",
+    "number": "27",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/27.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "50",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-28",
+    "name": "Natu",
+    "number": "28",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/28.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "40",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-29",
+    "name": "Xatu",
+    "number": "29",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/29.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Rare",
+    "hp": "90",
+    "evolvesFrom": "Natu"
+  },
+  {
+    "id": "xy6-30",
+    "name": "Shuppet",
+    "number": "30",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/30.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-31",
+    "name": "Banette",
+    "number": "31",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/31.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Rare",
+    "hp": "80",
+    "evolvesFrom": "Shuppet"
+  },
+  {
+    "id": "xy6-32",
+    "name": "Banette",
+    "number": "32",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/32.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Rare",
+    "hp": "90",
+    "evolvesFrom": "Shuppet"
+  },
+  {
+    "id": "xy6-33",
+    "name": "Deoxys",
+    "number": "33",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/33.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "110",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-34",
+    "name": "Gallade-EX",
+    "number": "34",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/34.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "170",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-35",
+    "name": "M Gallade-EX",
+    "number": "35",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/35.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "MEGA",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "220",
+    "evolvesFrom": "Gallade-EX"
+  },
+  {
+    "id": "xy6-36",
+    "name": "Gligar",
+    "number": "36",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/36.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "70",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-37",
+    "name": "Gliscor",
+    "number": "37",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/37.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "90",
+    "evolvesFrom": "Gligar"
+  },
+  {
+    "id": "xy6-38",
+    "name": "Binacle",
+    "number": "38",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/38.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-39",
+    "name": "Hawlucha",
+    "number": "39",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/39.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "80",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-40",
+    "name": "Absol",
+    "number": "40",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/40.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "100",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-41",
+    "name": "Inkay",
+    "number": "41",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/41.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "50",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-42",
+    "name": "Jirachi",
+    "number": "42",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/42.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "70",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-43",
+    "name": "Togepi",
+    "number": "43",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/43.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "40",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-44",
+    "name": "Togetic",
+    "number": "44",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/44.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "80",
+    "evolvesFrom": "Togepi"
+  },
+  {
+    "id": "xy6-45",
+    "name": "Togekiss",
+    "number": "45",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/45.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare",
+    "hp": "140",
+    "evolvesFrom": "Togetic"
+  },
+  {
+    "id": "xy6-46",
+    "name": "Togekiss",
+    "number": "46",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/46.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "130",
+    "evolvesFrom": "Togetic"
+  },
+  {
+    "id": "xy6-47",
+    "name": "Carbink",
+    "number": "47",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/47.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare",
+    "hp": "70",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-48",
+    "name": "Klefki",
+    "number": "48",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/48.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-49",
+    "name": "Dratini",
+    "number": "49",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/49.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "50",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-50",
+    "name": "Dragonair",
+    "number": "50",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/50.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "80",
+    "evolvesFrom": "Dratini"
+  },
+  {
+    "id": "xy6-51",
+    "name": "Dragonite",
+    "number": "51",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/51.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare",
+    "hp": "150",
+    "evolvesFrom": "Dragonair"
+  },
+  {
+    "id": "xy6-52",
+    "name": "Dragonite",
+    "number": "52",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/52.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "160",
+    "evolvesFrom": "Dragonair"
+  },
+  {
+    "id": "xy6-53",
+    "name": "Altaria",
+    "number": "53",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/53.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "80",
+    "evolvesFrom": "Swablu"
+  },
+  {
+    "id": "xy6-54",
+    "name": "Bagon",
+    "number": "54",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/54.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-55",
+    "name": "Bagon",
+    "number": "55",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/55.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-56",
+    "name": "Shelgon",
+    "number": "56",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/56.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "80",
+    "evolvesFrom": "Bagon"
+  },
+  {
+    "id": "xy6-57",
+    "name": "Salamence",
+    "number": "57",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/57.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "160",
+    "evolvesFrom": "Shelgon"
+  },
+  {
+    "id": "xy6-58",
+    "name": "Latios-EX",
+    "number": "58",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/58.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "170",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-59",
+    "name": "M Latios-EX",
+    "number": "59",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/59.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "MEGA",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "220",
+    "evolvesFrom": "Latios-EX"
+  },
+  {
+    "id": "xy6-60",
+    "name": "Rayquaza-EX",
+    "number": "60",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/60.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "180",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-61",
+    "name": "M Rayquaza-EX",
+    "number": "61",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/61.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "MEGA",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "230",
+    "evolvesFrom": "Rayquaza-EX"
+  },
+  {
+    "id": "xy6-62",
+    "name": "Hydreigon-EX",
+    "number": "62",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/62.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "180",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-63",
+    "name": "Reshiram",
+    "number": "63",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/63.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "130",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-64",
+    "name": "Zekrom",
+    "number": "64",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/64.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "130",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-65",
+    "name": "Spearow",
+    "number": "65",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/65.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-66",
+    "name": "Fearow",
+    "number": "66",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/66.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "100",
+    "evolvesFrom": "Spearow"
+  },
+  {
+    "id": "xy6-67",
+    "name": "Meowth",
+    "number": "67",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/67.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-68",
+    "name": "Dunsparce",
+    "number": "68",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/68.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-69",
+    "name": "Skarmory",
+    "number": "69",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/69.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Rare",
+    "hp": "100",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-70",
+    "name": "Taillow",
+    "number": "70",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/70.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "50",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-71",
+    "name": "Swellow",
+    "number": "71",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/71.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Rare",
+    "hp": "90",
+    "evolvesFrom": "Taillow"
+  },
+  {
+    "id": "xy6-72",
+    "name": "Swellow",
+    "number": "72",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/72.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Rare Holo",
+    "hp": "90",
+    "evolvesFrom": "Taillow"
+  },
+  {
+    "id": "xy6-73",
+    "name": "Swablu",
+    "number": "73",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/73.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "40",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-74",
+    "name": "Altaria",
+    "number": "74",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/74.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Rare",
+    "hp": "90",
+    "evolvesFrom": "Swablu"
+  },
+  {
+    "id": "xy6-75",
+    "name": "Rayquaza-EX",
+    "number": "75",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/75.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "170",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-76",
+    "name": "M Rayquaza-EX",
+    "number": "76",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/76.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "MEGA",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "220",
+    "evolvesFrom": "Rayquaza-EX"
+  },
+  {
+    "id": "xy6-77",
+    "name": "Shaymin-EX",
+    "number": "77",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/77.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Holo EX",
+    "hp": "110",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-77a",
+    "name": "Shaymin-EX",
+    "number": "77a",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/77a.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "110",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-78",
+    "name": "Pidove",
+    "number": "78",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/78.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "60",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-79",
+    "name": "Tranquill",
+    "number": "79",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/79.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Stage 1"
+    ],
+    "rarity": "Uncommon",
+    "hp": "80",
+    "evolvesFrom": "Pidove"
+  },
+  {
+    "id": "xy6-80",
+    "name": "Unfezant",
+    "number": "80",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/80.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Uncommon",
+    "hp": "130",
+    "evolvesFrom": "Tranquill"
+  },
+  {
+    "id": "xy6-81",
+    "name": "Unfezant",
+    "number": "81",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/81.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Stage 2"
+    ],
+    "rarity": "Rare",
+    "hp": "140",
+    "evolvesFrom": "Tranquill"
+  },
+  {
+    "id": "xy6-82",
+    "name": "Fletchling",
+    "number": "82",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/82.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic"
+    ],
+    "rarity": "Common",
+    "hp": "40",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-83",
+    "name": "Gallade Spirit Link",
+    "number": "83",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/83.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Pokémon Tool"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-84",
+    "name": "Healing Scarf",
+    "number": "84",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/84.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Pokémon Tool"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-85",
+    "name": "Latios Spirit Link",
+    "number": "85",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/85.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Pokémon Tool"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-86",
+    "name": "Mega Turbo",
+    "number": "86",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/86.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Item"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-87",
+    "name": "Rayquaza Spirit Link",
+    "number": "87",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/87.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Pokémon Tool"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-88",
+    "name": "Revive",
+    "number": "88",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/88.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Item"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-89",
+    "name": "Sky Field",
+    "number": "89",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/89.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Stadium"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-90",
+    "name": "Steven",
+    "number": "90",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/90.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Supporter"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-91",
+    "name": "Switch",
+    "number": "91",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/91.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Item"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-92",
+    "name": "Trainers' Mail",
+    "number": "92",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/92.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Item"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-92a",
+    "name": "Trainers' Mail",
+    "number": "92a",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/92a.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Item"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-93",
+    "name": "Ultra Ball",
+    "number": "93",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/93.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Item"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-94",
+    "name": "Wally",
+    "number": "94",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/94.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Supporter"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-95",
+    "name": "Wide Lens",
+    "number": "95",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/95.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Pokémon Tool"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-96",
+    "name": "Winona",
+    "number": "96",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/96.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Supporter"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-97",
+    "name": "Double Dragon Energy",
+    "number": "97",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/97.png"
+    },
+    "supertype": "Energy",
+    "types": null,
+    "subtypes": [
+      "Special"
+    ],
+    "rarity": "Uncommon",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-98",
+    "name": "Thundurus-EX",
+    "number": "98",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/98.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "170",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-99",
+    "name": "Gallade-EX",
+    "number": "99",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/99.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "170",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-100",
+    "name": "M Gallade-EX",
+    "number": "100",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/100.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "subtypes": [
+      "MEGA",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "220",
+    "evolvesFrom": "Gallade-EX"
+  },
+  {
+    "id": "xy6-101",
+    "name": "Latios-EX",
+    "number": "101",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/101.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "170",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-102",
+    "name": "M Latios-EX",
+    "number": "102",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/102.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "MEGA",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "220",
+    "evolvesFrom": "Latios-EX"
+  },
+  {
+    "id": "xy6-103",
+    "name": "Hydreigon-EX",
+    "number": "103",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/103.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "180",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-104",
+    "name": "Rayquaza-EX",
+    "number": "104",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/104.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "170",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-105",
+    "name": "M Rayquaza-EX",
+    "number": "105",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/105.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "MEGA",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "220",
+    "evolvesFrom": "Rayquaza-EX"
+  },
+  {
+    "id": "xy6-106",
+    "name": "Shaymin-EX",
+    "number": "106",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/106.png"
+    },
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": "110",
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-107",
+    "name": "Wally",
+    "number": "107",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/107.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Supporter"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-108",
+    "name": "Winona",
+    "number": "108",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/108.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Supporter"
+    ],
+    "rarity": "Rare Ultra",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-109",
+    "name": "Energy Switch",
+    "number": "109",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/109.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Item"
+    ],
+    "rarity": "Rare Secret",
+    "hp": null,
+    "evolvesFrom": null
+  },
+  {
+    "id": "xy6-110",
+    "name": "VS Seeker",
+    "number": "110",
+    "setId": "xy6",
+    "set": {
+      "id": "xy6",
+      "name": "Roaring Skies"
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/xy6/110.png"
+    },
+    "supertype": "Trainer",
+    "types": null,
+    "subtypes": [
+      "Item"
+    ],
+    "rarity": "Rare Secret",
+    "hp": null,
+    "evolvesFrom": null
+  }
+]
