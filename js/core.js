@@ -858,6 +858,17 @@ const API = (() => {
       return n;
     },
 
+    findCardInDb(name) {
+      if (!name) return null;
+      const target = name.toLowerCase().trim();
+      if (idIndex && idIndex.has(target)) return idIndex.get(target);
+      if (nameIndex && nameIndex.has(target)) {
+        const list = nameIndex.get(target);
+        if (list && list.length > 0) return list[0];
+      }
+      return (dbCards || []).find(c => (c.name || '').toLowerCase().includes(target)) || null;
+    },
+
     async fetchFromAPI(name) {
       try {
         const data = await fetchJSON(`${BASE}/cards?q=name:"${name}"&pageSize=3`);

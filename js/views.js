@@ -848,27 +848,38 @@ const Wizard = (() => {
 
     const topOwned = ownedScored.slice(0, 6);
 
-    // Missing candidates catalog
-    const fallbackMissingCatalog = filterSupertype === 'pokemon' ? [
-      { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], hp: '230', abilities: [{name:'Amp'}] },
-      { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], hp: '220', abilities: [{name:'Tandem Unit'}] },
-      { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], hp: '280', abilities: [{name:'Quick Search'}] },
-      { name: 'Squawkabilly ex', supertype: 'Pokémon', types: ['Colorless'], hp: '160', abilities: [{name:'Squawk'}] },
-      { name: 'Radiant Greninja', supertype: 'Pokémon', types: ['Water'], hp: '130', abilities: [{name:'Cards'}] },
-      { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], hp: '180', abilities: [{name:'Restart'}] }
-    ] : filterSupertype === 'energy' ? [
-      { name: 'Luminous Energy', supertype: 'Energy', reason: 'Buena cobertura' },
-      { name: 'Jet Energy', supertype: 'Energy', reason: 'Más movilidad' },
-      { name: 'Double Turbo Energy', supertype: 'Energy', reason: 'Mayor velocidad' },
-      { name: 'Reversal Energy', supertype: 'Energy', reason: 'Soporte de remontada' }
-    ] : [
-      { name: "Boss's Orders", supertype: 'Trainer', reason: 'Amenaza decisiva' },
-      { name: 'Arven', supertype: 'Trainer', reason: 'Soporte genérico' },
-      { name: 'Iono', supertype: 'Trainer', reason: 'Control de mano' },
-      { name: 'Buddy-Buddy Poffin', supertype: 'Trainer', reason: 'Más consistencia' },
-      { name: 'Ultra Ball', supertype: 'Trainer', reason: 'Búsqueda clave' },
-      { name: 'Super Rod', supertype: 'Trainer', reason: 'Recuperación' }
-    ];
+    // Dynamic Missing candidates catalog
+    let fallbackMissingCatalog = [];
+    if (filterSupertype === 'pokemon') {
+      fallbackMissingCatalog = [
+        { name: 'Dragonair', supertype: 'Pokémon', types: ['Dragon'], hp: '100', evolvesFrom: 'Dratini' },
+        { name: 'Dratini', supertype: 'Pokémon', types: ['Dragon'], hp: '70' },
+        { name: 'Dragonite VSTAR', supertype: 'Pokémon', types: ['Dragon'], hp: '280', evolvesFrom: 'Dragonite V' },
+        { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], hp: '230', abilities: [{name:'Amp'}] },
+        { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], hp: '220', abilities: [{name:'Tandem'}] },
+        { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], hp: '280', abilities: [{name:'Quick Search'}] },
+        { name: 'Squawkabilly ex', supertype: 'Pokémon', types: ['Colorless'], hp: '160', abilities: [{name:'Squawk'}] },
+        { name: 'Radiant Greninja', supertype: 'Pokémon', types: ['Water'], hp: '130', abilities: [{name:'Cards'}] },
+        { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], hp: '180', abilities: [{name:'Restart'}] }
+      ];
+    } else if (filterSupertype === 'energy') {
+      fallbackMissingCatalog = [
+        { name: 'Luminous Energy', supertype: 'Energy', reason: 'Buena cobertura' },
+        { name: 'Jet Energy', supertype: 'Energy', reason: 'Más movilidad' },
+        { name: 'Double Turbo Energy', supertype: 'Energy', reason: 'Mayor velocidad' },
+        { name: 'Reversal Energy', supertype: 'Energy', reason: 'Soporte de remontada' }
+      ];
+    } else {
+      fallbackMissingCatalog = [
+        { name: 'Rare Candy', supertype: 'Trainer', reason: 'Acelera evolución' },
+        { name: "Boss's Orders", supertype: 'Trainer', reason: 'Amenaza decisiva' },
+        { name: 'Arven', supertype: 'Trainer', reason: 'Soporte genérico' },
+        { name: 'Iono', supertype: 'Trainer', reason: 'Control de mano' },
+        { name: 'Buddy-Buddy Poffin', supertype: 'Trainer', reason: 'Más consistencia' },
+        { name: 'Ultra Ball', supertype: 'Trainer', reason: 'Búsqueda clave' },
+        { name: 'Super Rod', supertype: 'Trainer', reason: 'Recuperación' }
+      ];
+    }
 
     const missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0);
     const missingScored = missingCandidates.map(c => {
@@ -1073,7 +1084,20 @@ const Wizard = (() => {
   async function addCardByName(name, category, countInputId, extraOpts){
     if(!name) return;
     const count = countInputId ? (Number(document.getElementById(countInputId)?.value) || 1) : 1;
-    state.cards.push({id: nextId++, category, name, count, isDraw: extraOpts?.isDraw || false});
+    const details = getCardDetails(name);
+    state.cards.push({
+      id: nextId++,
+      category,
+      name,
+      count,
+      isDraw: extraOpts?.isDraw || false,
+      types: details?.types || [],
+      subtypes: details?.subtypes || [],
+      evolvesFrom: details?.evolvesFrom || null,
+      hp: details?.hp || null,
+      attacks: details?.attacks || [],
+      abilities: details?.abilities || []
+    });
     render();
   }
 
