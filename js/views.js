@@ -819,7 +819,8 @@ const Wizard = (() => {
     const attackCosts = new Set();
     cardAttacks.forEach(a => (a.cost || []).forEach(c => { if (c !== 'Colorless') attackCosts.add(c); }));
     const sharedEnergyType = [...attackCosts].find(c => deckEnergies.has(c));
-    if (sharedEnergyType && deckEnergies.size > 0) {
+    const sharesEnergy = Boolean(sharedEnergyType);
+    if (sharesEnergy && deckEnergies.size > 0) {
       score += 30;
       const energyDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(sharedEnergyType) : sharedEnergyType;
       if (!primaryReason) primaryReason = 'Comparte energía ' + energyDisplay;
