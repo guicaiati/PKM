@@ -61,11 +61,16 @@ const Scanner = (() => {
         try {
           const suggestions = await API.autocomplete(val);
           if (!suggestions.length) { list.classList.remove('show'); return; }
-          list.innerHTML = suggestions.map(s => `<div class="autocomplete-item">${s}</div>`).join('');
+          list.innerHTML = suggestions.map(s => {
+            const owned = Collection.countByName(s);
+            const badge = owned > 0 ? `<span class="ac-owned">Tenés ${owned}</span>` : '';
+            return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
+          }).join('');
           list.classList.add('show');
           list.querySelectorAll('.autocomplete-item').forEach(el => {
             el.addEventListener('click', () => {
-              input.value = el.textContent;
+              const cardName = el.dataset.val || el.querySelector('span')?.textContent || el.textContent;
+              input.value = cardName;
               list.classList.remove('show');
               Scanner.doSearch();
             });
@@ -1124,13 +1129,18 @@ const Wizard = (() => {
         try {
           const suggestions = await API.autocomplete(val);
           if(!suggestions.length){ list.classList.remove('show'); return; }
-          list.innerHTML = suggestions.map(s=>`<div class="autocomplete-item">${escapeHtml(s)}</div>`).join('');
+          list.innerHTML = suggestions.map(s => {
+            const owned = countOwned(s);
+            const badge = owned > 0 ? `<span class="ac-owned">Tenés ${owned}</span>` : '';
+            return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
+          }).join('');
           list.classList.add('show');
           list.querySelectorAll('.autocomplete-item').forEach(el=>{
             el.addEventListener('click', ()=>{
-              input.value = el.textContent;
+              const cardName = el.dataset.val || el.querySelector('span')?.textContent || el.textContent;
+              input.value = cardName;
               list.classList.remove('show');
-              if(onSelect) onSelect(el.textContent);
+              if(onSelect) onSelect(cardName);
             });
           });
         } catch(e){ list.classList.remove('show'); }

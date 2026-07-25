@@ -369,6 +369,32 @@ details.sidebar-box {
   }
 }
 
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+
+  &:hover {
+    background: var(--line);
+    color: var(--text);
+  }
+
+  .ac-owned {
+    font-size: 10px;
+    font-weight: 700;
+    color: #38e07b;
+    background: rgba(56, 224, 123, 0.18);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    white-space: nowrap;
+  }
+}
+
 /* Helpers */
 .hidden { display: none !important; }
 .mb-12 { margin-bottom: 12px; }
