@@ -731,11 +731,34 @@ const Wizard = (() => {
     </div>`;
   }
 
-  function calculateCompatibility(card, currentDeckCards) {
-    let score = 0;
-    let reasons = [];
+  function getCardDetails(name) {
+    if (!name) return null;
+    const fromCol = Collection.findByName(name);
+    if (fromCol) return fromCol;
 
-    const pokemonInDeck = currentDeckCards.filter(c => c.category === 'pokemon');
+    const knownMap = {
+      'pikachu': { name: 'Pikachu', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic'], hp: '70' },
+      'raichu': { name: 'Raichu', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Pikachu', hp: '120', attacks: [{cost:['Lightning','Colorless']}] },
+      'flaaffy': { name: 'Flaaffy', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Mareep', hp: '90', abilities: [{name:'Dynamotor'}], attacks: [{cost:['Lightning']}] },
+      'lanturn': { name: 'Lanturn', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Chinchou', hp: '120', attacks: [{cost:['Lightning']}] },
+      'iron treads ex': { name: 'Iron Treads ex', supertype: 'Pokémon', types: ['Metal'], subtypes: ['Basic', 'ex'], hp: '220', attacks: [{cost:['Metal','Colorless']}] },
+      'tapu koko ex': { name: 'Tapu Koko ex', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic', 'ex'], hp: '210', abilities: [{name:'Vengeful Strikedown'}], attacks: [{cost:['Lightning']}] },
+      'iron hands ex': { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic', 'ex'], hp: '230', abilities: [{name:'Amp'}], attacks: [{cost:['Lightning','Colorless','Colorless']}] },
+      'miraidon ex': { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic', 'ex'], hp: '220', abilities: [{name:'Tandem Unit'}], attacks: [{cost:['Lightning','Lightning','Colorless']}] },
+      'pidgeot ex': { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], subtypes: ['Stage 2', 'ex'], evolvesFrom: 'Pidgeotto', hp: '280', abilities: [{name:'Quick Search'}] },
+      'squawkabilly ex': { name: 'Squawkabilly ex', supertype: 'Pokémon', types: ['Colorless'], subtypes: ['Basic', 'ex'], hp: '160', abilities: [{name:'Squawk and Seize'}] },
+      'radiant greninja': { name: 'Radiant Greninja', supertype: 'Pokémon', types: ['Water'], subtypes: ['Basic', 'Radiant'], hp: '130', abilities: [{name:'Concealed Cards'}] },
+      'mew ex': { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], subtypes: ['Basic', 'ex'], hp: '180', abilities: [{name:'Restart'}] }
+    };
+    return knownMap[name.toLowerCase()] || { name, supertype: 'Pokémon' };
+  }
+
+  function calculateCompatibility(cardRaw, currentDeckCards) {
+    const card = getCardDetails(cardRaw.name) || cardRaw;
+    let score = 0;
+
+    const deckDetailed = currentDeckCards.map(c => getCardDetails(c.name) || c);
+    const pokemonInDeck = deckDetailed.filter(c => (c.supertype || c.category || '').toLowerCase().includes('pok'));
     const energyInDeck = currentDeckCards.filter(c => c.category === 'energy');
 
     const deckTypes = new Set();
@@ -746,55 +769,56 @@ const Wizard = (() => {
 
     const cardTypes = card.types || [];
     const cardAttacks = card.attacks || [];
-
-    // +30 mismo tipo
-    const matchesType = cardTypes.some(t => deckTypes.has(t));
-    if (matchesType && deckTypes.size > 0) {
-      score += 30;
-      reasons.push('Mismo tipo');
-    }
-
-    // +30 comparte energías
-    const attackCosts = new Set();
-    cardAttacks.forEach(a => (a.cost || []).forEach(c => { if (c !== 'Colorless') attackCosts.add(c); }));
-    const sharesEnergy = [...attackCosts].some(c => deckEnergies.has(c));
-    if (sharesEnergy && deckEnergies.size > 0) {
-      score += 30;
-      reasons.push('Comparte energías');
-    }
-
-    // +25 completa evolución
     const cardEvolvesFrom = (card.evolvesFrom || '').toLowerCase();
     const cardName = (card.name || '').toLowerCase();
+
+    let primaryReason = null;
+
+    // 1. Completa evolución (+40 pts)
     const matchesEvolution = pokemonInDeck.some(p => {
       const pName = (p.name || '').toLowerCase();
       const pEvolvesFrom = (p.evolvesFrom || '').toLowerCase();
       return (cardEvolvesFrom && pName.includes(cardEvolvesFrom)) || (pEvolvesFrom && cardName.includes(pEvolvesFrom));
     });
     if (matchesEvolution) {
-      score += 25;
-      reasons.push('Completa evolución');
+      score += 40;
+      primaryReason = 'Completa evolución';
     }
 
-    // +20 habilidad útil
+    // 2. Mismo tipo (+30 pts)
+    const matchesType = cardTypes.some(t => deckTypes.has(t));
+    if (matchesType && deckTypes.size > 0) {
+      score += 30;
+      if (!primaryReason) primaryReason = 'Mismo tipo';
+    }
+
+    // 3. Comparte energías (+30 pts)
+    const attackCosts = new Set();
+    cardAttacks.forEach(a => (a.cost || []).forEach(c => { if (c !== 'Colorless') attackCosts.add(c); }));
+    const sharesEnergy = [...attackCosts].some(c => deckEnergies.has(c));
+    if (sharesEnergy && deckEnergies.size > 0) {
+      score += 30;
+      if (!primaryReason) primaryReason = 'Comparte energías';
+    }
+
+    // 4. Habilidad útil (+20 pts)
     if (card.abilities && card.abilities.length > 0) {
       score += 20;
-      reasons.push('Habilidad útil');
+      if (!primaryReason) primaryReason = 'Habilidad útil';
     }
 
-    // +15 soporte genérico o mayor potencia
+    // 5. Potencia / Consistencia (+15 pts)
     if (card.hp && parseInt(card.hp, 10) >= 200) {
       score += 15;
-      reasons.push('Mayor potencia');
-    } else if (card.rarity && card.rarity.includes('Ultra')) {
+      if (!primaryReason) primaryReason = 'Mayor potencia';
+    } else if (card.subtypes && card.subtypes.some(s => s.includes('ex') || s.includes('V'))) {
       score += 15;
-      reasons.push('Más consistencia');
-    } else if (!reasons.length) {
-      score += 15;
-      reasons.push('Buena cobertura');
+      if (!primaryReason) primaryReason = 'Más consistencia';
     }
 
-    // -30 agrega un tipo de energía nuevo
+    if (!primaryReason) primaryReason = 'Buena cobertura';
+
+    // Penalty: -30 si requiere un tipo de energía nuevo
     const newEnergyNeeded = [...attackCosts].some(c => !deckEnergies.has(c) && deckEnergies.size > 0);
     if (newEnergyNeeded && !sharesEnergy) {
       score -= 30;
@@ -802,7 +826,7 @@ const Wizard = (() => {
 
     return {
       score,
-      reason: reasons[0] || 'Buena cobertura'
+      reason: primaryReason
     };
   }
 
@@ -824,14 +848,14 @@ const Wizard = (() => {
 
     const topOwned = ownedScored.slice(0, 6);
 
-    // Improvements (missing cards) catalog
+    // Missing candidates catalog
     const fallbackMissingCatalog = filterSupertype === 'pokemon' ? [
-      { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], hp: '230', abilities: [{name:'Amp'}], reason: 'Mayor potencia' },
-      { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], hp: '220', abilities: [{name:'Tandem Unit'}], reason: 'Más consistencia' },
-      { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], hp: '280', abilities: [{name:'Quick Search'}], reason: 'Completa evolución' },
-      { name: 'Squawkabilly ex', supertype: 'Pokémon', types: ['Colorless'], hp: '160', abilities: [{name:'Squawk'}], reason: 'Más consistencia' },
-      { name: 'Radiant Greninja', supertype: 'Pokémon', types: ['Water'], hp: '130', abilities: [{name:'Cards'}], reason: 'Habilidad útil' },
-      { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], hp: '180', abilities: [{name:'Restart'}], reason: 'Soporte genérico' }
+      { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], hp: '230', abilities: [{name:'Amp'}] },
+      { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], hp: '220', abilities: [{name:'Tandem Unit'}] },
+      { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], hp: '280', abilities: [{name:'Quick Search'}] },
+      { name: 'Squawkabilly ex', supertype: 'Pokémon', types: ['Colorless'], hp: '160', abilities: [{name:'Squawk'}] },
+      { name: 'Radiant Greninja', supertype: 'Pokémon', types: ['Water'], hp: '130', abilities: [{name:'Cards'}] },
+      { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], hp: '180', abilities: [{name:'Restart'}] }
     ] : filterSupertype === 'energy' ? [
       { name: 'Luminous Energy', supertype: 'Energy', reason: 'Buena cobertura' },
       { name: 'Jet Energy', supertype: 'Energy', reason: 'Más movilidad' },
@@ -849,7 +873,7 @@ const Wizard = (() => {
     const missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0);
     const missingScored = missingCandidates.map(c => {
       const compat = calculateCompatibility(c, currentDeck);
-      return { ...c, score: compat.score, reason: c.reason || compat.reason };
+      return { ...c, score: compat.score, reason: compat.reason };
     }).sort((a, b) => b.score - a.score);
 
     const topMissing = missingScored.slice(0, 6);
