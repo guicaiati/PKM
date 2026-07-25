@@ -736,11 +736,19 @@ const Wizard = (() => {
     const fromCol = Collection.findByName(name);
     if (fromCol) return fromCol;
 
+    const fromDb = API.findCardInDb ? API.findCardInDb(name) : null;
+    if (fromDb) return fromDb;
+
     const knownMap = {
       'pikachu': { name: 'Pikachu', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic'], hp: '70' },
       'raichu': { name: 'Raichu', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Pikachu', hp: '120', attacks: [{cost:['Lightning','Colorless']}] },
       'flaaffy': { name: 'Flaaffy', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Mareep', hp: '90', abilities: [{name:'Dynamotor'}], attacks: [{cost:['Lightning']}] },
       'lanturn': { name: 'Lanturn', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Chinchou', hp: '120', attacks: [{cost:['Lightning']}] },
+      'dratini': { name: 'Dratini', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['Basic'], hp: '70', attacks: [{cost:['Water','Lightning']}] },
+      'dragonair': { name: 'Dragonair', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['Stage 1'], evolvesFrom: 'Dratini', hp: '100', attacks: [{cost:['Water','Lightning']}] },
+      'dragonite': { name: 'Dragonite', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['Stage 2'], evolvesFrom: 'Dragonair', hp: '160', attacks: [{cost:['Water','Lightning']}] },
+      'dragonite v': { name: 'Dragonite V', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['Basic', 'V'], hp: '230', attacks: [{cost:['Water','Lightning']}] },
+      'dragonite vstar': { name: 'Dragonite VSTAR', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['VSTAR'], evolvesFrom: 'Dragonite V', hp: '280', attacks: [{cost:['Water','Lightning']}] },
       'iron treads ex': { name: 'Iron Treads ex', supertype: 'Pokémon', types: ['Metal'], subtypes: ['Basic', 'ex'], hp: '220', attacks: [{cost:['Metal','Colorless']}] },
       'tapu koko ex': { name: 'Tapu Koko ex', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic', 'ex'], hp: '210', abilities: [{name:'Vengeful Strikedown'}], attacks: [{cost:['Lightning']}] },
       'iron hands ex': { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic', 'ex'], hp: '230', abilities: [{name:'Amp'}], attacks: [{cost:['Lightning','Colorless','Colorless']}] },
@@ -751,6 +759,19 @@ const Wizard = (() => {
       'mew ex': { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], subtypes: ['Basic', 'ex'], hp: '180', abilities: [{name:'Restart'}] }
     };
     return knownMap[name.toLowerCase()] || { name, supertype: 'Pokémon' };
+  }
+
+  function shareFamily(nameA, nameB) {
+    if (!nameA || !nameB) return false;
+    const a = nameA.toLowerCase();
+    const b = nameB.toLowerCase();
+    if (a === b) return false;
+    if ((a.includes('dragon') || a.includes('dratini')) && (b.includes('dragon') || b.includes('dratini'))) return true;
+    if ((a.includes('pika') || a.includes('rai')) && (b.includes('pika') || b.includes('rai'))) return true;
+    if (a.includes('char') && b.includes('char')) return true;
+    if ((a.includes('ralts') || a.includes('kirl') || a.includes('gard')) && (b.includes('ralts') || b.includes('kirl') || b.includes('gard'))) return true;
+    if ((a.includes('mareep') || a.includes('flaaffy') || a.includes('ampharos')) && (b.includes('mareep') || b.includes('flaaffy') || b.includes('ampharos'))) return true;
+    return false;
   }
 
   function calculateCompatibility(cardRaw, currentDeckCards) {
@@ -774,22 +795,23 @@ const Wizard = (() => {
 
     let primaryReason = null;
 
-    // 1. Completa evolución (+40 pts)
-    const matchesEvolution = pokemonInDeck.some(p => {
+    // 1. Completa evolución (+50 pts)
+    const matchedDeckPokemon = pokemonInDeck.find(p => {
       const pName = (p.name || '').toLowerCase();
       const pEvolvesFrom = (p.evolvesFrom || '').toLowerCase();
-      return (cardEvolvesFrom && pName.includes(cardEvolvesFrom)) || (pEvolvesFrom && cardName.includes(pEvolvesFrom));
+      return (cardEvolvesFrom && pName.includes(cardEvolvesFrom)) || (pEvolvesFrom && cardName.includes(pEvolvesFrom)) || shareFamily(cardName, pName);
     });
-    if (matchesEvolution) {
-      score += 40;
-      primaryReason = 'Completa evolución';
+
+    if (matchedDeckPokemon) {
+      score += 50;
+      primaryReason = 'Completa evolución de ' + matchedDeckPokemon.name;
     }
 
     // 2. Mismo tipo (+30 pts)
     const matchesType = cardTypes.some(t => deckTypes.has(t));
     if (matchesType && deckTypes.size > 0) {
       score += 30;
-      if (!primaryReason) primaryReason = 'Mismo tipo';
+      if (!primaryReason) primaryReason = 'Mismo tipo ' + cardTypes[0];
     }
 
     // 3. Comparte energías (+30 pts)
@@ -851,10 +873,35 @@ const Wizard = (() => {
     // Dynamic Missing candidates catalog
     let fallbackMissingCatalog = [];
     if (filterSupertype === 'pokemon') {
+      const deckPokemonNames = currentDeck.filter(c => c.category === 'pokemon').map(c => c.name);
+      
+      const familyAdditions = [];
+      deckPokemonNames.forEach(pName => {
+        if (pName.toLowerCase().includes('dragon')) {
+          familyAdditions.push(
+            { name: 'Dratini', supertype: 'Pokémon', types: ['Dragon'], hp: '70' },
+            { name: 'Dragonite', supertype: 'Pokémon', types: ['Dragon'], hp: '160', evolvesFrom: 'Dragonair' },
+            { name: 'Dragonite VSTAR', supertype: 'Pokémon', types: ['Dragon'], hp: '280', evolvesFrom: 'Dragonite V' }
+          );
+        }
+        if (pName.toLowerCase().includes('pika') || pName.toLowerCase().includes('rai')) {
+          familyAdditions.push(
+            { name: 'Raichu', supertype: 'Pokémon', types: ['Lightning'], hp: '120', evolvesFrom: 'Pikachu' },
+            { name: 'Pikachu', supertype: 'Pokémon', types: ['Lightning'], hp: '70' }
+          );
+        }
+        if (pName.toLowerCase().includes('char')) {
+          familyAdditions.push(
+            { name: 'Charizard ex', supertype: 'Pokémon', types: ['Fire'], hp: '330', evolvesFrom: 'Charmeleon' },
+            { name: 'Charmander', supertype: 'Pokémon', types: ['Fire'], hp: '70' }
+          );
+        }
+      });
+
       fallbackMissingCatalog = [
-        { name: 'Dragonair', supertype: 'Pokémon', types: ['Dragon'], hp: '100', evolvesFrom: 'Dratini' },
+        ...familyAdditions,
+        { name: 'Dragonite', supertype: 'Pokémon', types: ['Dragon'], hp: '160', evolvesFrom: 'Dragonair' },
         { name: 'Dratini', supertype: 'Pokémon', types: ['Dragon'], hp: '70' },
-        { name: 'Dragonite VSTAR', supertype: 'Pokémon', types: ['Dragon'], hp: '280', evolvesFrom: 'Dragonite V' },
         { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], hp: '230', abilities: [{name:'Amp'}] },
         { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], hp: '220', abilities: [{name:'Tandem'}] },
         { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], hp: '280', abilities: [{name:'Quick Search'}] },
@@ -881,10 +928,10 @@ const Wizard = (() => {
       ];
     }
 
-    const missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0);
+    const missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0 && !alreadyAdded.has(c.name.toLowerCase()));
     const missingScored = missingCandidates.map(c => {
       const compat = calculateCompatibility(c, currentDeck);
-      return { ...c, score: compat.score, reason: compat.reason };
+      return { ...c, score: compat.score, reason: c.reason || compat.reason };
     }).sort((a, b) => b.score - a.score);
 
     const topMissing = missingScored.slice(0, 6);
