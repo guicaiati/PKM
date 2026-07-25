@@ -273,6 +273,52 @@ button.ghost:hover, label.ghost:hover {
   margin-bottom: 6px;
 }
 
+.hint-small {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.suggest-section {
+  margin-bottom: 12px;
+}
+.suggest-section .suggest-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--holo-a);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.smart-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-align: left;
+}
+.smart-chip .chip-name {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.smart-chip .chip-reason {
+  font-size: 10px;
+  opacity: 0.75;
+  font-family: var(--mono);
+  margin-top: 2px;
+  line-height: 1;
+}
+
 .filter-chip {
   font-family: var(--mono);
   font-size: 12px;

@@ -170,6 +170,55 @@ button, label {
 .search-history { margin-top: 14px; }
 .deck-sub-h { font-size: 12px; opacity: 0.6; margin-bottom: 6px; }
 
+.hint-small {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.suggest-section {
+  margin-bottom: 12px;
+
+  .suggest-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--holo-a);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+}
+
+.chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.smart-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-align: left;
+
+  .chip-name {
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .chip-reason {
+    font-size: 10px;
+    opacity: 0.75;
+    font-family: var(--mono);
+    margin-top: 2px;
+    line-height: 1;
+  }
+}
+
 .filter-chip {
   font-family: var(--mono); font-size: 12px;
   background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--line);

@@ -731,24 +731,163 @@ const Wizard = (() => {
     </div>`;
   }
 
-  function buildSuggestionsHtml(filterSupertype){
+  function calculateCompatibility(card, currentDeckCards) {
+    let score = 0;
+    let reasons = [];
+
+    const pokemonInDeck = currentDeckCards.filter(c => c.category === 'pokemon');
+    const energyInDeck = currentDeckCards.filter(c => c.category === 'energy');
+
+    const deckTypes = new Set();
+    pokemonInDeck.forEach(p => { if (p.types) p.types.forEach(t => deckTypes.add(t)); });
+
+    const deckEnergies = new Set();
+    energyInDeck.forEach(e => { if (e.energyType) deckEnergies.add(e.energyType); });
+
+    const cardTypes = card.types || [];
+    const cardAttacks = card.attacks || [];
+
+    // +30 mismo tipo
+    const matchesType = cardTypes.some(t => deckTypes.has(t));
+    if (matchesType && deckTypes.size > 0) {
+      score += 30;
+      reasons.push('Mismo tipo');
+    }
+
+    // +30 comparte energías
+    const attackCosts = new Set();
+    cardAttacks.forEach(a => (a.cost || []).forEach(c => { if (c !== 'Colorless') attackCosts.add(c); }));
+    const sharesEnergy = [...attackCosts].some(c => deckEnergies.has(c));
+    if (sharesEnergy && deckEnergies.size > 0) {
+      score += 30;
+      reasons.push('Comparte energías');
+    }
+
+    // +25 completa evolución
+    const cardEvolvesFrom = (card.evolvesFrom || '').toLowerCase();
+    const cardName = (card.name || '').toLowerCase();
+    const matchesEvolution = pokemonInDeck.some(p => {
+      const pName = (p.name || '').toLowerCase();
+      const pEvolvesFrom = (p.evolvesFrom || '').toLowerCase();
+      return (cardEvolvesFrom && pName.includes(cardEvolvesFrom)) || (pEvolvesFrom && cardName.includes(pEvolvesFrom));
+    });
+    if (matchesEvolution) {
+      score += 25;
+      reasons.push('Completa evolución');
+    }
+
+    // +20 habilidad útil
+    if (card.abilities && card.abilities.length > 0) {
+      score += 20;
+      reasons.push('Habilidad útil');
+    }
+
+    // +15 soporte genérico o mayor potencia
+    if (card.hp && parseInt(card.hp, 10) >= 200) {
+      score += 15;
+      reasons.push('Mayor potencia');
+    } else if (card.rarity && card.rarity.includes('Ultra')) {
+      score += 15;
+      reasons.push('Más consistencia');
+    } else if (!reasons.length) {
+      score += 15;
+      reasons.push('Buena cobertura');
+    }
+
+    // -30 agrega un tipo de energía nuevo
+    const newEnergyNeeded = [...attackCosts].some(c => !deckEnergies.has(c) && deckEnergies.size > 0);
+    if (newEnergyNeeded && !sharesEnergy) {
+      score -= 30;
+    }
+
+    return {
+      score,
+      reason: reasons[0] || 'Buena cobertura'
+    };
+  }
+
+  function buildSuggestionsHtml(filterSupertype) {
     const colCards = getCollectionCards();
-    let filtered = colCards;
-    if(filterSupertype === 'pokemon') filtered = colCards.filter(c => (c.supertype||'').includes('Pok'));
-    else if(filterSupertype === 'energy') filtered = colCards.filter(c => (c.supertype||'').includes('Energ'));
-    else if(filterSupertype === 'trainer') filtered = colCards.filter(c => (c.supertype||'').includes('Train'));
+    const currentDeck = state.cards;
+    const alreadyAdded = new Set(currentDeck.map(c => c.name.toLowerCase()));
 
-    if(filtered.length === 0) return '';
-    filtered.sort((a,b) => (b.count||1) - (a.count||1));
-    const top = filtered.slice(0, 12);
-    const alreadyAdded = new Set(state.cards.map(c => c.name.toLowerCase()));
+    // Filter collection cards
+    let ownedCandidates = colCards;
+    if (filterSupertype === 'pokemon') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Pok'));
+    else if (filterSupertype === 'energy') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Energ'));
+    else if (filterSupertype === 'trainer') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Train'));
 
-    const chips = top.map(c => {
+    const ownedScored = ownedCandidates.map(c => {
+      const compat = calculateCompatibility(c, currentDeck);
+      return { ...c, score: compat.score, reason: compat.reason };
+    }).sort((a, b) => b.score - a.score);
+
+    const topOwned = ownedScored.slice(0, 6);
+
+    // Improvements (missing cards) catalog
+    const fallbackMissingCatalog = filterSupertype === 'pokemon' ? [
+      { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], hp: '230', abilities: [{name:'Amp'}], reason: 'Mayor potencia' },
+      { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], hp: '220', abilities: [{name:'Tandem Unit'}], reason: 'Más consistencia' },
+      { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], hp: '280', abilities: [{name:'Quick Search'}], reason: 'Completa evolución' },
+      { name: 'Squawkabilly ex', supertype: 'Pokémon', types: ['Colorless'], hp: '160', abilities: [{name:'Squawk'}], reason: 'Más consistencia' },
+      { name: 'Radiant Greninja', supertype: 'Pokémon', types: ['Water'], hp: '130', abilities: [{name:'Cards'}], reason: 'Habilidad útil' },
+      { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], hp: '180', abilities: [{name:'Restart'}], reason: 'Soporte genérico' }
+    ] : filterSupertype === 'energy' ? [
+      { name: 'Luminous Energy', supertype: 'Energy', reason: 'Buena cobertura' },
+      { name: 'Jet Energy', supertype: 'Energy', reason: 'Más movilidad' },
+      { name: 'Double Turbo Energy', supertype: 'Energy', reason: 'Mayor velocidad' },
+      { name: 'Reversal Energy', supertype: 'Energy', reason: 'Soporte de remontada' }
+    ] : [
+      { name: "Boss's Orders", supertype: 'Trainer', reason: 'Amenaza decisiva' },
+      { name: 'Arven', supertype: 'Trainer', reason: 'Soporte genérico' },
+      { name: 'Iono', supertype: 'Trainer', reason: 'Control de mano' },
+      { name: 'Buddy-Buddy Poffin', supertype: 'Trainer', reason: 'Más consistencia' },
+      { name: 'Ultra Ball', supertype: 'Trainer', reason: 'Búsqueda clave' },
+      { name: 'Super Rod', supertype: 'Trainer', reason: 'Recuperación' }
+    ];
+
+    const missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0);
+    const missingScored = missingCandidates.map(c => {
+      const compat = calculateCompatibility(c, currentDeck);
+      return { ...c, score: compat.score, reason: c.reason || compat.reason };
+    }).sort((a, b) => b.score - a.score);
+
+    const topMissing = missingScored.slice(0, 6);
+
+    const renderChip = (c) => {
       const added = alreadyAdded.has(c.name.toLowerCase());
-      return `<button type="button" class="filter-chip wiz-suggest-chip ${added ? 'active' : ''}" data-suggest-name="${escapeHtml(c.name)}">${escapeHtml(c.name)} (${c.count||1}x)${added ? ' ✓' : ''}</button>`;
-    }).join('');
+      return `<button type="button" class="filter-chip wiz-suggest-chip smart-chip ${added ? 'active' : ''}" data-suggest-name="${escapeHtml(c.name)}">
+        <span class="chip-name">${escapeHtml(c.name)}${added ? ' ✓' : ''}</span>
+        <span class="chip-reason">${escapeHtml(c.reason)}</span>
+      </button>`;
+    };
 
-    return `<div style="margin-bottom:12px;"><div style="font-size:12px;opacity:0.6;margin-bottom:6px;">Sugerencias de tu colección:</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${chips}</div></div>`;
+    const ownedHtml = topOwned.length > 0
+      ? topOwned.map(renderChip).join('')
+      : '<div class="empty" style="font-size:11px;padding:6px;">No tenés cartas disponibles acá.</div>';
+
+    const missingHtml = topMissing.length > 0
+      ? topMissing.map(renderChip).join('')
+      : '<div class="empty" style="font-size:11px;padding:6px;">¡Ya tenés todas las mejores cartas!</div>';
+
+    return `
+      <div class="smart-suggestions-block" style="margin-bottom:12px;">
+        <p class="hint" style="margin-bottom:2px;font-weight:700;">🧠 Recomendaciones inteligentes</p>
+        <div class="hint-small">
+          Mostramos primero las mejores cartas de tu colección y, si faltan, las mejoras recomendadas para este mazo.
+        </div>
+
+        <div class="suggest-section">
+          <div class="suggest-title">⭐ De tu colección</div>
+          <div id="ownedSuggestions" class="chip-container">${ownedHtml}</div>
+        </div>
+
+        <div class="suggest-section">
+          <div class="suggest-title">💎 Mejoras</div>
+          <div id="missingSuggestions" class="chip-container">${missingHtml}</div>
+        </div>
+      </div>
+    `;
   }
 
   function renderGroupedList(items) {
