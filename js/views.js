@@ -878,6 +878,38 @@ const Wizard = (() => {
     return 'basic';
   }
 
+  function getDeckRole(c) {
+    const card = getCardDetails(c.name) || c;
+    const name = (card.name || '').toLowerCase();
+    const hp = parseInt(card.hp || 0, 10);
+    const abilities = card.abilities || [];
+    const subtypes = (card.subtypes || []).map(s => s.toLowerCase());
+
+    // 1. Motor / Banca (Bench engine & Support)
+    if (abilities.some(a => {
+      const text = ((a.name || '') + ' ' + (a.text || '')).toLowerCase();
+      return text.includes('search') || text.includes('draw') || text.includes('attach') || text.includes('energy') || text.includes('cards') || text.includes('restart');
+    }) || name.includes('pidgeot') || name.includes('squawkabilly') || name.includes('mew ex') || name.includes('flaaffy') || name.includes('kirlia') || name.includes('bibarel') || name.includes('radiant greninja')) {
+      return 'support';
+    }
+
+    // 2. Atacante Principal (Main Heavy Attacker)
+    if (hp >= 200 || subtypes.includes('stage 2') || subtypes.includes('vstar') || subtypes.includes('vmax') || name.includes('dragonite') || name.includes('charizard') || name.includes('iron hands') || name.includes('miraidon') || name.includes('gardevoir')) {
+      return 'main';
+    }
+
+    // 3. Atacante Secundario / Reserva (Backup / Tech Attacker)
+    return 'secondary';
+  }
+
+  function matchesStageOrRoleFilter(c, filter) {
+    if (!filter || filter === 'all') return true;
+    if (filter === 'main' || filter === 'secondary' || filter === 'support') {
+      return getDeckRole(c) === filter;
+    }
+    return getStageCategory(c) === filter;
+  }
+
   function buildSuggestionsHtml(filterSupertype) {
     const colCards = getCollectionCards();
     const currentDeck = state.cards;
@@ -890,7 +922,7 @@ const Wizard = (() => {
     else if (filterSupertype === 'trainer') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Train'));
 
     if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
-      ownedCandidates = ownedCandidates.filter(c => getStageCategory(c) === state.stageFilter);
+      ownedCandidates = ownedCandidates.filter(c => matchesStageOrRoleFilter(c, state.stageFilter));
     }
 
     const ownedScored = ownedCandidates.map(c => {
@@ -960,7 +992,7 @@ const Wizard = (() => {
 
     let missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0 && !alreadyAdded.has(c.name.toLowerCase()));
     if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
-      missingCandidates = missingCandidates.filter(c => getStageCategory(c) === state.stageFilter);
+      missingCandidates = missingCandidates.filter(c => matchesStageOrRoleFilter(c, state.stageFilter));
     }
 
     const missingScored = missingCandidates.map(c => {
@@ -987,20 +1019,22 @@ const Wizard = (() => {
 
     const ownedHtml = topOwned.length > 0
       ? topOwned.map(renderChip).join('')
-      : '<div class="empty" style="font-size:11px;padding:6px;">No tenés cartas disponibles para este nivel.</div>';
+      : '<div class="empty" style="font-size:11px;padding:6px;">No tenés cartas disponibles para este filtro.</div>';
 
     const missingHtml = topMissing.length > 0
       ? topMissing.map(renderChip).join('')
-      : '<div class="empty" style="font-size:11px;padding:6px;">No hay sugerencias para este nivel.</div>';
+      : '<div class="empty" style="font-size:11px;padding:6px;">No hay sugerencias para este filtro.</div>';
 
     const stageFiltersHtml = filterSupertype === 'pokemon' ? `
       <div class="stage-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 12px;">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Pre-selección por nivel:</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Filtro TCG:</span>
         <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='all'?'active':''}" data-stage="all">Todos</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='main'?'active':''}" data-stage="main">⚔️ Atacante Principal</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='secondary'?'active':''}" data-stage="secondary">🛡️ Reserva / Secundario</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='support'?'active':''}" data-stage="support">⚙️ Motor / Banca</button>
         <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='basic'?'active':''}" data-stage="basic">🌱 Básicos</button>
         <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='stage1'?'active':''}" data-stage="stage1">⚡ Nivel 1</button>
         <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='stage2'?'active':''}" data-stage="stage2">🔥 Nivel 2</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='ex'?'active':''}" data-stage="ex">💎 ex / VSTAR</button>
       </div>
     ` : '';
 
