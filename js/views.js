@@ -808,19 +808,21 @@ const Wizard = (() => {
     }
 
     // 2. Mismo tipo (+30 pts)
-    const matchesType = cardTypes.some(t => deckTypes.has(t));
-    if (matchesType && deckTypes.size > 0) {
+    const matchedType = cardTypes.find(t => deckTypes.has(t));
+    if (matchedType && deckTypes.size > 0) {
       score += 30;
-      if (!primaryReason) primaryReason = 'Mismo tipo ' + cardTypes[0];
+      const typeDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(matchedType) : matchedType;
+      if (!primaryReason) primaryReason = 'Mismo tipo (' + typeDisplay + ')';
     }
 
     // 3. Comparte energías (+30 pts)
     const attackCosts = new Set();
     cardAttacks.forEach(a => (a.cost || []).forEach(c => { if (c !== 'Colorless') attackCosts.add(c); }));
-    const sharesEnergy = [...attackCosts].some(c => deckEnergies.has(c));
-    if (sharesEnergy && deckEnergies.size > 0) {
+    const sharedEnergyType = [...attackCosts].find(c => deckEnergies.has(c));
+    if (sharedEnergyType && deckEnergies.size > 0) {
       score += 30;
-      if (!primaryReason) primaryReason = 'Comparte energías';
+      const energyDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(sharedEnergyType) : sharedEnergyType;
+      if (!primaryReason) primaryReason = 'Comparte energía ' + energyDisplay;
     }
 
     // 4. Habilidad útil (+20 pts)

@@ -890,6 +890,22 @@ const UI = (() => {
 
   const TYPE_ES = { Fire: 'Fuego', Water: 'Agua', Grass: 'Planta', Lightning: 'Rayo', Psychic: 'Psíquico', Fighting: 'Lucha', Darkness: 'Oscuridad', Metal: 'Metal', Colorless: 'Incoloro', Dragon: 'Dragón', Fairy: 'Hada' };
 
+  const TYPE_SYMBOL = {
+    Fire: '🔥', Water: '💧', Grass: '🍃', Lightning: '⚡',
+    Psychic: '🔮', Fighting: '👊', Darkness: '🌙', Metal: '⚙️',
+    Dragon: '🐲', Colorless: '⭐', Fairy: '🌸',
+    Fuego: '🔥', Agua: '💧', Planta: '🍃', Rayo: '⚡',
+    Psíquico: '🔮', Lucha: '👊', Oscuridad: '🌙',
+    Dragón: '🐲', Incoloro: '⭐', Hada: '🌸'
+  };
+
+  function getEnergySymbol(type) {
+    if (!type) return '';
+    const sym = TYPE_SYMBOL[type] || '';
+    const esName = TYPE_ES[type] || type;
+    return sym ? `${sym} ${esName}` : esName;
+  }
+
   const TCG_EN_TO_ES = {
     'Active Pokémon': 'Pokémon Activo',
     'Benched Pokémon': 'Pokémon en Banca',
@@ -1445,6 +1461,8 @@ const UI = (() => {
     },
 
     cardNamePlain,
-    setReverseNameMap
+    setReverseNameMap,
+    getEnergySymbol,
+    TYPE_SYMBOL
   };
 })();
