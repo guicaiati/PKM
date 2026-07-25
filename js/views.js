@@ -1104,24 +1104,50 @@ const Wizard = (() => {
     rail.innerHTML = STEP_META.map(s=>`<button type="button" class="filter-chip ${state.step===s.n?'active':''}" data-wizard-step="${s.n}">${s.n}. ${s.label}</button>`).join('');
   }
 
-  function renderCardTable(list, category){
-    if(list.length===0) return `<div class="empty">Todavía no agregaste cartas acá.</div>`;
+  function renderCardRow(c) {
+    const owned = countOwned(c.name);
+    const needed = Number(c.count || 0);
+    const missing = Math.max(0, needed - owned);
+    return `
+    <tr data-id="${c.id}">
+      <td>${escapeHtml(c.name)}</td>
+      <td><button type="button" class="ghost wizard-qty" data-qty="-1" data-id="${c.id}">−</button> ${c.count} <button type="button" class="ghost wizard-qty" data-qty="1" data-id="${c.id}">+</button></td>
+      <td style="color:${missing>0?'var(--fire)':'var(--grass)'}">${missing>0?`Falta ${missing}`:`✔ ${owned}`}</td>
+      <td><button type="button" class="ghost wizard-remove" data-remove="${c.id}">✕</button></td>
+    </tr>`;
+  }
+
+  function renderCardTable(list, category) {
+    if (list.length === 0) return `<div class="empty">Todavía no agregaste cartas acá.</div>`;
+
+    if (category === 'pokemon') {
+      const groups = [
+        { key: 'main', label: '⚔️ Atacantes Principales', items: list.filter(c => getDeckRole(c) === 'main') },
+        { key: 'secondary', label: '🛡️ Atacantes de Reserva / Secundarios', items: list.filter(c => getDeckRole(c) === 'secondary') },
+        { key: 'support', label: '⚙️ Motor de Banca / Apoyo', items: list.filter(c => getDeckRole(c) === 'support') }
+      ];
+
+      let html = '';
+      groups.forEach(g => {
+        if (g.items.length === 0) return;
+        html += `<div class="table-group-block" style="margin-top:12px;margin-bottom:12px;">
+          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--holo-a);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">${g.label} (${g.items.reduce((s,x)=>s+Number(x.count||1),0)})</div>
+          <table class="wizard-ledger">
+            <thead><tr><th>Nombre</th><th>Cant.</th><th>Tenés</th><th></th></tr></thead>
+            <tbody>
+              ${g.items.map(renderCardRow).join('')}
+            </tbody>
+          </table>
+        </div>`;
+      });
+      return html || `<div class="empty">Todavía no agregaste cartas acá.</div>`;
+    }
+
     return `
       <table class="wizard-ledger">
         <thead><tr><th>Nombre</th><th>Cant.</th><th>Tenés</th><th></th></tr></thead>
         <tbody>
-          ${list.map(c=>{
-            const owned = countOwned(c.name);
-            const needed = Number(c.count||0);
-            const missing = Math.max(0, needed - owned);
-            return `
-            <tr data-id="${c.id}">
-              <td>${escapeHtml(c.name)}</td>
-              <td><button type="button" class="ghost wizard-qty" data-qty="-1" data-id="${c.id}">−</button> ${c.count} <button type="button" class="ghost wizard-qty" data-qty="1" data-id="${c.id}">+</button></td>
-              <td style="color:${missing>0?'var(--fire)':'var(--grass)'}">${missing>0?`Falta ${missing}`:`✔ ${owned}`}</td>
-              <td><button type="button" class="ghost wizard-remove" data-remove="${c.id}">✕</button></td>
-            </tr>`;
-          }).join('')}
+          ${list.map(renderCardRow).join('')}
         </tbody>
       </table>`;
   }
