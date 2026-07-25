@@ -204,10 +204,34 @@ button, label {
   border-radius: 8px;
   text-align: left;
 
+  .chip-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+
   .chip-name {
     font-weight: 600;
     font-size: 12px;
     line-height: 1.2;
+  }
+
+  .chip-owned {
+    font-size: 10px;
+    font-weight: 700;
+    color: #38e07b;
+    background: rgba(56, 224, 123, 0.18);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    line-height: 1.1;
+  }
+
+  .chip-added {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--holo-b);
   }
 
   .chip-reason {

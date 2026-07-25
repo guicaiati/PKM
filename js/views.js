@@ -941,8 +941,15 @@ const Wizard = (() => {
 
     const renderChip = (c) => {
       const added = alreadyAdded.has(c.name.toLowerCase());
+      const owned = countOwned(c.name);
+      const ownedBadge = owned > 0 ? `<span class="chip-owned">Tenés ${owned}</span>` : '';
+      const addedBadge = added ? `<span class="chip-added">✓</span>` : '';
       return `<button type="button" class="filter-chip wiz-suggest-chip smart-chip ${added ? 'active' : ''}" data-suggest-name="${escapeHtml(c.name)}">
-        <span class="chip-name">${escapeHtml(c.name)}${added ? ' ✓' : ''}</span>
+        <div class="chip-top">
+          <span class="chip-name">${escapeHtml(c.name)}</span>
+          ${ownedBadge}
+          ${addedBadge}
+        </div>
         <span class="chip-reason">${escapeHtml(c.reason)}</span>
       </button>`;
     };
