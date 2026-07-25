@@ -12,17 +12,15 @@
 <body>
   <div id="app">
     <div class="ledger-head">
-      <h1><span class="thraex-title" style="font-size:20px;opacity:0.7;vertical-align:middle;margin-right:4px;">PKM</span> Trainer's Ledger</h1>
-      <div class="tag">escanea &middot; cataloga &middot; armá tu mazo</div>
+      <h1><span class="thraex-title name-sub">PKM</span> Trainer's Ledger</h1>
+      <div class="tag">buscá &middot; cataloga &middot; armá tu mazo</div>
     </div>
 
     <nav class="tabs">
       <button data-tab="scan" class="active">Buscar</button>
-      <button data-tab="collection">Mi colección</button>
-      <button data-tab="build">Construir mazo</button>
-      <button data-tab="saved">Guardados</button>
-      <button data-tab="meta">Meta</button>
-      <button data-tab="archetypes">Arquetipos</button>
+      <button data-tab="build">Armar mazo</button>
+      <button data-tab="collection">Colección</button>
+      <button data-tab="saved">Guardado</button>
     </nav>
 
     <!-- SEARCH / SCAN -->
@@ -48,7 +46,7 @@
         <div class="grid" id="searchResults"></div>
         <div class="search-history" id="searchHistory">
           <div class="deck-sub-h">Búsquedas recientes</div>
-          <div class="history-chips" id="historyChips"></div>
+          <div class="search-filters history-chips" id="historyChips"></div>
         </div>
       </div>
     </section>
@@ -94,9 +92,9 @@
             <button class="action" id="saveCollectionBtn">Guardar colección</button>
             <button class="ghost" id="enrichAllBtn" title="Actualizar datos de todas las colecciones guardadas desde la API">Actualizar datos</button>
             <button class="ghost" id="exportCollectionBtn">Exportar JSON</button>
-            <label class="ghost" style="cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;">
+            <label class="ghost btn-label">
               Importar JSON
-              <input type="file" accept=".json" id="importCollectionInput" style="display:none;" />
+              <input type="file" accept=".json" id="importCollectionInput" class="hidden" />
             </label>
           </div>
         </div>
@@ -105,61 +103,55 @@
       </div>
     </section>
 
-    <!-- DECK BUILDER -->
+    <!-- ARMAR MAZO: guía paso a paso como núcleo -->
     <section class="panel" id="panel-build">
+
       <div class="card-box">
-        <h2>Constructor inteligente de mazos</h2>
-        <p class="hint">
-          Seleccioná las colecciones que querés usar para construir el mazo. El sistema las combinará y armará un mazo completo de 60 cartas.
-        </p>
-        <div class="deck-collections-select" id="deckCollectionsSelect">
-          <div class="deck-sub-h">Colecciones para usar:</div>
-          <div class="collection-chips" id="deckCollectionChips"></div>
-        </div>
+        <h2>Armar mazo — paso a paso</h2>
+        <p class="hint">Un método de 8 pasos para armar un mazo consistente a partir de tu colección: plan, Pokémon, energía, robo, apoyo, consistencia simulada y cobertura de amenazas. En cada paso vas a ver sugerencias según lo que ya tenés.</p>
         <div class="row">
-          <div class="search-wrap">
-            <input type="text" id="deckPokemonInput" placeholder="ej: Charizard ex, Gardevoir ex (opcional)" />
-            <div class="autocomplete-list" id="deckAutocompleteList"></div>
+          <button class="action" id="wizImportBtn">Importar desde mi colección</button>
+        </div>
+        <div class="status" id="wizImportStatus"></div>
+      </div>
+
+      <!-- Navegación de pasos + contenido del paso actual -->
+      <div class="card-box">
+        <div class="search-filters" id="wizardStepChips"></div>
+      </div>
+      <div class="card-box" id="wizardStepBody"></div>
+
+      <!-- Lo que más importa: tenés vs falta comprar, siempre a la vista -->
+      <div class="card-box">
+        <h2>Tenés / falta comprar</h2>
+        <div class="next-steps-grid">
+          <div>
+            <h3>Ya tenés</h3>
+            <div id="removeList"></div>
           </div>
-          <button class="action" id="analyzeDeckBtn">Analizar colección</button>
-          <button class="action" id="autoBuildBtn" style="background:var(--surface-2);color:var(--text);border:1px solid var(--line);">Construir según mis cartas</button>
-        </div>
-        <div class="status" id="deckStatus"></div>
-      </div>
-
-      <!-- Progress -->
-      <div class="card-box progress-box" id="progressBox" style="display:none;">
-        <div class="progress-header">
-          <span id="progressTask">Iniciando análisis...</span>
-          <span id="progressPercent">0%</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+          <div>
+            <h3>Falta comprar</h3>
+            <div id="buyList"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Results -->
-      <div id="deckResults" style="display:none;">
-        <!-- Score -->
+      <!-- Resultado final una vez completado el paso a paso -->
+      <div id="deckResults" class="hidden">
+
         <div class="card-box">
           <h2>Puntaje del mazo</h2>
           <div class="deck-score" id="deckScore"></div>
           <div class="score-total" id="scoreTotal"></div>
         </div>
 
-        <!-- Variants -->
         <div class="card-box">
-          <h2>Variantes del mazo</h2>
-          <div class="variants-row" id="deckVariants"></div>
+          <h2>Mazo completo — <span id="deckCardCount">60</span> cartas</h2>
+          <div class="deck-section" id="deckPokemonSection"></div>
+          <div class="deck-section" id="deckTrainerSection"></div>
+          <div class="deck-section" id="deckEnergySection"></div>
         </div>
 
-        <!-- Cómo jugar -->
-        <div class="card-box" id="gameplaySection" style="display:none;">
-          <h2>Cómo jugar este mazo</h2>
-          <div id="gameplayTips"></div>
-        </div>
-
-        <!-- Save Deck -->
         <div class="card-box">
           <div class="row">
             <input type="text" id="deckNameInput" placeholder="Nombre del mazo" />
@@ -169,103 +161,46 @@
           <div class="saved-decks" id="savedDecks"></div>
         </div>
 
-        <!-- Full Deck -->
-        <div class="card-box">
-          <h2>Mazo completo — <span id="deckCardCount">60</span> cartas</h2>
-          <div class="deck-section" id="deckPokemonSection"></div>
-          <div class="deck-section" id="deckTrainerSection"></div>
-          <div class="deck-section" id="deckEnergySection"></div>
-        </div>
-
-        <!-- Buy List -->
-        <div class="card-box">
-          <h2>Comprar</h2>
-          <div id="buyList"></div>
-        </div>
-
-        <!-- Remove List -->
-        <div class="card-box">
-          <h2>Eliminar de tu colección</h2>
-          <div id="removeList"></div>
-        </div>
-
-        <!-- Meta Comparison -->
-        <div class="card-box">
-          <h2>Comparación con el meta</h2>
-          <div id="metaComparison"></div>
-          <h3>Sugerencias para mejorar tu mazo</h3>
-          <div id="suggestionsContainer"></div>
-        </div>
       </div>
     </section>
 
-    <!-- SAVED -->
+    <!-- GUARDADO -->
     <section class="panel" id="panel-saved">
       <div class="card-box">
+        <h2>Mis mazos</h2>
+        <p class="hint">Mazos guardados. Cargalos para verlos o modificá la variante.</p>
+        <div id="savedDecksFull"></div>
+        <div class="empty" id="savedDecksEmpty">No tenés mazos guardados. Andá a "Armar mazo" y generá uno para guardarlo.</div>
+      </div>
+      <div class="card-box">
         <h2>Mis colecciones</h2>
-        <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminpalas.</p>
-        <div style="margin-bottom:12px;">
+        <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminalas.</p>
+        <div class="mb-12">
           <div class="search-wrap">
             <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..." autocomplete="off" />
             <div class="autocomplete-list" id="savedSearchAutocomplete"></div>
           </div>
         </div>
+        <div class="row mb-12">
+          <button class="ghost" id="exportAllCollectionsTxt">Exportar colecciones TXT</button>
+        </div>
         <div id="savedCollectionsFull"></div>
-        <div class="empty" id="savedCollectionsEmpty">No tenés colecciones guardadas. Andá a "Mi colección" y guardá una.</div>
-      </div>
-      <div class="card-box">
-        <h2>Mis mazos</h2>
-        <p class="hint">Mazos guardados. Cargalos para verlos o modificá la variante.</p>
-        <div id="savedDecksFull"></div>
-        <div class="empty" id="savedDecksEmpty">No tenés mazos guardados. Andá a "Construir mazo" y generá uno para guardarlo.</div>
+        <div class="empty" id="savedCollectionsEmpty">No tenés colecciones guardadas. Andá a "Colección" y guardá una.</div>
       </div>
     </section>
 
-    <!-- META -->
-    <section class="panel" id="panel-meta">
-      <div class="card-box">
-        <h2>Meta actual — Standard</h2>
-        <p class="hint">Datos de uso y popularidad de arquetipos competitivos. Actualizado periódicamente desde Limitless TCG.</p>
-        <div class="meta-info" id="metaInfo"></div>
-        <div id="metaRanking"></div>
-      </div>
-      <div class="card-box">
-        <h2>Tu colección permite jugar</h2>
-        <div id="collectionCompatibility"></div>
-      </div>
+    <!-- DB Sidebar Accordion Section -->
+    <section class="db-sidebar" id="dbSidebar">
+      <details class="sidebar-box card-box">
+        <summary class="accordion-header">Base de datos y Sets Locales</summary>
+        <div class="db-status" id="dbStatus" style="margin-top:12px;"></div>
+      </details>
     </section>
 
-    <!-- ARCHETYPES -->
-    <section class="panel" id="panel-archetypes">
-      <div class="card-box">
-        <h2>Arquetipos guardados</h2>
-        <p class="hint">Arquetipos pre-cargados y creados por vos. Podés editarlos o agregar nuevos.</p>
-        <div id="archetypeList"></div>
-      </div>
-      <div class="card-box">
-        <h2>Agregar arquetipo</h2>
-        <div class="row">
-          <input type="text" id="archName" placeholder="Nombre del arquetipo (ej: Charizard ex)" />
-        </div>
-        <textarea id="archList" placeholder="Una carta por línea, formato: Nombre de la carta x4&#10;ej:&#10;Charizard ex x2&#10;Pidgeot ex x1&#10;Rare Candy x4"></textarea>
-        <div class="row" style="margin-top:10px;">
-          <button class="action" id="addArchBtn">Agregar arquetipo</button>
-          <button class="ghost" id="resetArchBtn">Restaurar pre-cargados</button>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- DB Sidebar -->
-  <div class="db-sidebar" id="dbSidebar">
-    <div class="sidebar-box">
-      <h3>Base de datos</h3>
-      <div class="db-status" id="dbStatus"></div>
-    </div>
   </div>
 
   <!-- Card Explanation Modal -->
-  <div class="modal-overlay" id="cardModal" style="display:none;">
+  <div class="modal-overlay hidden" id="cardModal">
     <div class="modal-content">
       <button class="modal-close" id="modalClose">&times;</button>
       <div id="modalBody"></div>
@@ -276,15 +211,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
-  <script src="js/storage.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/progress.js"></script>
-  <script src="js/scanner.js"></script>
-  <script src="js/collection.js"></script>
-  <script src="js/meta.js"></script>
-  <script src="js/deckbuilder.js"></script>
-  <script src="js/saved.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/views.js"></script>
 </body>
 </html>

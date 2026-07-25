@@ -1,0 +1,46 @@
+// Fuentes
+@font-face {
+  font-family: 'EssentiarumTCG';
+  src: url('../fonts/EssentiarumTCG-SVG.otf') format('svg'),
+       url('../fonts/EssentiarumTCG.otf') format('opentype');
+  font-weight: normal; font-style: normal; font-display: swap;
+}
+
+@font-face {
+  font-family: 'ThraexMagnus';
+  src: url('../fonts/ThraexMagnus.woff2') format('woff2'),
+       url('../fonts/ThraexMagnus.otf') format('opentype');
+  font-weight: normal; font-style: normal; font-display: swap;
+}
+
+// Variables SASS & CSS Tokens
+$bg: #14172B;
+$surface: #1D2140;
+$surface-2: #262B52;
+$line: #383F72;
+$text: #EDEBFF;
+$text-dim: #A8ADD6;
+$holo-a: #7DD3FC;
+$holo-b: #C084FC;
+$holo-c: #FDBA74;
+$fire: #F87171;
+$grass: #4ADE80;
+
+:root {
+  --bg: #{$bg};
+  --surface: #{$surface};
+  --surface-2: #{$surface-2};
+  --line: #{$line};
+  --text: #{$text};
+  --text-dim: #{$text-dim};
+  --holo-a: #{$holo-a};
+  --holo-b: #{$holo-b};
+  --holo-c: #{$holo-c};
+  --fire: #{$fire};
+  --grass: #{$grass};
+  --display: 'Space Grotesk', sans-serif;
+  --body: 'Inter', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --tcg: 'EssentiarumTCG', sans-serif;
+  --poke: 'ThraexMagnus', sans-serif;
+}

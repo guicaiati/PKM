@@ -1,0 +1,12 @@
+{
+  "name": "trainers-ledger",
+  "version": "2.0.0",
+  "description": "Pokémon TCG Deck Builder & Collection Manager",
+  "scripts": {
+    "build:css": "npx -y sass scss/styles.scss css/styles.css --style=compressed",
+    "watch:css": "npx -y sass --watch scss/styles.scss:css/styles.css"
+  },
+  "devDependencies": {
+    "sass": "^1.70.0"
+  }
+}
