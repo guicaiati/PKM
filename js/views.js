@@ -860,6 +860,24 @@ const Wizard = (() => {
     };
   }
 
+  function getStageCategory(c) {
+    const card = getCardDetails(c.name) || c;
+    const name = (card.name || '').toLowerCase();
+    const subtypes = (card.subtypes || []).map(s => s.toLowerCase());
+    const evoFrom = card.evolvesFrom;
+
+    if (subtypes.some(s => s.includes('ex') || s.includes('v'))) {
+      return 'ex';
+    }
+    if (subtypes.some(s => s.includes('stage 2')) || name.includes('dragonite') || name.includes('charizard') || name.includes('gardevoir') || name.includes('pidgeot')) {
+      return 'stage2';
+    }
+    if (subtypes.some(s => s.includes('stage 1')) || evoFrom || name.includes('dragonair') || name.includes('charmeleon') || name.includes('kirlia') || name.includes('raichu') || name.includes('flaaffy')) {
+      return 'stage1';
+    }
+    return 'basic';
+  }
+
   function buildSuggestionsHtml(filterSupertype) {
     const colCards = getCollectionCards();
     const currentDeck = state.cards;
@@ -870,6 +888,10 @@ const Wizard = (() => {
     if (filterSupertype === 'pokemon') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Pok'));
     else if (filterSupertype === 'energy') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Energ'));
     else if (filterSupertype === 'trainer') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Train'));
+
+    if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
+      ownedCandidates = ownedCandidates.filter(c => getStageCategory(c) === state.stageFilter);
+    }
 
     const ownedScored = ownedCandidates.map(c => {
       const compat = calculateCompatibility(c, currentDeck);
@@ -936,7 +958,11 @@ const Wizard = (() => {
       ];
     }
 
-    const missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0 && !alreadyAdded.has(c.name.toLowerCase()));
+    let missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0 && !alreadyAdded.has(c.name.toLowerCase()));
+    if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
+      missingCandidates = missingCandidates.filter(c => getStageCategory(c) === state.stageFilter);
+    }
+
     const missingScored = missingCandidates.map(c => {
       const compat = calculateCompatibility(c, currentDeck);
       return { ...c, score: compat.score, reason: c.reason || compat.reason };
@@ -961,11 +987,22 @@ const Wizard = (() => {
 
     const ownedHtml = topOwned.length > 0
       ? topOwned.map(renderChip).join('')
-      : '<div class="empty" style="font-size:11px;padding:6px;">No tenés cartas disponibles acá.</div>';
+      : '<div class="empty" style="font-size:11px;padding:6px;">No tenés cartas disponibles para este nivel.</div>';
 
     const missingHtml = topMissing.length > 0
       ? topMissing.map(renderChip).join('')
-      : '<div class="empty" style="font-size:11px;padding:6px;">¡Ya tenés todas las mejores cartas!</div>';
+      : '<div class="empty" style="font-size:11px;padding:6px;">No hay sugerencias para este nivel.</div>';
+
+    const stageFiltersHtml = filterSupertype === 'pokemon' ? `
+      <div class="stage-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 12px;">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Pre-selección por nivel:</span>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='all'?'active':''}" data-stage="all">Todos</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='basic'?'active':''}" data-stage="basic">🌱 Básicos</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='stage1'?'active':''}" data-stage="stage1">⚡ Nivel 1</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='stage2'?'active':''}" data-stage="stage2">🔥 Nivel 2</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='ex'?'active':''}" data-stage="ex">💎 ex / VSTAR</button>
+      </div>
+    ` : '';
 
     return `
       <div class="smart-suggestions-block" style="margin-bottom:12px;">
@@ -973,6 +1010,8 @@ const Wizard = (() => {
         <div class="hint-small">
           Mostramos primero las mejores cartas de tu colección y, si faltan, las mejoras recomendadas para este mazo.
         </div>
+
+        ${stageFiltersHtml}
 
         <div class="suggest-section">
           <div class="suggest-title">⭐ De tu colección</div>
@@ -1182,6 +1221,13 @@ const Wizard = (() => {
     body.querySelectorAll('.wizard-remove').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         state.cards = state.cards.filter(c=>c.id!==Number(btn.dataset.remove));
+        render();
+      });
+    });
+
+    body.querySelectorAll('.wiz-stage-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        state.stageFilter = btn.dataset.stage;
         render();
       });
     });
