@@ -409,20 +409,86 @@ button.ghost:hover, label.ghost:hover {
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-top: 3px solid var(--line);
 }
 .pkcard img {
   width: 100%;
   aspect-ratio: 48.5/68;
   object-fit: cover;
-  border-radius: 6px;
+  display: block;
+  background: #0d0f1e;
 }
 .pkcard .meta {
-  margin-top: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pkcard .name-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pkcard .name-row .name {
+  flex: 1;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.pkcard .name-row .card-info-btn {
+  padding: 1px 4px;
+  font-size: 12px;
+  min-width: unset;
+  flex: 0;
+}
+.pkcard .set {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.pkcard .card-info {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.card-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+  width: 100%;
+  aspect-ratio: 48.5/68;
+  border-radius: 8px;
+  color: var(--bg);
+}
+
+.card-add-owned-row {
+  display: flex;
+  gap: 4px;
+}
+.card-add-owned-row .card-owned-tag {
+  flex: 1;
+  text-align: center;
+  padding: 6px;
+  background: var(--grass);
+  color: var(--bg);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.card-add-owned-row .add-btn {
+  flex: 1;
   font-size: 12px;
 }
-.pkcard .name {
-  font-weight: 600;
+
+.btn-full {
+  width: 100%;
 }
 
 .wizard-ledger {

@@ -1068,22 +1068,22 @@ const UI = (() => {
       if (opts.showAdd) {
         const owned = opts.owned || 0;
         if (owned > 0) {
-          qtyHTML = `<div style="display:flex;gap:4px;">
-            <span style="flex:1;text-align:center;padding:6px;background:var(--grass);color:var(--bg);border-radius:6px;font-size:12px;font-weight:600;">✔ Tengo ${owned}</span>
-            <button class="ghost add-btn" style="flex:1;font-size:12px;">+ Agregar</button>
+          qtyHTML = `<div class="card-add-owned-row">
+            <span class="card-owned-tag">✔ Tengo ${owned}</span>
+            <button class="ghost add-btn">+ Agregar</button>
           </div>`;
         } else {
-          qtyHTML = `<button class="ghost add-btn" style="width:100%;">+ Agregar</button>`;
+          qtyHTML = `<button class="ghost add-btn btn-full">+ Agregar</button>`;
         }
       }
       const typeColor = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
       const tcVar = typeColor[card.types && card.types[0]] || 'colorless';
       const initial = (card.name || '?')[0].toUpperCase();
-      const placeholder = `<div class="card-placeholder" style="background:var(--${tcVar});color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;width:100%;aspect-ratio:48.5/68;border-radius:8px;">${initial}</div>`;
+      const placeholder = `<div class="card-placeholder cd-badge-${tcVar}">${initial}</div>`;
       div.innerHTML = `
         ${card.image ? `<img src="" alt="${card.name}" loading="lazy"/>` : placeholder}
         <div class="meta">
-          <div class="name-row"><span class="name">${cardNameDisplay(card.name)}</span><button class="ghost card-info-btn" title="Qué hace esta carta"><span class="tcg-sym" style="font-size:14px;">?</span></button></div>
+          <div class="name-row"><span class="name">${cardNameDisplay(card.name)}</span><button class="ghost card-info-btn" title="Qué hace esta carta"><span class="tcg-sym">?</span></button></div>
           <div class="set">${card.set || ''}</div>
           ${card.number ? `<div class="card-info">#${card.number}</div>` : ''}
           ${qtyHTML}
