@@ -894,6 +894,15 @@ const UI = (() => {
 
   const TYPE_ES = { Fire: 'Fuego', Water: 'Agua', Grass: 'Planta', Lightning: 'Rayo', Psychic: 'Psíquico', Fighting: 'Lucha', Darkness: 'Oscuridad', Metal: 'Metal', Colorless: 'Incoloro', Dragon: 'Dragón', Fairy: 'Hada' };
 
+  const TYPE_CHAR = {
+    Fire: 'r', Water: 'w', Grass: 'g', Lightning: 'l',
+    Psychic: 'p', Fighting: 'f', Darkness: 'd', Metal: 'm',
+    Dragon: 'n', Colorless: 'c', Fairy: 'y',
+    Fuego: 'r', Agua: 'w', Planta: 'g', Rayo: 'l',
+    Psíquico: 'p', Lucha: 'f', Oscuridad: 'd',
+    Dragón: 'n', Incoloro: 'c', Hada: 'y'
+  };
+
   const TYPE_SYMBOL = {
     Fire: '🔥', Water: '💧', Grass: '🍃', Lightning: '⚡',
     Psychic: '🔮', Fighting: '👊', Darkness: '🌙', Metal: '⚙️',
@@ -905,9 +914,11 @@ const UI = (() => {
 
   function getEnergySymbol(type) {
     if (!type) return '';
-    const sym = TYPE_SYMBOL[type] || '';
+    const char = TYPE_CHAR[type] || '';
+    const emoji = TYPE_SYMBOL[type] || '';
     const esName = TYPE_ES[type] || type;
-    return sym ? `${sym} ${esName}` : esName;
+    const fontIcon = char ? `<span class="tcg-sym" style="font-family:var(--tcg);margin-right:4px;font-size:14px;vertical-align:middle;">${char}</span>` : (emoji ? `${emoji} ` : '');
+    return `${fontIcon}${esName}`;
   }
 
   const TCG_EN_TO_ES = {
