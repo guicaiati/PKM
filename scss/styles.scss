@@ -299,6 +299,9 @@ button, label {
     text-align: center;
     font-weight: 600;
     font-size: 12px;
+
+    &.owned-missing { color: var(--fire); }
+    &.owned-complete { color: var(--grass); }
   }
 
   .col-action {
@@ -307,7 +310,7 @@ button, label {
 }
 
 .tcg-sym {
-  font-family: var(--tcg), 'EssentiarumTCG', sans-serif;
+  font-family: "EssentiarumTCG", sans-serif;
   font-style: normal;
   font-weight: normal;
   line-height: 1;

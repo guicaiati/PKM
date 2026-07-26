@@ -443,12 +443,18 @@ button.ghost:hover, label.ghost:hover {
   font-weight: 600;
   font-size: 12px;
 }
+.aligned-ledger .col-owned.owned-missing {
+  color: var(--fire);
+}
+.aligned-ledger .col-owned.owned-complete {
+  color: var(--grass);
+}
 .aligned-ledger .col-action {
   text-align: right;
 }
 
 .tcg-sym {
-  font-family: var(--tcg), "EssentiarumTCG", sans-serif;
+  font-family: "EssentiarumTCG", sans-serif;
   font-style: normal;
   font-weight: normal;
   line-height: 1;

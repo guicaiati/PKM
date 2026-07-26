@@ -1078,8 +1078,8 @@ const Wizard = (() => {
   function getTypeBadge(c) {
     const card = getCardDetails(c.name) || c;
     const typeRaw = (card.types && card.types[0]) || c.energyType || 'Colorless';
-    const symbolText = UI.getEnergySymbol ? UI.getEnergySymbol(typeRaw) : typeRaw;
-    return `<span class="type-tag">${escapeHtml(symbolText)}</span>`;
+    const symbolHtml = UI.getEnergySymbol ? UI.getEnergySymbol(typeRaw) : escapeHtml(typeRaw);
+    return `<span class="type-tag">${symbolHtml}</span>`;
   }
 
   function renderCardRow(c) {
@@ -1095,7 +1095,7 @@ const Wizard = (() => {
       <td class="col-type">${typeBadge}</td>
       <td class="col-stage">${stageBadge}</td>
       <td class="col-qty"><button type="button" class="ghost wizard-qty" data-qty="-1" data-id="${c.id}">−</button> <span class="qty-num">${c.count}</span> <button type="button" class="ghost wizard-qty" data-qty="1" data-id="${c.id}">+</button></td>
-      <td class="col-owned" style="color:${missing>0?'var(--fire)':'var(--grass)'}">${missing>0?`Falta ${missing}`:`✔ ${owned}`}</td>
+      <td class="col-owned ${missing > 0 ? 'owned-missing' : 'owned-complete'}">${missing > 0 ? `Falta ${missing}` : `✔ ${owned}`}</td>
       <td class="col-action"><button type="button" class="ghost wizard-remove" data-remove="${c.id}">✕</button></td>
     </tr>`;
   }
