@@ -766,10 +766,13 @@ const Wizard = (() => {
     // 2. Shared evolution base (e.g. Pupitar and Tyranitar both belong to Larvitar)
     if (evoA && evoB && (evoA === evoB || evoA.includes(evoB) || evoB.includes(evoA))) return true;
 
-    // 3. Strict prefix family check for root names of length >= 5 (e.g., Charmander, Charmeleon, Charizard)
+    // If neither card evolves from anything, they are basic standalone cards and not evolution partners
+    if (!evoA && !evoB) return false;
+
+    // 3. Strict prefix family check for root names of length >= 5 only when at least one evolvesFrom exists
     const baseA = nameA.replace(/\s*(ex|vstar|vmax|v|gx)\s*/gi, '').trim();
     const baseB = nameB.replace(/\s*(ex|vstar|vmax|v|gx)\s*/gi, '').trim();
-    if (baseA.length >= 5 && baseB.length >= 5 && baseA.slice(0, 5) === baseB.slice(0, 5)) {
+    if ((evoA || evoB) && baseA.length >= 5 && baseB.length >= 5 && baseA.slice(0, 5) === baseB.slice(0, 5)) {
       return true;
     }
 
