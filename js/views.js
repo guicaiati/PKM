@@ -1090,10 +1090,10 @@ const Wizard = (() => {
       return '<span class="stage-tag tag-ex">ex</span>';
     }
     if (subtypes.some(s => s.includes('stage 2') || s.includes('fase 2') || s.includes('nivel 2'))) {
-      return '<span class="stage-tag tag-stage2">Nivel 2</span>';
+      return '<span class="stage-tag tag-stage2">Fase 2</span>';
     }
     if (subtypes.some(s => s.includes('stage 1') || s.includes('fase 1') || s.includes('nivel 1')) || Boolean(evoFrom)) {
-      return '<span class="stage-tag tag-stage1">Nivel 1</span>';
+      return '<span class="stage-tag tag-stage1">Fase 1</span>';
     }
     return '<span class="stage-tag tag-basic">Básico</span>';
   }
@@ -1139,7 +1139,7 @@ const Wizard = (() => {
       if (!hasBasic && !hasStage1OrCandy) {
         return {
           valid: false,
-          warning: `Falta el Pokémon Básico y (Nivel 1 o Rare Candy / Caramelo Raro) en el mazo.`
+          warning: `Falta el Pokémon Básico y (Fase 1 o Rare Candy / Caramelo Raro) en el mazo.`
         };
       } else if (!hasBasic) {
         return {
@@ -1149,7 +1149,7 @@ const Wizard = (() => {
       } else if (!hasStage1OrCandy) {
         return {
           valid: false,
-          warning: `Falta Nivel 1 o Rare Candy (Caramelo Raro) en el mazo para evolucionar.`
+          warning: `Falta Fase 1 o Rare Candy (Caramelo Raro) en el mazo para evolucionar.`
         };
       }
     }
