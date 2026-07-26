@@ -744,7 +744,7 @@ const Wizard = (() => {
     const fromDb = API.findCardInDb ? API.findCardInDb(name) : null;
     if (fromDb) return fromDb;
 
-    return { name, supertype: 'Pokémon' };
+    return { name, supertype: 'Pokémon', subtypes: ['Basic'], evolvesFrom: '' };
   }
 
   function isEvolutionPartner(cardA, cardB) {
