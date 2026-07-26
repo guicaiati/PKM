@@ -804,7 +804,7 @@ const Wizard = (() => {
     const matchedType = cardTypes.find(t => deckTypes.has(t));
     if (matchedType && deckTypes.size > 0) {
       score += 30;
-      const typeDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(matchedType) : matchedType;
+      const typeDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(matchedType, true) : matchedType;
       if (!primaryReason) primaryReason = 'Mismo tipo (' + typeDisplay + ')';
     }
 
@@ -815,7 +815,7 @@ const Wizard = (() => {
     const sharesEnergy = Boolean(sharedEnergyType);
     if (sharesEnergy && deckEnergies.size > 0) {
       score += 30;
-      const energyDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(sharedEnergyType) : sharedEnergyType;
+      const energyDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(sharedEnergyType, true) : sharedEnergyType;
       if (!primaryReason) primaryReason = 'Comparte energía ' + energyDisplay;
     }
 

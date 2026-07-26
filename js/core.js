@@ -900,11 +900,12 @@ const UI = (() => {
     Dragon: 'n', Colorless: 'c', Fairy: 'y'
   };
 
-  function getEnergySymbol(type) {
+  function getEnergySymbol(type, plainText = false) {
     if (!type) return '';
     const esName = TYPE_ES[type] || type;
+    if (plainText) return esName;
     const char = TYPE_CHAR[type] || TYPE_CHAR[esName] || '';
-    const fontIcon = char ? `<span class="tcg-sym" style="margin-right:4px;font-size:12px;">${char}</span>` : '';
+    const fontIcon = char ? `<span class="tcg-sym">${char}</span>` : '';
     return `${fontIcon}${esName}`;
   }
 
