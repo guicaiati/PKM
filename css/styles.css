@@ -390,7 +390,6 @@ button.ghost:hover, label.ghost:hover {
   font-weight: 600;
 }
 
-/* Tables, Modals, Toasts & Sidebar */
 .wizard-ledger {
   width: 100%;
   border-collapse: collapse;
@@ -406,6 +405,77 @@ button.ghost:hover, label.ghost:hover {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-dim);
+}
+
+.aligned-ledger {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.aligned-ledger th, .aligned-ledger td {
+  padding: 8px 10px;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.aligned-ledger .col-name {
+  font-weight: 600;
+}
+.aligned-ledger .col-type {
+  font-size: 12px;
+}
+.aligned-ledger .col-stage {
+  font-size: 11px;
+}
+.aligned-ledger .col-qty {
+  text-align: center;
+}
+.aligned-ledger .col-qty .qty-num {
+  display: inline-block;
+  width: 20px;
+  font-weight: 700;
+  font-family: var(--mono);
+  text-align: center;
+}
+.aligned-ledger .col-owned {
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+}
+.aligned-ledger .col-action {
+  text-align: right;
+}
+
+.type-tag {
+  font-size: 11.5px;
+  font-family: var(--body);
+  font-weight: 600;
+}
+
+.stage-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  display: inline-block;
+}
+.stage-tag.tag-basic {
+  color: #38e07b;
+  background: rgba(56, 224, 123, 0.15);
+}
+.stage-tag.tag-stage1 {
+  color: #3399ff;
+  background: rgba(51, 153, 255, 0.15);
+}
+.stage-tag.tag-stage2 {
+  color: #ff9900;
+  background: rgba(255, 153, 0, 0.15);
+}
+.stage-tag.tag-ex {
+  color: #cc66ff;
+  background: rgba(204, 102, 255, 0.15);
 }
 
 .wizard-arche {

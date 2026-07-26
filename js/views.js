@@ -1104,16 +1104,46 @@ const Wizard = (() => {
     rail.innerHTML = STEP_META.map(s=>`<button type="button" class="filter-chip ${state.step===s.n?'active':''}" data-wizard-step="${s.n}">${s.n}. ${s.label}</button>`).join('');
   }
 
+  function getStageBadge(c) {
+    const card = getCardDetails(c.name) || c;
+    const name = (card.name || '').toLowerCase();
+    const subtypes = (card.subtypes || []).map(s => s.toLowerCase());
+    const evoFrom = card.evolvesFrom;
+
+    if (subtypes.some(s => s.includes('ex') || s.includes('vstar') || s.includes('vmax') || s.includes('v'))) {
+      return '<span class="stage-tag tag-ex">ex</span>';
+    }
+    if (subtypes.some(s => s.includes('stage 2')) || name.includes('dragonite') || name.includes('charizard') || name.includes('gardevoir') || name.includes('pidgeot')) {
+      return '<span class="stage-tag tag-stage2">Nivel 2</span>';
+    }
+    if (subtypes.some(s => s.includes('stage 1')) || evoFrom || name.includes('dragonair') || name.includes('charmeleon') || name.includes('kirlia') || name.includes('raichu') || name.includes('flaaffy')) {
+      return '<span class="stage-tag tag-stage1">Nivel 1</span>';
+    }
+    return '<span class="stage-tag tag-basic">Básico</span>';
+  }
+
+  function getTypeBadge(c) {
+    const card = getCardDetails(c.name) || c;
+    const typeRaw = (card.types && card.types[0]) || c.energyType || 'Colorless';
+    const symbolText = UI.getEnergySymbol ? UI.getEnergySymbol(typeRaw) : typeRaw;
+    return `<span class="type-tag">${escapeHtml(symbolText)}</span>`;
+  }
+
   function renderCardRow(c) {
     const owned = countOwned(c.name);
     const needed = Number(c.count || 0);
     const missing = Math.max(0, needed - owned);
+    const typeBadge = getTypeBadge(c);
+    const stageBadge = getStageBadge(c);
+
     return `
     <tr data-id="${c.id}">
-      <td>${escapeHtml(c.name)}</td>
-      <td><button type="button" class="ghost wizard-qty" data-qty="-1" data-id="${c.id}">−</button> ${c.count} <button type="button" class="ghost wizard-qty" data-qty="1" data-id="${c.id}">+</button></td>
-      <td style="color:${missing>0?'var(--fire)':'var(--grass)'}">${missing>0?`Falta ${missing}`:`✔ ${owned}`}</td>
-      <td><button type="button" class="ghost wizard-remove" data-remove="${c.id}">✕</button></td>
+      <td class="col-name">${escapeHtml(c.name)}</td>
+      <td class="col-type">${typeBadge}</td>
+      <td class="col-stage">${stageBadge}</td>
+      <td class="col-qty"><button type="button" class="ghost wizard-qty" data-qty="-1" data-id="${c.id}">−</button> <span class="qty-num">${c.count}</span> <button type="button" class="ghost wizard-qty" data-qty="1" data-id="${c.id}">+</button></td>
+      <td class="col-owned" style="color:${missing>0?'var(--fire)':'var(--grass)'}">${missing>0?`Falta ${missing}`:`✔ ${owned}`}</td>
+      <td class="col-action"><button type="button" class="ghost wizard-remove" data-remove="${c.id}">✕</button></td>
     </tr>`;
   }
 
@@ -1130,10 +1160,19 @@ const Wizard = (() => {
       let html = '';
       groups.forEach(g => {
         if (g.items.length === 0) return;
-        html += `<div class="table-group-block" style="margin-top:12px;margin-bottom:12px;">
+        html += `<div class="table-group-block" style="margin-top:14px;margin-bottom:14px;">
           <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--holo-a);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">${g.label} (${g.items.reduce((s,x)=>s+Number(x.count||1),0)})</div>
-          <table class="wizard-ledger">
-            <thead><tr><th>Nombre</th><th>Cant.</th><th>Tenés</th><th></th></tr></thead>
+          <table class="wizard-ledger aligned-ledger">
+            <thead>
+              <tr>
+                <th style="width:30%;">Nombre</th>
+                <th style="width:20%;">Tipo</th>
+                <th style="width:16%;">Nivel</th>
+                <th style="width:16%;text-align:center;">Cant.</th>
+                <th style="width:12%;text-align:center;">Tenés</th>
+                <th style="width:6%;text-align:right;"></th>
+              </tr>
+            </thead>
             <tbody>
               ${g.items.map(renderCardRow).join('')}
             </tbody>
@@ -1144,8 +1183,17 @@ const Wizard = (() => {
     }
 
     return `
-      <table class="wizard-ledger">
-        <thead><tr><th>Nombre</th><th>Cant.</th><th>Tenés</th><th></th></tr></thead>
+      <table class="wizard-ledger aligned-ledger">
+        <thead>
+          <tr>
+            <th style="width:30%;">Nombre</th>
+            <th style="width:20%;">Tipo</th>
+            <th style="width:16%;">Nivel</th>
+            <th style="width:16%;text-align:center;">Cant.</th>
+            <th style="width:12%;text-align:center;">Tenés</th>
+            <th style="width:6%;text-align:right;"></th>
+          </tr>
+        </thead>
         <tbody>
           ${list.map(renderCardRow).join('')}
         </tbody>
