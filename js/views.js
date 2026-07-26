@@ -1398,34 +1398,145 @@ const Wizard = (() => {
    SAVED MODULE (GUARDADO)
    ========================================== */
 const Saved = (() => {
-  async function renderCollections(searchQuery) {
+  let searchTimer = null;
+  let isInitialized = false;
+
+  function setupSearch() {
+    const input = document.getElementById('savedCollectionSearch');
+    const list = document.getElementById('savedSearchAutocomplete');
+    if (!input || !list) return;
+
+    input.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      const val = input.value.trim().toLowerCase();
+      
+      searchTimer = setTimeout(async () => {
+        renderCollections(val);
+
+        if (val.length < 2) {
+          list.classList.remove('show');
+          return;
+        }
+
+        const saved = await Storage.loadNamedCollections();
+        const liveData = Collection.getMap();
+        const liveName = Collection.getCurrentName();
+        const allCards = [];
+
+        if (liveName) Object.values(liveData).forEach(c => allCards.push(c.name));
+        saved.forEach(col => (col.data || []).forEach(c => allCards.push(c.name)));
+
+        const matchingNames = [...new Set(allCards)].filter(n => (n || '').toLowerCase().includes(val)).slice(0, 10);
+
+        if (!matchingNames.length) {
+          list.classList.remove('show');
+          return;
+        }
+
+        list.innerHTML = matchingNames.map(s => {
+          const owned = Collection.countByName(s);
+          const badge = owned > 0 ? `<span class="ac-owned">Tenés ${owned}</span>` : '';
+          return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
+        }).join('');
+
+        list.classList.add('show');
+        list.querySelectorAll('.autocomplete-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const cardName = el.dataset.val || el.querySelector('span')?.textContent || el.textContent;
+            input.value = cardName;
+            list.classList.remove('show');
+            renderCollections(cardName.toLowerCase());
+          });
+        });
+      }, 50);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#savedCollectionSearch') && !e.target.closest('#savedSearchAutocomplete')) {
+        list.classList.remove('show');
+      }
+    });
+
+    document.getElementById('exportAllCollectionsTxt')?.addEventListener('click', async () => {
+      const saved = await Storage.loadNamedCollections();
+      if (!saved.length) { UI.toast('No hay colecciones para exportar', 'info'); return; }
+      
+      let text = '=== COLECCIONES GUARDADAS ===\n\n';
+      saved.forEach(col => {
+        text += `--- ${col.name} ---\n`;
+        (col.data || []).forEach(c => {
+          text += `${c.count || 1}x ${c.name} (${c.set || ''} #${c.number || ''})\n`;
+        });
+        text += '\n';
+      });
+
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'todas_las_colecciones.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+      UI.toast('Colecciones exportadas a TXT', 'success');
+    });
+  }
+
+  async function renderCollections(searchQuery = '') {
     const container = document.getElementById('savedCollectionsFull');
     const empty = document.getElementById('savedCollectionsEmpty');
     if (!container) return;
+
     const saved = await Storage.loadNamedCollections();
     const liveData = Collection.getMap();
     const liveName = Collection.getCurrentName();
 
-    if (saved.length === 0 && !liveName) {
+    const currentEntry = liveName ? { id: 'current', name: liveName, savedAt: Date.now(), data: Object.values(liveData) } : null;
+    const others = liveName ? saved.filter(c => c.name !== liveName) : saved;
+    let all = currentEntry ? [currentEntry, ...others] : others;
+
+    if (searchQuery) {
+      all = all.map(col => {
+        const matchingCards = (col.data || []).filter(c => (c.name || '').toLowerCase().includes(searchQuery));
+        const matchesColName = (col.name || '').toLowerCase().includes(searchQuery);
+        if (matchesColName || matchingCards.length > 0) {
+          return { ...col, matchingCards };
+        }
+        return null;
+      }).filter(Boolean);
+    }
+
+    if (all.length === 0) {
       container.innerHTML = '';
-      if (empty) empty.style.display = 'block';
+      if (empty) {
+        empty.style.display = 'block';
+        empty.textContent = searchQuery ? `No se encontraron colecciones con "${searchQuery}".` : 'No tenés colecciones guardadas. Andá a "Colección" y guardá una.';
+      }
       return;
     }
     if (empty) empty.style.display = 'none';
 
-    const currentEntry = liveName ? { id: 'current', name: liveName, savedAt: Date.now(), data: Object.values(liveData) } : null;
-    const others = liveName ? saved.filter(c => c.name !== liveName) : saved;
-    const all = currentEntry ? [currentEntry, ...others] : others;
-
     container.innerHTML = all.map(c => {
-      const total = c.data.reduce((s, x) => s + (x.count || 0), 0);
+      const total = (c.data || []).reduce((s, x) => s + (x.count || 0), 0);
+      const isCurrent = c.id === 'current';
+      
+      let matchesHtml = '';
+      if (c.matchingCards && c.matchingCards.length > 0) {
+        matchesHtml = `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;">
+          <div style="color:var(--holo-a);font-weight:600;margin-bottom:4px;">Cartas encontradas (${c.matchingCards.length}):</div>
+          ${c.matchingCards.slice(0, 5).map(m => `<div style="color:var(--text);">${escapeHtml(m.name)} (x${m.count||1})</div>`).join('')}
+        </div>`;
+      }
+
       return `
         <div class="saved-card" data-id="${c.id}">
-          <div class="saved-card-header"><div class="saved-card-name">${c.name}</div></div>
+          <div class="saved-card-header">
+            <div class="saved-card-name">${escapeHtml(c.name)} ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Actual)</span>' : ''}</div>
+          </div>
           <div class="saved-card-stats"><span class="sc-stat">${total} cartas</span></div>
-          <div class="saved-card-actions">
-            <button class="action saved-card-load">Cargar</button>
-            <button class="ghost saved-card-delete">Eliminar</button>
+          ${matchesHtml}
+          <div class="saved-card-actions" style="margin-top:10px;">
+            <button class="action saved-card-load">${isCurrent ? 'Actualizar' : 'Cargar'}</button>
+            ${!isCurrent ? '<button class="ghost saved-card-delete">Eliminar</button>' : ''}
           </div>
         </div>`;
     }).join('');
@@ -1433,6 +1544,7 @@ const Saved = (() => {
     container.querySelectorAll('.saved-card-load').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.closest('.saved-card').dataset.id;
+        if (id === 'current') return;
         const loaded = await Storage.loadCollectionAsNamed(id);
         if (loaded) {
           await Storage.saveCollection(loaded);
@@ -1448,7 +1560,8 @@ const Saved = (() => {
         const id = btn.closest('.saved-card').dataset.id;
         if (confirm('¿Eliminar colección?')) {
           await Storage.deleteNamedCollection(id);
-          renderCollections();
+          const searchVal = document.getElementById('savedCollectionSearch')?.value?.trim().toLowerCase() || '';
+          renderCollections(searchVal);
           UI.toast('Eliminada', 'success');
         }
       });
@@ -1470,7 +1583,7 @@ const Saved = (() => {
 
     container.innerHTML = saved.map(d => `
       <div class="saved-card" data-id="${d.id}">
-        <div class="saved-card-header"><div class="saved-card-name">${d.name}</div></div>
+        <div class="saved-card-header"><div class="saved-card-name">${escapeHtml(d.name)}</div></div>
         <div class="saved-card-actions">
           <button class="action saved-card-load">Cargar mazo</button>
           <button class="ghost saved-card-delete">Eliminar</button>
@@ -1502,7 +1615,12 @@ const Saved = (() => {
 
   return {
     async render() {
-      await renderCollections();
+      if (!isInitialized) {
+        setupSearch();
+        isInitialized = true;
+      }
+      const searchVal = document.getElementById('savedCollectionSearch')?.value?.trim().toLowerCase() || '';
+      await renderCollections(searchVal);
       await renderDecks();
     }
   };
