@@ -1418,22 +1418,25 @@ const Saved = (() => {
           return;
         }
 
+        const apiSuggestions = await API.autocomplete(val);
+
         const saved = await Storage.loadNamedCollections();
         const liveData = Collection.getMap();
         const liveName = Collection.getCurrentName();
-        const allCards = [];
+        const localCards = [];
 
-        if (liveName) Object.values(liveData).forEach(c => allCards.push(c.name));
-        saved.forEach(col => (col.data || []).forEach(c => allCards.push(c.name)));
+        if (liveName) Object.values(liveData).forEach(c => localCards.push(c.name));
+        saved.forEach(col => (col.data || []).forEach(c => localCards.push(c.name)));
 
-        const matchingNames = [...new Set(allCards)].filter(n => (n || '').toLowerCase().includes(val)).slice(0, 10);
+        const matchingLocal = [...new Set(localCards)].filter(n => (n || '').toLowerCase().includes(val));
+        const combined = [...new Set([...matchingLocal, ...apiSuggestions])].slice(0, 10);
 
-        if (!matchingNames.length) {
+        if (!combined.length) {
           list.classList.remove('show');
           return;
         }
 
-        list.innerHTML = matchingNames.map(s => {
+        list.innerHTML = combined.map(s => {
           const owned = Collection.countByName(s);
           const badge = owned > 0 ? `<span class="ac-owned">Tenés ${owned}</span>` : '';
           return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
@@ -1448,7 +1451,7 @@ const Saved = (() => {
             renderCollections(cardName.toLowerCase());
           });
         });
-      }, 50);
+      }, API.isDbReady ? 50 : 200);
     });
 
     document.addEventListener('click', (e) => {
