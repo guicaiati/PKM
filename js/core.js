@@ -869,6 +869,10 @@ const API = (() => {
       return (dbCards || []).find(c => (c.name || '').toLowerCase().includes(target)) || null;
     },
 
+    getDbCards() {
+      return dbCards || [];
+    },
+
     async fetchFromAPI(name) {
       try {
         const data = await fetchJSON(`${BASE}/cards?q=name:"${name}"&pageSize=3`);

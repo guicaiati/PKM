@@ -917,35 +917,30 @@ const Wizard = (() => {
 
     const topOwned = ownedScored.slice(0, 6);
 
-    // Dynamic Missing candidates catalog
+    // Dynamic Missing candidates catalog from IndexedDB database and collections
     let fallbackMissingCatalog = [];
+    const dbCatalog = API.getDbCards ? API.getDbCards() : [];
+
     if (filterSupertype === 'pokemon') {
       const deckPokemon = currentDeck.filter(c => c.category === 'pokemon').map(c => getCardDetails(c.name) || c);
-      const familyAdditions = [];
+      const deckTypes = [...new Set(deckPokemon.flatMap(p => p.types || []))];
+      
+      const dbPokemon = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('pok'));
+      const matchingTypes = dbPokemon.filter(c => (c.types || []).some(t => deckTypes.includes(t)));
+      
+      const familyCandidates = [];
       deckPokemon.forEach(p => {
         if (p.evolvesFrom) {
-          const base = getCardDetails(p.evolvesFrom);
-          if (base) familyAdditions.push(base);
+          const match = dbPokemon.find(c => (c.name || '').toLowerCase() === p.evolvesFrom.toLowerCase());
+          if (match) familyCandidates.push(match);
         }
       });
-      fallbackMissingCatalog = familyAdditions;
+
+      fallbackMissingCatalog = [...familyCandidates, ...matchingTypes, ...dbPokemon].slice(0, 50);
     } else if (filterSupertype === 'energy') {
-      fallbackMissingCatalog = [
-        { name: 'Luminous Energy', supertype: 'Energy', reason: 'Buena cobertura' },
-        { name: 'Jet Energy', supertype: 'Energy', reason: 'Más movilidad' },
-        { name: 'Double Turbo Energy', supertype: 'Energy', reason: 'Mayor velocidad' },
-        { name: 'Reversal Energy', supertype: 'Energy', reason: 'Soporte de remontada' }
-      ];
+      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('energ')).slice(0, 20);
     } else {
-      fallbackMissingCatalog = [
-        { name: 'Rare Candy', supertype: 'Trainer', reason: 'Acelera evolución' },
-        { name: "Boss's Orders", supertype: 'Trainer', reason: 'Amenaza decisiva' },
-        { name: 'Arven', supertype: 'Trainer', reason: 'Soporte genérico' },
-        { name: 'Iono', supertype: 'Trainer', reason: 'Control de mano' },
-        { name: 'Buddy-Buddy Poffin', supertype: 'Trainer', reason: 'Más consistencia' },
-        { name: 'Ultra Ball', supertype: 'Trainer', reason: 'Búsqueda clave' },
-        { name: 'Super Rod', supertype: 'Trainer', reason: 'Recuperación' }
-      ];
+      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('train')).slice(0, 30);
     }
 
     let missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0 && !alreadyAdded.has(c.name.toLowerCase()));
