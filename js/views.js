@@ -495,10 +495,10 @@ const Collection = (() => {
 
     if (items.length === 0) {
       grid.innerHTML = '';
-      if (empty) empty.style.display = 'block';
+      if (empty) empty.classList.remove('hidden');
       return;
     }
-    if (empty) empty.style.display = 'none';
+    if (empty) empty.classList.add('hidden');
     grid.innerHTML = '';
     items.forEach(c => {
       try {
