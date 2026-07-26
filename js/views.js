@@ -708,23 +708,26 @@ const Wizard = (() => {
     colCards.forEach(raw => {
       const name = raw.name;
       if(!name || existingNames.has(name.toLowerCase())) return;
-      const supertype = (raw.supertype || '').toLowerCase();
+      const cardDetails = getCardDetails(name) || raw;
+      const supertype = (cardDetails.supertype || raw.supertype || raw.category || '').toLowerCase();
       const count = Number(raw.count || 1);
-      if(supertype.includes('pok')){
-        state.cards.push({id:nextId++, category:'pokemon', name, stage: raw.subtypes?.find(s=>s.includes('Stage')) || 'Básico', count});
-        added++;
-      } else if(supertype.includes('energ')){
+
+      if(supertype.includes('energ') || (raw.category === 'energy')){
         state.cards.push({id:nextId++, category:'energy', name, energyType: (raw.types && raw.types[0]) || name, count});
         added++;
-      } else if(supertype.includes('train')){
-        const role = raw.subtypes?.includes('Supporter') ? 'Supporter' : 'Item';
+      } else if(supertype.includes('train') || (raw.category === 'trainer')){
+        const role = (raw.subtypes || cardDetails.subtypes || []).some(s=>/supporter/i.test(s)) ? 'Supporter' : 'Item';
         state.cards.push({id:nextId++, category:'trainer', name, trainerRole: role, isDraw: false, count});
+        added++;
+      } else {
+        const stageName = (cardDetails.subtypes || raw.subtypes || []).find(s => String(s).toLowerCase().includes('stage')) || 'Básico';
+        state.cards.push({id:nextId++, category:'pokemon', name, stage: stageName, count});
         added++;
       }
       existingNames.add(name.toLowerCase());
     });
     save();
-    return {ok:true, msg:`Importadas ${added} cartas.`};
+    return {ok:true, msg:`Importadas ${added} cartas de tu colección.`};
   }
 
   function cardsBy(cat){ return state.cards.filter(c=>c.category===cat); }
@@ -940,7 +943,7 @@ const Wizard = (() => {
       return { ...c, score: compat.score, reason: compat.reason };
     }).sort((a, b) => b.score - a.score);
 
-    const topOwned = ownedScored.slice(0, 6);
+    const topOwned = ownedScored.slice(0, 50);
 
     // Dynamic Missing candidates catalog from IndexedDB database and collections
     let fallbackMissingCatalog = [];
