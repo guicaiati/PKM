@@ -24,7 +24,15 @@
   --holo-b: #C084FC;
   --holo-c: #FDBA74;
   --fire: #F87171;
+  --water: #38BDF8;
   --grass: #4ADE80;
+  --electric: #FACC15;
+  --psychic: #E879F9;
+  --fighting: #FB923C;
+  --colorless: #D4D4D8;
+  --darkness: #A78BFA;
+  --metal: #94A3B8;
+  --dragon: #FDE68A;
   --display: 'Space Grotesk', sans-serif;
   --body: 'Inter', sans-serif;
   --mono: 'IBM Plex Mono', monospace;
@@ -523,97 +531,195 @@ button.ghost:hover, label.ghost:hover {
 }
 
 /* Card Detail Modal Classes */
+.cd-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
 .cd-type-badge {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg);
+  padding: 3px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 13px;
 }
 
 .cd-badge-fire {
-  background: #f87171;
-  color: #14172b;
+  background: var(--fire);
 }
 
 .cd-badge-water {
-  background: #38bdf8;
-  color: #14172b;
+  background: var(--water);
 }
 
 .cd-badge-grass {
-  background: #4ade80;
-  color: #14172b;
+  background: var(--grass);
 }
 
 .cd-badge-electric {
-  background: #facc15;
-  color: #14172b;
+  background: var(--electric);
 }
 
 .cd-badge-psychic {
-  background: #c084fc;
-  color: #14172b;
+  background: var(--psychic);
 }
 
 .cd-badge-fighting {
-  background: #fb923c;
-  color: #14172b;
+  background: var(--fighting);
 }
 
 .cd-badge-darkness {
-  background: #818cf8;
-  color: #ffffff;
+  background: var(--darkness);
 }
 
 .cd-badge-metal {
-  background: #94a3b8;
-  color: #14172b;
+  background: var(--metal);
 }
 
 .cd-badge-colorless {
-  background: #cbd5e1;
-  color: #14172b;
+  background: var(--colorless);
 }
 
 .cd-badge-dragon {
-  background: #a855f7;
-  color: #ffffff;
+  background: var(--dragon);
 }
 
 .cd-badge-trainer {
   background: var(--holo-c);
-  color: var(--bg);
 }
 
 .cd-badge-energy {
   background: var(--holo-a);
-  color: var(--bg);
 }
 
-.cd-text-original {
-  opacity: 0.45;
-  font-size: 0.82em;
-  font-style: italic;
+.cd-subtype {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+}
+
+.cd-subtype.ex {
+  color: var(--fire);
+  border-color: var(--fire);
+}
+
+.cd-subtype.vmax {
+  color: var(--holo-c);
+  border-color: var(--holo-c);
+}
+
+.cd-subtype.vstar {
+  color: var(--holo-a);
+  border-color: var(--holo-a);
+}
+
+.cd-subtype.v {
+  color: var(--holo-b);
+  border-color: var(--holo-b);
+}
+
+.cd-subtype.ace-spec {
+  color: var(--holo-c);
+  border-color: var(--holo-c);
+}
+
+.cd-subtype.tm {
+  color: var(--electric);
+  border-color: var(--electric);
+}
+
+.cd-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.cd-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.cd-value {
+  font-family: var(--display);
+  font-weight: 700;
+}
+
+.cd-section {
+  margin-top: 12px;
+}
+
+.cd-section-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--holo-a);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+}
+
+.cd-ability {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-left: 3px solid var(--holo-b);
+}
+
+.cd-ability-name {
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--holo-b);
   display: block;
-  margin-top: 2px;
+  margin-bottom: 4px;
 }
 
-.cd-weakness, .cd-resistance {
+.cd-ability-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.cd-attack {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+
+.cd-attack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cd-attack-name {
+  font-family: var(--display);
+  font-weight: 700;
+}
+
+.cd-attack-cost {
+  font-size: 14px;
+  letter-spacing: 2px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.cd-loading-text {
-  text-align: center;
-  padding: 20px;
-  color: var(--text-dim);
 }
 
 .wizard-arche {
