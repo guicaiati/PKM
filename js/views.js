@@ -1727,17 +1727,34 @@ const Saved = (() => {
       }).filter(Boolean);
     }
 
+    const trash = await Storage.getTrashBinCollections();
+    let restoreBannerHtml = '';
+    if (trash.length > 0) {
+      const lastTrash = trash[trash.length - 1];
+      restoreBannerHtml = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(56,224,123,0.12);border:1px solid rgba(56,224,123,0.35);border-radius:8px;display:flex;align-items:center;justify-content:space-between;width:100%;">
+        <span style="font-size:13px;color:var(--text);">🗑️ Papelera: <strong>"${escapeHtml(lastTrash.name)}"</strong> fue eliminada.</span>
+        <button type="button" class="action" id="restoreCollectionBtn" style="padding:4px 12px;font-size:12px;">↩️ Restaurar</button>
+      </div>`;
+    }
+
     if (all.length === 0) {
-      container.innerHTML = '';
+      container.innerHTML = restoreBannerHtml;
       if (empty) {
         empty.style.display = 'block';
         empty.textContent = searchQuery ? `No se encontraron colecciones con "${searchQuery}".` : 'No tenés colecciones guardadas. Andá a "Colección" y guardá una.';
       }
+      document.getElementById('restoreCollectionBtn')?.addEventListener('click', async () => {
+        const item = await Storage.restoreLastDeletedCollection();
+        if (item) {
+          renderCollections(searchQuery);
+          UI.toast(`Colección "${item.name}" restaurada con éxito`, 'success');
+        }
+      });
       return;
     }
     if (empty) empty.style.display = 'none';
 
-    container.innerHTML = all.map(c => {
+    container.innerHTML = restoreBannerHtml + all.map(c => {
       const total = (c.data || []).reduce((s, x) => s + (x.count || 0), 0);
       const isCurrent = c.id === 'current';
 
@@ -1763,6 +1780,14 @@ const Saved = (() => {
         </div>`;
     }).join('');
 
+    document.getElementById('restoreCollectionBtn')?.addEventListener('click', async () => {
+      const item = await Storage.restoreLastDeletedCollection();
+      if (item) {
+        renderCollections(searchQuery);
+        UI.toast(`Colección "${item.name}" restaurada con éxito`, 'success');
+      }
+    });
+
     container.querySelectorAll('.saved-card-load').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.closest('.saved-card').dataset.id;
@@ -1780,11 +1805,11 @@ const Saved = (() => {
     container.querySelectorAll('.saved-card-delete').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.closest('.saved-card').dataset.id;
-        if (confirm('¿Eliminar colección?')) {
+        if (confirm('¿Eliminar colección? Se guardará en la papelera por si querés restaurarla.')) {
           await Storage.deleteNamedCollection(id);
           const searchVal = document.getElementById('savedCollectionSearch')?.value?.trim().toLowerCase() || '';
           renderCollections(searchVal);
-          UI.toast('Eliminada', 'success');
+          UI.toast('Colección enviada a la papelera. Podés restaurarla.', 'info');
         }
       });
     });

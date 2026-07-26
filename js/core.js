@@ -292,8 +292,30 @@ const Storage = (() => {
 
     async deleteNamedCollection(id) {
       let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
+      const itemToDelete = saved.find(c => c.id === id);
+      if (itemToDelete) {
+        let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
+        trash.push({ ...itemToDelete, deletedAt: Date.now() });
+        localStorage.setItem('savedCollections_trashBin', JSON.stringify(trash));
+      }
       saved = saved.filter(c => c.id !== id);
       localStorage.setItem('savedCollections', JSON.stringify(saved));
+    },
+
+    async restoreLastDeletedCollection() {
+      let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
+      if (trash.length === 0) return null;
+      const restoredItem = trash.pop();
+      localStorage.setItem('savedCollections_trashBin', JSON.stringify(trash));
+
+      let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
+      saved.push({ id: restoredItem.id, name: restoredItem.name, savedAt: Date.now(), data: restoredItem.data });
+      localStorage.setItem('savedCollections', JSON.stringify(saved));
+      return restoredItem;
+    },
+
+    async getTrashBinCollections() {
+      return JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
     },
 
     async loadCollectionAsNamed(id) {
