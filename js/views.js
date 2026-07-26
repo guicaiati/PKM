@@ -744,45 +744,26 @@ const Wizard = (() => {
     const fromDb = API.findCardInDb ? API.findCardInDb(name) : null;
     if (fromDb) return fromDb;
 
-    const knownMap = {
-      'pikachu': { name: 'Pikachu', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic'], hp: '70' },
-      'raichu': { name: 'Raichu', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Pikachu', hp: '120', attacks: [{cost:['Lightning','Colorless']}] },
-      'flaaffy': { name: 'Flaaffy', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Mareep', hp: '90', abilities: [{name:'Dynamotor'}], attacks: [{cost:['Lightning']}] },
-      'lanturn': { name: 'Lanturn', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Stage 1'], evolvesFrom: 'Chinchou', hp: '120', attacks: [{cost:['Lightning']}] },
-      'dratini': { name: 'Dratini', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['Basic'], hp: '70', attacks: [{cost:['Water','Lightning']}] },
-      'dragonair': { name: 'Dragonair', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['Stage 1'], evolvesFrom: 'Dratini', hp: '100', attacks: [{cost:['Water','Lightning']}] },
-      'dragonite': { name: 'Dragonite', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['Stage 2'], evolvesFrom: 'Dragonair', hp: '160', attacks: [{cost:['Water','Lightning']}] },
-      'dragonite v': { name: 'Dragonite V', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['Basic', 'V'], hp: '230', attacks: [{cost:['Water','Lightning']}] },
-      'dragonite vstar': { name: 'Dragonite VSTAR', supertype: 'Pokémon', types: ['Dragon'], subtypes: ['VSTAR'], evolvesFrom: 'Dragonite V', hp: '280', attacks: [{cost:['Water','Lightning']}] },
-      'iron treads ex': { name: 'Iron Treads ex', supertype: 'Pokémon', types: ['Metal'], subtypes: ['Basic', 'ex'], hp: '220', attacks: [{cost:['Metal','Colorless']}] },
-      'skarmory': { name: 'Skarmory', supertype: 'Pokémon', types: ['Metal'], subtypes: ['Basic'], hp: '120', attacks: [{cost:['Metal']}] },
-      'charmander': { name: 'Charmander', supertype: 'Pokémon', types: ['Fire'], subtypes: ['Basic'], hp: '70' },
-      'charmeleon': { name: 'Charmeleon', supertype: 'Pokémon', types: ['Fire'], subtypes: ['Stage 1'], evolvesFrom: 'Charmander', hp: '90' },
-      'charizard ex': { name: 'Charizard ex', supertype: 'Pokémon', types: ['Darkness'], subtypes: ['Stage 2', 'ex'], evolvesFrom: 'Charmeleon', hp: '330' },
-      'ralts': { name: 'Ralts', supertype: 'Pokémon', types: ['Psychic'], subtypes: ['Basic'], hp: '70' },
-      'kirlia': { name: 'Kirlia', supertype: 'Pokémon', types: ['Psychic'], subtypes: ['Stage 1'], evolvesFrom: 'Ralts', hp: '80' },
-      'gardevoir ex': { name: 'Gardevoir ex', supertype: 'Pokémon', types: ['Psychic'], subtypes: ['Stage 2', 'ex'], evolvesFrom: 'Kirlia', hp: '310' },
-      'tapu koko ex': { name: 'Tapu Koko ex', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic', 'ex'], hp: '210', abilities: [{name:'Vengeful Strikedown'}], attacks: [{cost:['Lightning']}] },
-      'iron hands ex': { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic', 'ex'], hp: '230', abilities: [{name:'Amp'}], attacks: [{cost:['Lightning','Colorless','Colorless']}] },
-      'miraidon ex': { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], subtypes: ['Basic', 'ex'], hp: '220', abilities: [{name:'Tandem Unit'}], attacks: [{cost:['Lightning','Lightning','Colorless']}] },
-      'pidgeot ex': { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], subtypes: ['Stage 2', 'ex'], evolvesFrom: 'Pidgeotto', hp: '280', abilities: [{name:'Quick Search'}] },
-      'squawkabilly ex': { name: 'Squawkabilly ex', supertype: 'Pokémon', types: ['Colorless'], subtypes: ['Basic', 'ex'], hp: '160', abilities: [{name:'Squawk and Seize'}] },
-      'radiant greninja': { name: 'Radiant Greninja', supertype: 'Pokémon', types: ['Water'], subtypes: ['Basic', 'Radiant'], hp: '130', abilities: [{name:'Concealed Cards'}] },
-      'mew ex': { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], subtypes: ['Basic', 'ex'], hp: '180', abilities: [{name:'Restart'}] }
-    };
-    return knownMap[name.toLowerCase()] || { name, supertype: 'Pokémon' };
+    return { name, supertype: 'Pokémon' };
   }
 
   function shareFamily(nameA, nameB) {
     if (!nameA || !nameB) return false;
-    const a = nameA.toLowerCase();
-    const b = nameB.toLowerCase();
-    if (a === b) return false;
-    if ((a.includes('dragon') || a.includes('dratini')) && (b.includes('dragon') || b.includes('dratini'))) return true;
-    if ((a.includes('pika') || a.includes('rai')) && (b.includes('pika') || b.includes('rai'))) return true;
-    if (a.includes('char') && b.includes('char')) return true;
-    if ((a.includes('ralts') || a.includes('kirl') || a.includes('gard')) && (b.includes('ralts') || b.includes('kirl') || b.includes('gard'))) return true;
-    if ((a.includes('mareep') || a.includes('flaaffy') || a.includes('ampharos')) && (b.includes('mareep') || b.includes('flaaffy') || b.includes('ampharos'))) return true;
+    const cardA = getCardDetails(nameA) || { name: nameA };
+    const cardB = getCardDetails(nameB) || { name: nameB };
+    const aName = (cardA.name || '').toLowerCase();
+    const bName = (cardB.name || '').toLowerCase();
+    const aEvo = (cardA.evolvesFrom || '').toLowerCase();
+    const bEvo = (cardB.evolvesFrom || '').toLowerCase();
+
+    if (aName === bName) return false;
+    if ((aEvo && bName.includes(aEvo)) || (bEvo && aName.includes(bEvo))) return true;
+    
+    // Check root prefix match (e.g. Dratini & Dragonite share "drag")
+    const cleanA = aName.replace(/\s*(ex|vstar|vmax|v|gx|ex)\s*/gi, '');
+    const cleanB = bName.replace(/\s*(ex|vstar|vmax|v|gx|ex)\s*/gi, '');
+    if (cleanA.length >= 4 && cleanB.length >= 4 && cleanA.slice(0, 4) === cleanB.slice(0, 4)) return true;
+
     return false;
   }
 
@@ -848,7 +829,7 @@ const Wizard = (() => {
     if (card.hp && parseInt(card.hp, 10) >= 200) {
       score += 15;
       if (!primaryReason) primaryReason = 'Mayor potencia';
-    } else if (card.subtypes && card.subtypes.some(s => s.includes('ex') || s.includes('V'))) {
+    } else if (card.subtypes && card.subtypes.some(s => s.toLowerCase().includes('ex') || s.toLowerCase().includes('v'))) {
       score += 15;
       if (!primaryReason) primaryReason = 'Más consistencia';
     }
@@ -869,17 +850,16 @@ const Wizard = (() => {
 
   function getStageCategory(c) {
     const card = getCardDetails(c.name) || c;
-    const name = (card.name || '').toLowerCase();
     const subtypes = (card.subtypes || []).map(s => s.toLowerCase());
     const evoFrom = card.evolvesFrom;
 
-    if (subtypes.some(s => s.includes('ex') || s.includes('v'))) {
+    if (subtypes.some(s => s.includes('ex') || s.includes('vstar') || s.includes('vmax') || s.includes('v') || s.includes('gx'))) {
       return 'ex';
     }
-    if (subtypes.some(s => s.includes('stage 2')) || name.includes('dragonite') || name.includes('charizard') || name.includes('gardevoir') || name.includes('pidgeot')) {
+    if (subtypes.some(s => s.includes('stage 2'))) {
       return 'stage2';
     }
-    if (subtypes.some(s => s.includes('stage 1')) || evoFrom || name.includes('dragonair') || name.includes('charmeleon') || name.includes('kirlia') || name.includes('raichu') || name.includes('flaaffy')) {
+    if (subtypes.some(s => s.includes('stage 1')) || evoFrom) {
       return 'stage1';
     }
     return 'basic';
@@ -887,21 +867,19 @@ const Wizard = (() => {
 
   function getDeckRole(c) {
     const card = getCardDetails(c.name) || c;
-    const name = (card.name || '').toLowerCase();
     const hp = parseInt(card.hp || 0, 10);
     const abilities = card.abilities || [];
     const subtypes = (card.subtypes || []).map(s => s.toLowerCase());
 
     // 1. Motor / Banca (Bench engine & Support)
-    if (abilities.some(a => {
+    const hasSupportAbility = abilities.some(a => {
       const text = ((a.name || '') + ' ' + (a.text || '')).toLowerCase();
       return text.includes('search') || text.includes('draw') || text.includes('attach') || text.includes('energy') || text.includes('cards') || text.includes('restart');
-    }) || name.includes('pidgeot') || name.includes('squawkabilly') || name.includes('mew ex') || name.includes('flaaffy') || name.includes('kirlia') || name.includes('bibarel') || name.includes('radiant greninja')) {
-      return 'support';
-    }
+    });
+    if (hasSupportAbility) return 'support';
 
     // 2. Atacante Principal (Main Heavy Attacker)
-    if (hp >= 200 || subtypes.includes('stage 2') || subtypes.includes('vstar') || subtypes.includes('vmax') || name.includes('dragonite') || name.includes('charizard') || name.includes('iron hands') || name.includes('miraidon') || name.includes('gardevoir')) {
+    if (hp >= 200 || subtypes.includes('stage 2') || subtypes.includes('vstar') || subtypes.includes('vmax') || subtypes.includes('ex') || subtypes.includes('v')) {
       return 'main';
     }
 
@@ -942,42 +920,15 @@ const Wizard = (() => {
     // Dynamic Missing candidates catalog
     let fallbackMissingCatalog = [];
     if (filterSupertype === 'pokemon') {
-      const deckPokemonNames = currentDeck.filter(c => c.category === 'pokemon').map(c => c.name);
-      
+      const deckPokemon = currentDeck.filter(c => c.category === 'pokemon').map(c => getCardDetails(c.name) || c);
       const familyAdditions = [];
-      deckPokemonNames.forEach(pName => {
-        if (pName.toLowerCase().includes('dragon')) {
-          familyAdditions.push(
-            { name: 'Dratini', supertype: 'Pokémon', types: ['Dragon'], hp: '70' },
-            { name: 'Dragonite', supertype: 'Pokémon', types: ['Dragon'], hp: '160', evolvesFrom: 'Dragonair' },
-            { name: 'Dragonite VSTAR', supertype: 'Pokémon', types: ['Dragon'], hp: '280', evolvesFrom: 'Dragonite V' }
-          );
-        }
-        if (pName.toLowerCase().includes('pika') || pName.toLowerCase().includes('rai')) {
-          familyAdditions.push(
-            { name: 'Raichu', supertype: 'Pokémon', types: ['Lightning'], hp: '120', evolvesFrom: 'Pikachu' },
-            { name: 'Pikachu', supertype: 'Pokémon', types: ['Lightning'], hp: '70' }
-          );
-        }
-        if (pName.toLowerCase().includes('char')) {
-          familyAdditions.push(
-            { name: 'Charizard ex', supertype: 'Pokémon', types: ['Fire'], hp: '330', evolvesFrom: 'Charmeleon' },
-            { name: 'Charmander', supertype: 'Pokémon', types: ['Fire'], hp: '70' }
-          );
+      deckPokemon.forEach(p => {
+        if (p.evolvesFrom) {
+          const base = getCardDetails(p.evolvesFrom);
+          if (base) familyAdditions.push(base);
         }
       });
-
-      fallbackMissingCatalog = [
-        ...familyAdditions,
-        { name: 'Dragonite', supertype: 'Pokémon', types: ['Dragon'], hp: '160', evolvesFrom: 'Dragonair' },
-        { name: 'Dratini', supertype: 'Pokémon', types: ['Dragon'], hp: '70' },
-        { name: 'Iron Hands ex', supertype: 'Pokémon', types: ['Lightning'], hp: '230', abilities: [{name:'Amp'}] },
-        { name: 'Miraidon ex', supertype: 'Pokémon', types: ['Lightning'], hp: '220', abilities: [{name:'Tandem'}] },
-        { name: 'Pidgeot ex', supertype: 'Pokémon', types: ['Colorless'], hp: '280', abilities: [{name:'Quick Search'}] },
-        { name: 'Squawkabilly ex', supertype: 'Pokémon', types: ['Colorless'], hp: '160', abilities: [{name:'Squawk'}] },
-        { name: 'Radiant Greninja', supertype: 'Pokémon', types: ['Water'], hp: '130', abilities: [{name:'Cards'}] },
-        { name: 'Mew ex', supertype: 'Pokémon', types: ['Psychic'], hp: '180', abilities: [{name:'Restart'}] }
-      ];
+      fallbackMissingCatalog = familyAdditions;
     } else if (filterSupertype === 'energy') {
       fallbackMissingCatalog = [
         { name: 'Luminous Energy', supertype: 'Energy', reason: 'Buena cobertura' },
