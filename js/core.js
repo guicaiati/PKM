@@ -914,11 +914,9 @@ const UI = (() => {
 
   function getEnergySymbol(type) {
     if (!type) return '';
-    const char = TYPE_CHAR[type] || '';
     const emoji = TYPE_SYMBOL[type] || '';
     const esName = TYPE_ES[type] || type;
-    const fontIcon = char ? `<span class="tcg-sym" style="font-family:var(--tcg);margin-right:4px;font-size:14px;vertical-align:middle;">${char}</span>` : (emoji ? `${emoji} ` : '');
-    return `${fontIcon}${esName}`;
+    return emoji ? `${emoji} ${esName}` : esName;
   }
 
   const TCG_EN_TO_ES = {
