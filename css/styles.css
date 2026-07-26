@@ -489,6 +489,100 @@ button.ghost:hover, label.ghost:hover {
   background: rgba(204, 102, 255, 0.15);
 }
 
+/* Card Detail Modal Classes */
+.cd-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.cd-badge-fire {
+  background: #f87171;
+  color: #14172b;
+}
+
+.cd-badge-water {
+  background: #38bdf8;
+  color: #14172b;
+}
+
+.cd-badge-grass {
+  background: #4ade80;
+  color: #14172b;
+}
+
+.cd-badge-electric {
+  background: #facc15;
+  color: #14172b;
+}
+
+.cd-badge-psychic {
+  background: #c084fc;
+  color: #14172b;
+}
+
+.cd-badge-fighting {
+  background: #fb923c;
+  color: #14172b;
+}
+
+.cd-badge-darkness {
+  background: #818cf8;
+  color: #ffffff;
+}
+
+.cd-badge-metal {
+  background: #94a3b8;
+  color: #14172b;
+}
+
+.cd-badge-colorless {
+  background: #cbd5e1;
+  color: #14172b;
+}
+
+.cd-badge-dragon {
+  background: #a855f7;
+  color: #ffffff;
+}
+
+.cd-badge-trainer {
+  background: var(--holo-c);
+  color: var(--bg);
+}
+
+.cd-badge-energy {
+  background: var(--holo-a);
+  color: var(--bg);
+}
+
+.cd-text-original {
+  opacity: 0.45;
+  font-size: 0.82em;
+  font-style: italic;
+  display: block;
+  margin-top: 2px;
+}
+
+.cd-weakness, .cd-resistance {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cd-loading-text {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-dim);
+}
+
 .wizard-arche {
   width: 100%;
   border: 1px solid var(--line);

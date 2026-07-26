@@ -1348,8 +1348,8 @@ const UI = (() => {
       const typeChar = typeIcons[type] || 'c';
       const typeLabel = TYPE_ES[type] || type;
 
-      html += '<div class="cd-header"><span class="cd-type-badge" style="background:var(--' + (typeVar[type] || 'colorless') + ')"><span class="tcg-sym" style="margin-right:4px;font-size:12px;">' + typeChar + '</span>' + typeLabel + '</span>';
-      if (isEx) html += '<span class="cd-subtype ex"><span class="tcg-sym" style="font-size:13px;">-ex</span></span>';
+      html += '<div class="cd-header"><span class="cd-type-badge cd-badge-' + (typeVar[type] || 'colorless') + '"><span class="tcg-sym">' + typeChar + '</span>' + typeLabel + '</span>';
+      if (isEx) html += '<span class="cd-subtype ex"><span class="tcg-sym">-ex</span></span>';
       html += '</div>';
 
       if (hp) html += '<div class="cd-stat"><span class="cd-label">HP</span><span class="cd-value">' + hp + '</span></div>';
@@ -1364,6 +1364,7 @@ const UI = (() => {
           if (a.text) {
             const tr = (await translateRules([a.text]))[0];
             html += '<span class="cd-ability-text">' + tr + '</span>';
+            if (tr !== a.text) html += '<span class="cd-ability-text cd-text-original">' + a.text + '</span>';
           }
           html += '</div>';
         }
@@ -1380,8 +1381,31 @@ const UI = (() => {
           if (a.text) {
             const tr = (await translateRules([a.text]))[0];
             html += '<div class="cd-attack-text">' + tr + '</div>';
+            if (tr !== a.text) html += '<div class="cd-attack-text cd-text-original">' + a.text + '</div>';
           }
           html += '</div>';
+        }
+        html += '</div>';
+      }
+
+      if (weaknesses.length > 0) {
+        html += '<div class="cd-section"><div class="cd-section-title">Debilidades</div>';
+        for (const w of weaknesses) {
+          const wType = w.type || 'Colorless';
+          const wChar = typeIcons[wType] || 'c';
+          const wLabel = TYPE_ES[wType] || wType;
+          html += '<div class="cd-weakness cd-badge-' + (typeVar[wType] || 'colorless') + '"><span class="tcg-sym">' + wChar + '</span> ' + wLabel + ' ' + (w.value || '') + '</div>';
+        }
+        html += '</div>';
+      }
+
+      if (resistances.length > 0) {
+        html += '<div class="cd-section"><div class="cd-section-title">Resistencias</div>';
+        for (const r of resistances) {
+          const rType = r.type || 'Colorless';
+          const rChar = typeIcons[rType] || 'c';
+          const rLabel = TYPE_ES[rType] || rType;
+          html += '<div class="cd-resistance cd-badge-' + (typeVar[rType] || 'colorless') + '"><span class="tcg-sym">' + rChar + '</span> ' + rLabel + ' ' + (r.value || '') + '</div>';
         }
         html += '</div>';
       }
@@ -1394,7 +1418,7 @@ const UI = (() => {
       const subs = card.subtypes || [];
       const isSupporter = subs.includes('Supporter');
       let badgeLabel = isSupporter ? 'Soporte' : 'Trainer';
-      let html = '<div class="card-detail"><div class="cd-header"><span class="cd-type-badge" style="background:var(--holo-c)">' + badgeLabel + '</span></div>';
+      let html = '<div class="card-detail"><div class="cd-header"><span class="cd-type-badge cd-badge-trainer">' + badgeLabel + '</span></div>';
       if (cardText.length > 0) {
         const translated = await translateRules(cardText);
         html += '<div class="cd-section"><div class="cd-section-title">Efecto</div>';
@@ -1406,8 +1430,7 @@ const UI = (() => {
     },
 
     async _energyDetailHTML(card, cardText) {
-      const type = (card.types && card.types[0]) || 'Colorless';
-      let html = '<div class="card-detail"><div class="cd-header"><span class="cd-type-badge" style="background:var(--colorless)">Energía</span></div>';
+      let html = '<div class="card-detail"><div class="cd-header"><span class="cd-type-badge cd-badge-energy">Energía</span></div>';
       if (cardText.length > 0) {
         const translated = await translateRules(cardText);
         html += '<div class="cd-section"><div class="cd-section-title">Efecto</div>';
@@ -1421,7 +1444,7 @@ const UI = (() => {
     showLoading(title) {
       const modal = document.getElementById('cardModal');
       const body = document.getElementById('modalBody');
-      body.innerHTML = `<h3>${title}</h3><div class="card-detail"><div class="cd-section" style="text-align:center;padding:20px;color:var(--text-dim);">Cargando info de la carta...</div></div>`;
+      body.innerHTML = `<h3>${title}</h3><div class="card-detail"><div class="cd-section cd-loading-text">Cargando info de la carta...</div></div>`;
       if (modal) {
         modal.style.display = 'flex';
         modal.classList.remove('hidden');
