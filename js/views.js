@@ -1258,12 +1258,33 @@ const Wizard = (() => {
   }
 
   function renderCardRow(c) {
+    const card = getCardDetails(c.name) || c;
+    const supertype = (card.supertype || c.category || '').toLowerCase();
+    const isTrainer = supertype.includes('train') || c.category === 'trainer';
+    const isEnergy = supertype.includes('energ') || c.category === 'energy';
+    const isPokemon = !isTrainer && !isEnergy;
+
     const owned = countOwned(c.name);
     const needed = Number(c.count || 0);
     const missing = Math.max(0, needed - owned);
-    const typeBadge = getTypeBadge(c);
-    const stageBadge = getStageBadge(c);
-    const evoCheck = checkEvolutionLineValidity(c, state.cards);
+
+    let typeBadge = '';
+    let stageBadge = '';
+
+    if (isPokemon) {
+      typeBadge = getTypeBadge(c);
+      stageBadge = getStageBadge(c);
+    } else if (isTrainer) {
+      const subtypes = card.subtypes || c.subtypes || [];
+      const role = c.trainerRole || (subtypes.find(s => /supporter|item|stadium|tool/i.test(s)) || 'Entrenador');
+      typeBadge = `<span class="type-tag t-trainer" style="border-top-color:var(--holo-c);">${escapeHtml(role)}</span>`;
+      stageBadge = `<span style="opacity:0.35;">—</span>`;
+    } else if (isEnergy) {
+      typeBadge = getTypeBadge(c);
+      stageBadge = `<span style="opacity:0.35;">—</span>`;
+    }
+
+    const evoCheck = isPokemon ? checkEvolutionLineValidity(c, state.cards) : { valid: true, warning: '' };
 
     const rowClass = evoCheck.valid ? '' : 'row-evo-warning';
     const warningBtn = evoCheck.valid ? '' : `<button type="button" class="ghost info-warn-btn" title="${escapeHtml(evoCheck.warning)}" onclick="UI.toast('${escapeHtml(evoCheck.warning)}', 'error')"><span class="warn-icon">⚠️</span></button>`;
