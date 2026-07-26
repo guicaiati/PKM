@@ -869,6 +869,9 @@ const Wizard = (() => {
     if (subtypes.some(s => s.includes('stage 2') || s.includes('fase 2'))) {
       return 'stage2';
     }
+    if (subtypes.some(s => s.includes('basic') || s.includes('básico') || s.includes('basico'))) {
+      return 'basic';
+    }
     if (subtypes.some(s => s.includes('stage 1') || s.includes('fase 1')) || Boolean(evoFrom)) {
       return 'stage1';
     }
@@ -1092,6 +1095,9 @@ const Wizard = (() => {
     if (subtypes.some(s => s.includes('stage 2') || s.includes('fase 2'))) {
       return '<span class="stage-tag tag-stage2">Fase 2</span>';
     }
+    if (subtypes.some(s => s.includes('basic') || s.includes('básico') || s.includes('basico'))) {
+      return '<span class="stage-tag tag-basic">Básico</span>';
+    }
     if (subtypes.some(s => s.includes('stage 1') || s.includes('fase 1')) || Boolean(evoFrom)) {
       return '<span class="stage-tag tag-stage1">Fase 1</span>';
     }
@@ -1111,7 +1117,9 @@ const Wizard = (() => {
     if (!supertype.includes('pok')) return { valid: true, warning: '' };
 
     const stageCat = getStageCategory(card);
-    const evolvesFrom = card.evolvesFrom || '';
+    if (stageCat === 'basic' || stageCat === 'ex') return { valid: true, warning: '' };
+
+    const evolvesFrom = (card.evolvesFrom || '').trim();
     const deckPokemon = currentDeckCards.filter(x => (x.category || '').toLowerCase() === 'pokemon').map(x => getCardDetails(x.name) || x);
     const deckNames = currentDeckCards.map(x => (x.name || '').toLowerCase());
 
