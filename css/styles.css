@@ -722,6 +722,263 @@ button.ghost:hover, label.ghost:hover {
   align-items: center;
 }
 
+/* Attack & Energy Cost Badges */
+.cost-free {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  font-size: 16px;
+  color: #888;
+  background: var(--colorless);
+  border-radius: 50%;
+  border: 2px solid #666;
+}
+
+.cost-colorless {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  background: #fff;
+  border-radius: 50%;
+  border: 2px solid #aaa;
+  color: #000;
+}
+
+.cost-typed {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 50%;
+  color: #fff;
+}
+.cost-typed .tcg-sym {
+  color: #fff;
+}
+.cost-typed.cost-fire {
+  background: var(--fire);
+}
+.cost-typed.cost-water {
+  background: var(--water);
+}
+.cost-typed.cost-grass {
+  background: var(--grass);
+}
+.cost-typed.cost-electric {
+  background: var(--electric);
+  color: #000;
+}
+.cost-typed.cost-electric .tcg-sym {
+  color: #000;
+}
+.cost-typed.cost-psychic {
+  background: var(--psychic);
+}
+.cost-typed.cost-fighting {
+  background: var(--fighting);
+}
+.cost-typed.cost-darkness {
+  background: var(--darkness);
+}
+.cost-typed.cost-metal {
+  background: var(--metal);
+  color: #000;
+}
+.cost-typed.cost-metal .tcg-sym {
+  color: #000;
+}
+.cost-typed.cost-dragon {
+  background: var(--dragon);
+}
+.cost-typed.cost-fairy {
+  background: #F9A8D4;
+  color: #000;
+}
+.cost-typed.cost-fairy .tcg-sym {
+  color: #000;
+}
+
+.cd-attack-damage {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--holo-c);
+  margin-top: 4px;
+}
+
+.cd-attack-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.cd-trainer-text {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* Edit Modal */
+.edit-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.edit-row label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+.edit-row input, .edit-row select {
+  flex: 1;
+  padding: 6px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.edit-block {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.edit-block input, .edit-block textarea {
+  width: 100%;
+  padding: 5px 7px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.edit-block textarea {
+  min-height: 40px;
+  resize: vertical;
+}
+
+/* Type Borders */
+.t-fire {
+  border-top-color: var(--fire) !important;
+}
+
+.t-water {
+  border-top-color: var(--water) !important;
+}
+
+.t-grass {
+  border-top-color: var(--grass) !important;
+}
+
+.t-lightning {
+  border-top-color: var(--electric) !important;
+}
+
+.t-psychic {
+  border-top-color: var(--psychic) !important;
+}
+
+.t-fighting {
+  border-top-color: var(--fighting) !important;
+}
+
+.t-darkness {
+  border-top-color: var(--darkness) !important;
+}
+
+.t-metal {
+  border-top-color: var(--metal) !important;
+}
+
+.t-colorless {
+  border-top-color: var(--colorless) !important;
+}
+
+.t-dragon {
+  border-top-color: var(--dragon) !important;
+}
+
+/* TCG Symbol Font Variants */
+.tcg-sym.type-icon {
+  width: 1.2em;
+  height: 1.2em;
+  text-align: center;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: inherit;
+}
+.tcg-sym.type-icon.fire {
+  color: var(--fire);
+}
+.tcg-sym.type-icon.water {
+  color: var(--water);
+}
+.tcg-sym.type-icon.grass {
+  color: var(--grass);
+}
+.tcg-sym.type-icon.lightning {
+  color: var(--electric);
+}
+.tcg-sym.type-icon.psychic {
+  color: var(--psychic);
+}
+.tcg-sym.type-icon.fighting {
+  color: var(--fighting);
+}
+.tcg-sym.type-icon.darkness {
+  color: var(--darkness);
+}
+.tcg-sym.type-icon.metal {
+  color: var(--metal);
+}
+.tcg-sym.type-icon.colorless {
+  color: var(--colorless);
+}
+.tcg-sym.type-icon.dragon {
+  color: var(--dragon);
+}
+.tcg-sym.type-icon.fairy {
+  color: #F9A8D4;
+}
+
+.tcg-sym.rarity {
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
 .wizard-arche {
   width: 100%;
   border: 1px solid var(--line);
