@@ -747,24 +747,37 @@ const Wizard = (() => {
     return { name, supertype: 'Pokémon' };
   }
 
-  function shareFamily(nameA, nameB) {
-    if (!nameA || !nameB) return false;
-    const cardA = getCardDetails(nameA) || { name: nameA };
-    const cardB = getCardDetails(nameB) || { name: nameB };
-    const aName = (cardA.name || '').toLowerCase();
-    const bName = (cardB.name || '').toLowerCase();
-    const aEvo = (cardA.evolvesFrom || '').toLowerCase();
-    const bEvo = (cardB.evolvesFrom || '').toLowerCase();
+  function isEvolutionPartner(cardA, cardB) {
+    if (!cardA || !cardB) return false;
+    const detailsA = getCardDetails(cardA.name || cardA) || (typeof cardA === 'string' ? { name: cardA } : cardA);
+    const detailsB = getCardDetails(cardB.name || cardB) || (typeof cardB === 'string' ? { name: cardB } : cardB);
 
-    if (aName === bName) return false;
-    if ((aEvo && bName.includes(aEvo)) || (bEvo && aName.includes(bEvo))) return true;
-    
-    // Check root prefix match (e.g. Dratini & Dragonite share "drag")
-    const cleanA = aName.replace(/\s*(ex|vstar|vmax|v|gx|ex)\s*/gi, '');
-    const cleanB = bName.replace(/\s*(ex|vstar|vmax|v|gx|ex)\s*/gi, '');
-    if (cleanA.length >= 4 && cleanB.length >= 4 && cleanA.slice(0, 4) === cleanB.slice(0, 4)) return true;
+    const nameA = (detailsA.name || '').toLowerCase().trim();
+    const nameB = (detailsB.name || '').toLowerCase().trim();
+    if (!nameA || !nameB || nameA === nameB) return false;
+
+    const evoA = (detailsA.evolvesFrom || '').toLowerCase().trim();
+    const evoB = (detailsB.evolvesFrom || '').toLowerCase().trim();
+
+    // 1. Direct evolution link (e.g. Pupitar evolves from Larvitar)
+    if (evoA && (evoA === nameB || nameB.includes(evoA))) return true;
+    if (evoB && (evoB === nameA || nameA.includes(evoB))) return true;
+
+    // 2. Shared evolution base (e.g. Pupitar and Tyranitar both belong to Larvitar)
+    if (evoA && evoB && (evoA === evoB || evoA.includes(evoB) || evoB.includes(evoA))) return true;
+
+    // 3. Strict prefix family check for root names of length >= 5 (e.g., Charmander, Charmeleon, Charizard)
+    const baseA = nameA.replace(/\s*(ex|vstar|vmax|v|gx)\s*/gi, '').trim();
+    const baseB = nameB.replace(/\s*(ex|vstar|vmax|v|gx)\s*/gi, '').trim();
+    if (baseA.length >= 5 && baseB.length >= 5 && baseA.slice(0, 5) === baseB.slice(0, 5)) {
+      return true;
+    }
 
     return false;
+  }
+
+  function shareFamily(nameA, nameB) {
+    return isEvolutionPartner(nameA, nameB);
   }
 
   function calculateCompatibility(cardRaw, currentDeckCards) {
@@ -783,17 +796,11 @@ const Wizard = (() => {
 
     const cardTypes = card.types || [];
     const cardAttacks = card.attacks || [];
-    const cardEvolvesFrom = (card.evolvesFrom || '').toLowerCase();
-    const cardName = (card.name || '').toLowerCase();
 
     let primaryReason = null;
 
     // 1. Completa evolución (+50 pts)
-    const matchedDeckPokemon = pokemonInDeck.find(p => {
-      const pName = (p.name || '').toLowerCase();
-      const pEvolvesFrom = (p.evolvesFrom || '').toLowerCase();
-      return (cardEvolvesFrom && pName.includes(cardEvolvesFrom)) || (pEvolvesFrom && cardName.includes(pEvolvesFrom)) || shareFamily(cardName, pName);
-    });
+    const matchedDeckPokemon = pokemonInDeck.find(p => isEvolutionPartner(card, p));
 
     if (matchedDeckPokemon) {
       score += 50;
