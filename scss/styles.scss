@@ -198,11 +198,42 @@ button, label {
 
 .smart-chip {
   display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: 8px;
   padding: 6px 12px;
   border-radius: 8px;
   text-align: left;
+
+  .chip-left-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .chip-type-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    line-height: 1;
+
+    .tcg-sym {
+      margin-right: 0;
+      font-size: 13px;
+    }
+  }
+
+  .chip-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+  }
 
   .chip-top {
     display: flex;
@@ -238,7 +269,7 @@ button, label {
     font-size: 10px;
     opacity: 0.75;
     font-family: var(--mono);
-    margin-top: 2px;
+    margin-top: 1px;
     line-height: 1;
   }
 }

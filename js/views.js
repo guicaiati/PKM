@@ -804,7 +804,7 @@ const Wizard = (() => {
     const matchedType = cardTypes.find(t => deckTypes.has(t));
     if (matchedType && deckTypes.size > 0) {
       score += 30;
-      const typeDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(matchedType) : matchedType;
+      const typeDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(matchedType, true) : matchedType;
       if (!primaryReason) primaryReason = 'Mismo tipo (' + typeDisplay + ')';
     }
 
@@ -815,7 +815,7 @@ const Wizard = (() => {
     const sharesEnergy = Boolean(sharedEnergyType);
     if (sharesEnergy && deckEnergies.size > 0) {
       score += 30;
-      const energyDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(sharedEnergyType) : sharedEnergyType;
+      const energyDisplay = UI.getEnergySymbol ? UI.getEnergySymbol(sharedEnergyType, true) : sharedEnergyType;
       if (!primaryReason) primaryReason = 'Comparte energía ' + energyDisplay;
     }
 
@@ -956,17 +956,31 @@ const Wizard = (() => {
     const topMissing = missingScored.slice(0, 6);
 
     const renderChip = (c) => {
+      const card = getCardDetails(c.name) || c;
+      const typeRaw = (card.types && card.types[0]) || c.energyType || 'Colorless';
+      const typeVarMap = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
+      const typeCharMap = { Fire: 'r', Water: 'w', Grass: 'g', Lightning: 'l', Psychic: 'p', Fighting: 'f', Darkness: 'd', Metal: 'm', Colorless: 'c', Dragon: 'n', Fairy: 'y' };
+      
+      const typeClass = typeVarMap[typeRaw] || 'colorless';
+      const typeChar = typeCharMap[typeRaw] || 'c';
+      const typeIconHtml = `<span class="chip-type-circle cost-typed cost-${typeClass}" title="${typeRaw}"><span class="tcg-sym">${typeChar}</span></span>`;
+
       const added = alreadyAdded.has(c.name.toLowerCase());
       const owned = countOwned(c.name);
       const ownedBadge = owned > 0 ? `<span class="chip-owned">Tenés ${owned}</span>` : '';
       const addedBadge = added ? `<span class="chip-added">✓</span>` : '';
       return `<button type="button" class="filter-chip wiz-suggest-chip smart-chip ${added ? 'active' : ''}" data-suggest-name="${escapeHtml(c.name)}">
-        <div class="chip-top">
-          <span class="chip-name">${escapeHtml(c.name)}</span>
-          ${ownedBadge}
-          ${addedBadge}
+        <div class="chip-left-icon">
+          ${typeIconHtml}
         </div>
-        <span class="chip-reason">${c.reason}</span>
+        <div class="chip-body">
+          <div class="chip-top">
+            <span class="chip-name">${escapeHtml(c.name)}</span>
+            ${ownedBadge}
+            ${addedBadge}
+          </div>
+          <span class="chip-reason">${escapeHtml(c.reason)}</span>
+        </div>
       </button>`;
     };
 
