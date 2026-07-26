@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trainer's Ledger v2.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
   <div id="app">
     <div class="ledger-head">
@@ -27,7 +31,8 @@
     <section class="panel active" id="panel-scan">
       <div class="card-box">
         <h2>Buscar carta</h2>
-        <p class="hint">Escribí el nombre, número o ID de la carta. Funciona con: "Charizard", "Charizard 110", "sv3pt5-110"</p>
+        <p class="hint">Escribí el nombre, número o ID de la carta. Funciona con: "Charizard", "Charizard 110",
+          "sv3pt5-110"</p>
         <div class="search-wrap">
           <input type="text" id="searchInput" placeholder="ej: Charizard ex 110" autocomplete="off" />
           <div class="autocomplete-list" id="autocompleteList"></div>
@@ -90,7 +95,8 @@
           <div class="row">
             <input type="text" id="collectionNameInput" placeholder="Nombre de la colección" />
             <button class="action" id="saveCollectionBtn">Guardar colección</button>
-            <button class="ghost" id="enrichAllBtn" title="Actualizar datos de todas las colecciones guardadas desde la API">Actualizar datos</button>
+            <button class="ghost" id="enrichAllBtn"
+              title="Actualizar datos de todas las colecciones guardadas desde la API">Actualizar datos</button>
             <button class="ghost" id="exportCollectionBtn">Exportar JSON</button>
             <label class="ghost btn-label">
               Importar JSON
@@ -108,7 +114,9 @@
 
       <div class="card-box">
         <h2>Armar mazo — paso a paso</h2>
-        <p class="hint">Un método de 8 pasos para armar un mazo consistente a partir de tu colección: plan, Pokémon, energía, robo, apoyo, consistencia simulada y cobertura de amenazas. En cada paso vas a ver sugerencias según lo que ya tenés.</p>
+        <p class="hint">Un método de 8 pasos para armar un mazo consistente a partir de tu colección: plan, Pokémon,
+          energía, robo, apoyo, consistencia simulada y cobertura de amenazas. En cada paso vas a ver sugerencias según
+          lo que ya tenés.</p>
         <div class="row">
           <button class="action" id="wizImportBtn">Importar desde mi colección</button>
           <button class="ghost" id="wizClearBtn" title="Vaciar todas las cartas del mazo actual">Limpiar mazo</button>
@@ -171,14 +179,16 @@
         <h2>Mis mazos</h2>
         <p class="hint">Mazos guardados. Cargalos para verlos o modificá la variante.</p>
         <div id="savedDecksFull"></div>
-        <div class="empty" id="savedDecksEmpty">No tenés mazos guardados. Andá a "Armar mazo" y generá uno para guardarlo.</div>
+        <div class="empty" id="savedDecksEmpty">No tenés mazos guardados. Andá a "Armar mazo" y generá uno para
+          guardarlo.</div>
       </div>
       <div class="card-box">
         <h2>Mis colecciones</h2>
         <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminalas.</p>
         <div class="mb-12">
           <div class="search-wrap">
-            <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..." autocomplete="off" />
+            <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..."
+              autocomplete="off" />
             <div class="autocomplete-list" id="savedSearchAutocomplete"></div>
           </div>
         </div>
@@ -186,7 +196,8 @@
           <button class="ghost" id="exportAllCollectionsTxt">Exportar colecciones TXT</button>
         </div>
         <div id="savedCollectionsFull"></div>
-        <div class="empty" id="savedCollectionsEmpty">No tenés colecciones guardadas. Andá a "Colección" y guardá una.</div>
+        <div class="empty" id="savedCollectionsEmpty">No tenés colecciones guardadas. Andá a "Colección" y guardá una.
+        </div>
       </div>
     </section>
 
@@ -215,4 +226,5 @@
   <script src="js/core.js"></script>
   <script src="js/views.js"></script>
 </body>
+
 </html>

@@ -304,7 +304,7 @@ const Scanner = (() => {
         } catch (err) {
           console.warn(`Failed: ${s.name}`, err);
           await new Promise(r => setTimeout(r, 3000));
-          try { await API.downloadSingleSet(s.id); } catch {}
+          try { await API.downloadSingleSet(s.id); } catch { }
         }
       }
 
@@ -537,7 +537,7 @@ const Collection = (() => {
             <span class="saved-chip-name">${current.name}</span>
             <span class="saved-chip-cards">${total} cartas</span>
           </div>`;
-    } catch(err) { container.innerHTML = ''; }
+    } catch (err) { container.innerHTML = ''; }
   }
 
   return {
@@ -562,7 +562,7 @@ const Collection = (() => {
           currentCollectionName = name;
           UI.toast('Colección "' + name + '" guardada', 'success');
           renderSavedCollections();
-        } catch(err) {
+        } catch (err) {
           UI.toast('Error al guardar: ' + err.message, 'error');
         }
       });
@@ -647,21 +647,21 @@ const Wizard = (() => {
   const STORAGE_KEY = 'trainersLedger.wizardProgress';
 
   const STEP_META = [
-    {n:1, key:'plan', label:'Plan'},
-    {n:2, key:'pokemon', label:'Pokémon'},
-    {n:3, key:'energy', label:'Energía'},
-    {n:4, key:'draw', label:'Robo'},
-    {n:5, key:'supporters', label:'Apoyo'},
-    {n:6, key:'consistency', label:'Consistencia'},
-    {n:7, key:'tech', label:'Amenazas'},
-    {n:8, key:'final', label:'Acta Final'},
+    { n: 1, key: 'plan', label: 'Plan' },
+    { n: 2, key: 'pokemon', label: 'Pokémon' },
+    { n: 3, key: 'energy', label: 'Energía' },
+    { n: 4, key: 'draw', label: 'Robo' },
+    { n: 5, key: 'supporters', label: 'Apoyo' },
+    { n: 6, key: 'consistency', label: 'Consistencia' },
+    { n: 7, key: 'tech', label: 'Amenazas' },
+    { n: 8, key: 'final', label: 'Acta Final' },
   ];
 
   const ARCHETYPES = [
-    {id:'rush', name:'Ataque rápido', desc:'Pegar fuerte y noquear antes de que el rival arranque su plan.'},
-    {id:'control', name:'Control / Disrupción', desc:'Negar recursos: energías, bancas, mano del rival.'},
-    {id:'combo', name:'Combo', desc:'Ensamblar 2-3 piezas específicas para una jugada decisiva.'},
-    {id:'mill', name:'Decking-out', desc:'Forzar a que el rival se quede sin cartas para robar.'},
+    { id: 'rush', name: 'Ataque rápido', desc: 'Pegar fuerte y noquear antes de que el rival arranque su plan.' },
+    { id: 'control', name: 'Control / Disrupción', desc: 'Negar recursos: energías, bancas, mano del rival.' },
+    { id: 'combo', name: 'Combo', desc: 'Ensamblar 2-3 piezas específicas para una jugada decisiva.' },
+    { id: 'mill', name: 'Decking-out', desc: 'Forzar a que el rival se quede sin cartas para robar.' },
   ];
 
   let state = {
@@ -669,7 +669,7 @@ const Wizard = (() => {
     archetype: null,
     hasAcceleration: false,
     cards: [],
-    threats: [{threat:'', answer:''}],
+    threats: [{ threat: '', answer: '' }],
   };
   let nextId = 1;
 
@@ -678,68 +678,68 @@ const Wizard = (() => {
       if (Collection.getCards) return Collection.getCards();
       if (Collection.getMap) return Object.values(Collection.getMap());
       return [];
-    } catch(e) { return []; }
+    } catch (e) { return []; }
   }
 
   function countOwned(name) {
-    try { return Collection.countByName(name); } catch(e) { return 0; }
+    try { return Collection.countByName(name); } catch (e) { return 0; }
   }
 
-  function save(){
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { }
   }
-  function load(){
-    try{
+  function load() {
+    try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){
+      if (raw) {
         const parsed = JSON.parse(raw);
         state = Object.assign(state, parsed);
-        nextId = Math.max(1, ...state.cards.map(c=>c.id+1), 1);
+        nextId = Math.max(1, ...state.cards.map(c => c.id + 1), 1);
       }
-    }catch(e){}
+    } catch (e) { }
   }
 
-  function importFromCollection(){
+  function importFromCollection() {
     const colCards = getCollectionCards();
-    if(colCards.length === 0){
-      return {ok:false, msg:'Tu colección está vacía. Agregá cartas desde "Buscar" primero.'};
+    if (colCards.length === 0) {
+      return { ok: false, msg: 'Tu colección está vacía. Agregá cartas desde "Buscar" primero.' };
     }
     let added = 0;
     const existingNames = new Set(state.cards.map(c => c.name.toLowerCase()));
     colCards.forEach(raw => {
       const name = raw.name;
-      if(!name || existingNames.has(name.toLowerCase())) return;
+      if (!name || existingNames.has(name.toLowerCase())) return;
       const cardDetails = getCardDetails(name) || raw;
       const supertype = (cardDetails.supertype || raw.supertype || raw.category || '').toLowerCase();
       const count = Number(raw.count || 1);
 
-      if(supertype.includes('energ') || (raw.category === 'energy')){
-        state.cards.push({id:nextId++, category:'energy', name, energyType: (raw.types && raw.types[0]) || name, count});
+      if (supertype.includes('energ') || (raw.category === 'energy')) {
+        state.cards.push({ id: nextId++, category: 'energy', name, energyType: (raw.types && raw.types[0]) || name, count });
         added++;
-      } else if(supertype.includes('train') || (raw.category === 'trainer')){
-        const role = (raw.subtypes || cardDetails.subtypes || []).some(s=>/supporter/i.test(s)) ? 'Supporter' : 'Item';
-        state.cards.push({id:nextId++, category:'trainer', name, trainerRole: role, isDraw: false, count});
+      } else if (supertype.includes('train') || (raw.category === 'trainer')) {
+        const role = (raw.subtypes || cardDetails.subtypes || []).some(s => /supporter/i.test(s)) ? 'Supporter' : 'Item';
+        state.cards.push({ id: nextId++, category: 'trainer', name, trainerRole: role, isDraw: false, count });
         added++;
       } else {
         const stageName = (cardDetails.subtypes || raw.subtypes || []).find(s => String(s).toLowerCase().includes('stage')) || 'Básico';
-        state.cards.push({id:nextId++, category:'pokemon', name, stage: stageName, count});
+        state.cards.push({ id: nextId++, category: 'pokemon', name, stage: stageName, count });
         added++;
       }
       existingNames.add(name.toLowerCase());
     });
     save();
-    return {ok:true, msg:`Importadas ${added} cartas de tu colección.`};
+    return { ok: true, msg: `Importadas ${added} cartas de tu colección.` };
   }
 
-  function cardsBy(cat){ return state.cards.filter(c=>c.category===cat); }
-  function sumCount(list){ return list.reduce((s,c)=>s+Number(c.count||0),0); }
-  function totalDeckCount(){ return sumCount(state.cards); }
+  function cardsBy(cat) { return state.cards.filter(c => c.category === cat); }
+  function sumCount(list) { return list.reduce((s, c) => s + Number(c.count || 0), 0); }
+  function totalDeckCount() { return sumCount(state.cards); }
 
-  function escapeHtml(s){
-    return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  function escapeHtml(s) {
+    return (s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   }
 
-  function buildSearchInputHtml(inputId, listId, placeholder){
+  function buildSearchInputHtml(inputId, listId, placeholder) {
     return `<div class="search-wrap" style="flex:1;min-width:200px;">
       <input type="text" id="${inputId}" placeholder="${placeholder}" autocomplete="off" style="width:100%;"/>
       <div class="autocomplete-list" id="${listId}"></div>
@@ -948,44 +948,19 @@ const Wizard = (() => {
 
     if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
       ownedCandidates = ownedCandidates.filter(c => matchesStageOrRoleFilter(c, state.stageFilter));
-    }
-
-    const ownedScored = ownedCandidates.map(c => {
-      const compat = calculateCompatibility(c, currentDeck);
-      return { ...c, score: compat.score, reason: compat.reason };
-    }).sort((a, b) => b.score - a.score);
-
-    const topOwned = ownedScored.slice(0, 50);
-
-    // Dynamic Missing candidates catalog from IndexedDB database and collections
-    let fallbackMissingCatalog = [];
-    const dbCatalog = API.getDbCards ? API.getDbCards() : [];
-
-    if (filterSupertype === 'pokemon') {
-      const deckPokemon = currentDeck.filter(c => c.category === 'pokemon').map(c => getCardDetails(c.name) || c);
-      const deckTypes = [...new Set(deckPokemon.flatMap(p => p.types || []))];
-      
-      const dbPokemon = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('pok'));
-      const matchingTypes = dbPokemon.filter(c => (c.types || []).some(t => deckTypes.includes(t)));
-      
-      const familyCandidates = [];
-      deckPokemon.forEach(p => {
-        if (p.evolvesFrom) {
-          const match = dbPokemon.find(c => (c.name || '').toLowerCase() === p.evolvesFrom.toLowerCase());
-          if (match) familyCandidates.push(match);
-        }
-      });
-
-      fallbackMissingCatalog = [...familyCandidates, ...matchingTypes, ...dbPokemon].slice(0, 50);
-    } else if (filterSupertype === 'energy') {
-      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('energ')).slice(0, 20);
-    } else {
-      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('train')).slice(0, 30);
-    }
-
-    let missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0 && !alreadyAdded.has(c.name.toLowerCase()));
-    if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
       missingCandidates = missingCandidates.filter(c => matchesStageOrRoleFilter(c, state.stageFilter));
+    }
+
+    if (state.elementFilter && state.elementFilter !== 'all' && (filterSupertype === 'pokemon' || filterSupertype === 'energy')) {
+      const isElemMatch = (cardItem) => {
+        const details = getCardDetails(cardItem.name) || cardItem;
+        const types = details.types || cardItem.types || [];
+        if (types.includes(state.elementFilter)) return true;
+        if (cardItem.energyType === state.elementFilter) return true;
+        return false;
+      };
+      ownedCandidates = ownedCandidates.filter(isElemMatch);
+      missingCandidates = missingCandidates.filter(isElemMatch);
     }
 
     const missingScored = missingCandidates.map(c => {
@@ -1000,7 +975,7 @@ const Wizard = (() => {
       const typeRaw = (card.types && card.types[0]) || c.energyType || 'Colorless';
       const typeVarMap = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
       const typeCharMap = { Fire: 'r', Water: 'w', Grass: 'g', Lightning: 'l', Psychic: 'p', Fighting: 'f', Darkness: 'd', Metal: 'm', Colorless: 'c', Dragon: 'n', Fairy: 'y' };
-      
+
       const typeClass = typeVarMap[typeRaw] || 'colorless';
       const typeChar = typeCharMap[typeRaw] || 'c';
       const typeIconHtml = `<span class="chip-type-circle cost-typed cost-${typeClass}" title="${typeRaw}"><span class="tcg-sym">${typeChar}</span></span>`;
@@ -1032,17 +1007,32 @@ const Wizard = (() => {
       ? topMissing.map(renderChip).join('')
       : '<div class="empty" style="font-size:11px;padding:6px;">No hay sugerencias para este filtro.</div>';
 
-    const stageFiltersHtml = filterSupertype === 'pokemon' ? `
-      <div class="stage-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 12px;">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Filtro TCG:</span>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='all'?'active':''}" data-stage="all">Todos</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='main'?'active':''}" data-stage="main">⚔️ Atacante Principal</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='secondary'?'active':''}" data-stage="secondary">🛡️ Reserva / Secundario</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='support'?'active':''}" data-stage="support">⚙️ Motor / Banca</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='basic'?'active':''}" data-stage="basic">🌱 Básicos</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='stage1'?'active':''}" data-stage="stage1">⚡ Nivel 1</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter==='stage2'?'active':''}" data-stage="stage2">🔥 Nivel 2</button>
+    const stageFiltersHtml = (filterSupertype === 'pokemon' || filterSupertype === 'energy') ? `
+      <div class="element-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px;">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Tipo:</span>
+        <button type="button" class="type-filter-btn ${(!state.elementFilter || state.elementFilter === 'all') ? 'active' : ''}" data-elem="all" title="Todos los elementos">★</button>
+        <button type="button" class="type-filter-btn cost-typed cost-fire ${state.elementFilter === 'Fire' ? 'active' : ''}" data-elem="Fire" title="Fuego"><span class="tcg-sym">r</span></button>
+        <button type="button" class="type-filter-btn cost-typed cost-water ${state.elementFilter === 'Water' ? 'active' : ''}" data-elem="Water" title="Agua"><span class="tcg-sym">w</span></button>
+        <button type="button" class="type-filter-btn cost-typed cost-grass ${state.elementFilter === 'Grass' ? 'active' : ''}" data-elem="Grass" title="Planta"><span class="tcg-sym">g</span></button>
+        <button type="button" class="type-filter-btn cost-typed cost-electric ${state.elementFilter === 'Lightning' ? 'active' : ''}" data-elem="Lightning" title="Rayo"><span class="tcg-sym">l</span></button>
+        <button type="button" class="type-filter-btn cost-typed cost-psychic ${state.elementFilter === 'Psychic' ? 'active' : ''}" data-elem="Psychic" title="Psíquico"><span class="tcg-sym">p</span></button>
+        <button type="button" class="type-filter-btn cost-typed cost-fighting ${state.elementFilter === 'Fighting' ? 'active' : ''}" data-elem="Fighting" title="Lucha"><span class="tcg-sym">f</span></button>
+        <button type="button" class="type-filter-btn cost-typed cost-darkness ${state.elementFilter === 'Darkness' ? 'active' : ''}" data-elem="Darkness" title="Oscuridad"><span class="tcg-sym">d</span></button>
+        <button type="button" class="type-filter-btn cost-typed cost-metal ${state.elementFilter === 'Metal' ? 'active' : ''}" data-elem="Metal" title="Metal"><span class="tcg-sym">m</span></button>
+        <button type="button" class="type-filter-btn cost-typed cost-dragon ${state.elementFilter === 'Dragon' ? 'active' : ''}" data-elem="Dragon" title="Dragón"><span class="tcg-sym">n</span></button>
+        <button type="button" class="type-filter-btn cost-colorless ${state.elementFilter === 'Colorless' ? 'active' : ''}" data-elem="Colorless" title="Incoloro"><span class="tcg-sym">c</span></button>
       </div>
+      ${filterSupertype === 'pokemon' ? `
+      <div class="stage-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 10px;">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Filtro TCG:</span>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'all' ? 'active' : ''}" data-stage="all">Todos</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'main' ? 'active' : ''}" data-stage="main">⚔️ Atacante Principal</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'secondary' ? 'active' : ''}" data-stage="secondary">🛡️ Reserva / Secundario</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'support' ? 'active' : ''}" data-stage="support">⚙️ Motor / Banca</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'basic' ? 'active' : ''}" data-stage="basic">🌱 Básicos</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'stage1' ? 'active' : ''}" data-stage="stage1">⚡ Nivel 1</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'stage2' ? 'active' : ''}" data-stage="stage2">🔥 Nivel 2</button>
+      </div>` : ''}
     ` : '';
 
     return `
@@ -1079,36 +1069,36 @@ const Wizard = (() => {
     for (const cat of cats) {
       const group = items.filter(i => (i.category || 'pokemon') === cat.key);
       if (!group.length) continue;
-      html += `<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;margin:8px 0 4px;font-weight:600;letter-spacing:0.5px;">${cat.label} (${group.reduce((s,x)=>s+x.qty,0)})</div>`;
+      html += `<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;margin:8px 0 4px;font-weight:600;letter-spacing:0.5px;">${cat.label} (${group.reduce((s, x) => s + x.qty, 0)})</div>`;
       html += group.map(i => `<div class="list-item"><span class="li-name">${escapeHtml(i.name)}</span><span class="li-qty">x${i.qty}</span></div>`).join('');
     }
     return html || '<div class="empty">Sin cartas.</div>';
   }
 
-  function updateHaveNeedPanel(){
+  function updateHaveNeedPanel() {
     const haveList = [], needList = [];
     state.cards.forEach(c => {
       const owned = countOwned(c.name);
       const needed = Number(c.count || 0);
       const cat = c.category || 'pokemon';
-      if(owned >= needed) haveList.push({name: c.name, category: cat, qty: needed});
-      else if(owned > 0) {
-        haveList.push({name: c.name, category: cat, qty: owned});
-        needList.push({name: c.name, category: cat, qty: needed - owned});
+      if (owned >= needed) haveList.push({ name: c.name, category: cat, qty: needed });
+      else if (owned > 0) {
+        haveList.push({ name: c.name, category: cat, qty: owned });
+        needList.push({ name: c.name, category: cat, qty: needed - owned });
       }
-      else needList.push({name: c.name, category: cat, qty: needed});
+      else needList.push({ name: c.name, category: cat, qty: needed });
     });
 
     const buyEl = document.getElementById('buyList');
     const haveEl = document.getElementById('removeList');
-    if(buyEl) buyEl.innerHTML = needList.length === 0 ? '<div class="empty">¡Tenés todo lo que necesitás!</div>' : renderGroupedList(needList);
-    if(haveEl) haveEl.innerHTML = haveList.length === 0 ? '<div class="empty">Todavía no agregaste cartas.</div>' : renderGroupedList(haveList);
+    if (buyEl) buyEl.innerHTML = needList.length === 0 ? '<div class="empty">¡Tenés todo lo que necesitás!</div>' : renderGroupedList(needList);
+    if (haveEl) haveEl.innerHTML = haveList.length === 0 ? '<div class="empty">Todavía no agregaste cartas.</div>' : renderGroupedList(haveList);
   }
 
-  function renderChips(){
+  function renderChips() {
     const rail = document.getElementById('wizardStepChips');
-    if(!rail) return;
-    rail.innerHTML = STEP_META.map(s=>`<button type="button" class="filter-chip ${state.step===s.n?'active':''}" data-wizard-step="${s.n}">${s.n}. ${s.label}</button>`).join('');
+    if (!rail) return;
+    rail.innerHTML = STEP_META.map(s => `<button type="button" class="filter-chip ${state.step === s.n ? 'active' : ''}" data-wizard-step="${s.n}">${s.n}. ${s.label}</button>`).join('');
   }
 
   function getStageBadge(c) {
@@ -1228,7 +1218,7 @@ const Wizard = (() => {
       groups.forEach(g => {
         if (g.items.length === 0) return;
         html += `<div class="table-group-block" style="margin-top:14px;margin-bottom:14px;">
-          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--holo-a);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">${g.label} (${g.items.reduce((s,x)=>s+Number(x.count||1),0)})</div>
+          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--holo-a);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">${g.label} (${g.items.reduce((s, x) => s + Number(x.count || 1), 0)})</div>
           <table class="wizard-ledger aligned-ledger">
             <thead>
               <tr>
@@ -1267,53 +1257,53 @@ const Wizard = (() => {
       </table>`;
   }
 
-  function renderStepBody(n){
-    if(n===1){
+  function renderStepBody(n) {
+    if (n === 1) {
       return `<p class="hint">Elegí el plan para tu mazo:</p>
         <div class="grid" id="wizardArchetypeGrid">
-          ${ARCHETYPES.map(a=>`<button type="button" class="card-box wizard-arche ${state.archetype===a.id?'active':''}" data-archetype="${a.id}"><strong>${a.name}</strong><p class="hint">${a.desc}</p></button>`).join('')}
+          ${ARCHETYPES.map(a => `<button type="button" class="card-box wizard-arche ${state.archetype === a.id ? 'active' : ''}" data-archetype="${a.id}"><strong>${a.name}</strong><p class="hint">${a.desc}</p></button>`).join('')}
         </div>`;
     }
-    if(n===2){
+    if (n === 2) {
       return `<p class="hint">Buscá Pokémon para agregar:</p>${buildSuggestionsHtml('pokemon')}
         <div class="row" style="gap:8px;align-items:center;">
-          ${buildSearchInputHtml('wizPkSearch','wizPkAutocomplete','Buscar Pokémon...')}
+          ${buildSearchInputHtml('wizPkSearch', 'wizPkAutocomplete', 'Buscar Pokémon...')}
           <input type="number" id="wizPkCount" min="1" max="4" value="1" style="width:70px;">
           <button class="action" id="wizAddPk">Agregar</button>
         </div>
-        ${renderCardTable(cardsBy('pokemon'),'pokemon')}`;
+        ${renderCardTable(cardsBy('pokemon'), 'pokemon')}`;
     }
-    if(n===3){
+    if (n === 3) {
       return `<p class="hint">Buscá Energías:</p>${buildSuggestionsHtml('energy')}
         <div class="row" style="gap:8px;align-items:center;">
-          ${buildSearchInputHtml('wizEnSearch','wizEnAutocomplete','Buscar Energía...')}
+          ${buildSearchInputHtml('wizEnSearch', 'wizEnAutocomplete', 'Buscar Energía...')}
           <input type="number" id="wizEnCount" min="1" max="20" value="1" style="width:70px;">
           <button class="action" id="wizAddEn">Agregar</button>
         </div>
-        ${renderCardTable(cardsBy('energy'),'energy')}`;
+        ${renderCardTable(cardsBy('energy'), 'energy')}`;
     }
-    if(n===4){
-      return `<p class="hint">Cartas de robo:</p>${renderCardTable(cardsBy('trainer').filter(c=>c.isDraw),'trainer')}`;
+    if (n === 4) {
+      return `<p class="hint">Cartas de robo:</p>${renderCardTable(cardsBy('trainer').filter(c => c.isDraw), 'trainer')}`;
     }
-    if(n===5){
+    if (n === 5) {
       return `<p class="hint">Buscá Entrenadores / Apoyo:</p>${buildSuggestionsHtml('trainer')}
         <div class="row" style="gap:8px;align-items:center;">
-          ${buildSearchInputHtml('wizTrSearch','wizTrAutocomplete','Buscar Trainer...')}
+          ${buildSearchInputHtml('wizTrSearch', 'wizTrAutocomplete', 'Buscar Trainer...')}
           <input type="number" id="wizTrCount" min="1" max="4" value="1" style="width:70px;">
           <label><input type="checkbox" id="wizTrDraw"> Es robo</label>
           <button class="action" id="wizAddTr">Agregar</button>
         </div>
-        ${renderCardTable(cardsBy('trainer'),'trainer')}`;
+        ${renderCardTable(cardsBy('trainer'), 'trainer')}`;
     }
-    if(n===6){
+    if (n === 6) {
       return `<div class="status">Total mazo: <strong>${totalDeckCount()}</strong> / 60 cartas.</div>`;
     }
-    if(n===7){
+    if (n === 7) {
       return `<p class="hint">Amenazas y respuestas:</p>
-        ${state.threats.map((t,i)=>`<div class="row"><input type="text" class="wizThreatInput" value="${escapeHtml(t.threat)}" placeholder="Amenaza"/><input type="text" class="wizAnswerInput" value="${escapeHtml(t.answer)}" placeholder="Tech"/><button type="button" class="ghost" data-remove-threat="${i}">✕</button></div>`).join('')}
+        ${state.threats.map((t, i) => `<div class="row"><input type="text" class="wizThreatInput" value="${escapeHtml(t.threat)}" placeholder="Amenaza"/><input type="text" class="wizAnswerInput" value="${escapeHtml(t.answer)}" placeholder="Tech"/><button type="button" class="ghost" data-remove-threat="${i}">✕</button></div>`).join('')}
         <button type="button" class="ghost" id="wizAddThreat">+ Amenaza</button>`;
     }
-    if(n===8){
+    if (n === 8) {
       return `<div class="status">Mazo completo — <strong>${totalDeckCount()} cartas</strong>.</div>
         <div style="display:flex;gap:8px;margin-top:12px;">
           <button type="button" class="action" id="wizSaveDeck">Guardar mazo</button>
@@ -1323,47 +1313,47 @@ const Wizard = (() => {
     return '';
   }
 
-  function render(){
+  function render() {
     renderChips();
     const body = document.getElementById('wizardStepBody');
-    if(body) body.innerHTML = renderStepBody(state.step);
+    if (body) body.innerHTML = renderStepBody(state.step);
     attachStepListeners();
     updateHaveNeedPanel();
     save();
   }
 
-  function setupAutocomplete(inputId, listId, onSelect){
+  function setupAutocomplete(inputId, listId, onSelect) {
     const input = document.getElementById(inputId);
     const list = document.getElementById(listId);
-    if(!input || !list) return;
-    input.addEventListener('input', ()=>{
+    if (!input || !list) return;
+    input.addEventListener('input', () => {
       const val = input.value.trim();
-      if(val.length < 2){ list.classList.remove('show'); return; }
-      setTimeout(async ()=>{
+      if (val.length < 2) { list.classList.remove('show'); return; }
+      setTimeout(async () => {
         try {
           const suggestions = await API.autocomplete(val);
-          if(!suggestions.length){ list.classList.remove('show'); return; }
+          if (!suggestions.length) { list.classList.remove('show'); return; }
           list.innerHTML = suggestions.map(s => {
             const owned = countOwned(s);
             const badge = owned > 0 ? `<span class="ac-owned">Tenés ${owned}</span>` : '';
             return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
           }).join('');
           list.classList.add('show');
-          list.querySelectorAll('.autocomplete-item').forEach(el=>{
-            el.addEventListener('click', ()=>{
+          list.querySelectorAll('.autocomplete-item').forEach(el => {
+            el.addEventListener('click', () => {
               const cardName = el.dataset.val || el.querySelector('span')?.textContent || el.textContent;
               input.value = cardName;
               list.classList.remove('show');
-              if(onSelect) onSelect(cardName);
+              if (onSelect) onSelect(cardName);
             });
           });
-        } catch(e){ list.classList.remove('show'); }
+        } catch (e) { list.classList.remove('show'); }
       }, 50);
     });
   }
 
-  async function addCardByName(name, category, countInputId, extraOpts){
-    if(!name) return;
+  async function addCardByName(name, category, countInputId, extraOpts) {
+    if (!name) return;
     const count = countInputId ? (Number(document.getElementById(countInputId)?.value) || 1) : 1;
     const details = getCardDetails(name);
     state.cards.push({
@@ -1382,75 +1372,82 @@ const Wizard = (() => {
     render();
   }
 
-  function attachStepListeners(){
+  function attachStepListeners() {
     const body = document.getElementById('wizardStepBody');
-    if(!body) return;
+    if (!body) return;
 
-    body.querySelectorAll('.wizard-qty').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
+    body.querySelectorAll('.wizard-qty').forEach(btn => {
+      btn.addEventListener('click', () => {
         const id = Number(btn.dataset.id), delta = Number(btn.dataset.qty);
-        const card = state.cards.find(c=>c.id===id);
-        if(card){ card.count = Math.max(1, Number(card.count)+delta); render(); }
+        const card = state.cards.find(c => c.id === id);
+        if (card) { card.count = Math.max(1, Number(card.count) + delta); render(); }
       });
     });
-    body.querySelectorAll('.wizard-remove').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        state.cards = state.cards.filter(c=>c.id!==Number(btn.dataset.remove));
+    body.querySelectorAll('.wizard-remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.cards = state.cards.filter(c => c.id !== Number(btn.dataset.remove));
         render();
       });
     });
 
-    body.querySelectorAll('.wiz-stage-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
+    body.querySelectorAll('.wiz-stage-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
         state.stageFilter = btn.dataset.stage;
         render();
       });
     });
 
-    body.querySelectorAll('.wiz-suggest-chip').forEach(chip=>{
-      chip.addEventListener('click', ()=>{
+    body.querySelectorAll('[data-elem]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.elementFilter = btn.dataset.elem;
+        render();
+      });
+    });
+
+    body.querySelectorAll('.wiz-suggest-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
         const name = chip.dataset.suggestName;
         let cat = state.step === 3 ? 'energy' : state.step === 5 ? 'trainer' : 'pokemon';
         addCardByName(name, cat, null, null);
       });
     });
 
-    if(state.step===1){
-      body.querySelectorAll('[data-archetype]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{ state.archetype = btn.dataset.archetype; render(); });
+    if (state.step === 1) {
+      body.querySelectorAll('[data-archetype]').forEach(btn => {
+        btn.addEventListener('click', () => { state.archetype = btn.dataset.archetype; render(); });
       });
     }
-    if(state.step===2){
+    if (state.step === 2) {
       setupAutocomplete('wizPkSearch', 'wizPkAutocomplete');
-      document.getElementById('wizAddPk')?.addEventListener('click', ()=>{
+      document.getElementById('wizAddPk')?.addEventListener('click', () => {
         const name = document.getElementById('wizPkSearch')?.value?.trim();
-        if(name) addCardByName(name, 'pokemon', 'wizPkCount');
+        if (name) addCardByName(name, 'pokemon', 'wizPkCount');
       });
     }
-    if(state.step===3){
+    if (state.step === 3) {
       setupAutocomplete('wizEnSearch', 'wizEnAutocomplete');
-      document.getElementById('wizAddEn')?.addEventListener('click', ()=>{
+      document.getElementById('wizAddEn')?.addEventListener('click', () => {
         const name = document.getElementById('wizEnSearch')?.value?.trim();
-        if(name) addCardByName(name, 'energy', 'wizEnCount');
+        if (name) addCardByName(name, 'energy', 'wizEnCount');
       });
     }
-    if(state.step===5){
+    if (state.step === 5) {
       setupAutocomplete('wizTrSearch', 'wizTrAutocomplete');
-      document.getElementById('wizAddTr')?.addEventListener('click', ()=>{
+      document.getElementById('wizAddTr')?.addEventListener('click', () => {
         const name = document.getElementById('wizTrSearch')?.value?.trim();
         const isDraw = document.getElementById('wizTrDraw')?.checked || false;
-        if(name) addCardByName(name, 'trainer', 'wizTrCount', {isDraw});
+        if (name) addCardByName(name, 'trainer', 'wizTrCount', { isDraw });
       });
     }
-    if(state.step===7){
-      document.getElementById('wizAddThreat')?.addEventListener('click', ()=>{ state.threats.push({threat:'', answer:''}); render(); });
-      body.querySelectorAll('[data-remove-threat]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{ state.threats.splice(Number(btn.dataset.removeThreat),1); render(); });
+    if (state.step === 7) {
+      document.getElementById('wizAddThreat')?.addEventListener('click', () => { state.threats.push({ threat: '', answer: '' }); render(); });
+      body.querySelectorAll('[data-remove-threat]').forEach(btn => {
+        btn.addEventListener('click', () => { state.threats.splice(Number(btn.dataset.removeThreat), 1); render(); });
       });
     }
-    if(state.step===8){
+    if (state.step === 8) {
       document.getElementById('wizExport')?.addEventListener('click', exportDeckAsText);
-      document.getElementById('wizSaveDeck')?.addEventListener('click', async ()=>{
+      document.getElementById('wizSaveDeck')?.addEventListener('click', async () => {
         const name = prompt('Nombre del mazo:', 'Mi Mazo') || 'Mi Mazo';
         const deckData = {
           archetypeName: state.archetype || 'Personalizado',
@@ -1468,14 +1465,14 @@ const Wizard = (() => {
     }
   }
 
-  function exportDeckAsText(){
+  function exportDeckAsText() {
     const lines = ['Pokémon:'];
-    cardsBy('pokemon').forEach(c=>lines.push(`${c.count}x ${c.name}`));
+    cardsBy('pokemon').forEach(c => lines.push(`${c.count}x ${c.name}`));
     lines.push('', 'Entrenadores:');
-    cardsBy('trainer').forEach(c=>lines.push(`${c.count}x ${c.name}`));
+    cardsBy('trainer').forEach(c => lines.push(`${c.count}x ${c.name}`));
     lines.push('', 'Energía:');
-    cardsBy('energy').forEach(c=>lines.push(`${c.count}x ${c.name}`));
-    const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+    cardsBy('energy').forEach(c => lines.push(`${c.count}x ${c.name}`));
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = 'mazo.txt';
@@ -1483,32 +1480,32 @@ const Wizard = (() => {
     URL.revokeObjectURL(url);
   }
 
-  function loadSavedDeck(deckData, name){
-    if(deckData && deckData.cards) state.cards = deckData.cards;
+  function loadSavedDeck(deckData, name) {
+    if (deckData && deckData.cards) state.cards = deckData.cards;
     state.step = 8;
     render();
     UI.toast(`Mazo "${name || ''}" cargado`, 'success');
   }
 
-  function init(){
+  function init() {
     const panel = document.getElementById('panel-build');
-    if(!panel) return;
+    if (!panel) return;
     load();
-    document.getElementById('wizardStepChips')?.addEventListener('click', e=>{
+    document.getElementById('wizardStepChips')?.addEventListener('click', e => {
       const btn = e.target.closest('[data-wizard-step]');
-      if(btn){ state.step = Number(btn.dataset.wizardStep); render(); }
+      if (btn) { state.step = Number(btn.dataset.wizardStep); render(); }
     });
-    document.getElementById('wizImportBtn')?.addEventListener('click', ()=>{
+    document.getElementById('wizImportBtn')?.addEventListener('click', () => {
       const res = importFromCollection();
       UI.toast(res.msg, res.ok ? 'success' : 'info');
-      if(res.ok) render();
+      if (res.ok) render();
     });
-    document.getElementById('wizClearBtn')?.addEventListener('click', ()=>{
-      if(state.cards.length === 0){
+    document.getElementById('wizClearBtn')?.addEventListener('click', () => {
+      if (state.cards.length === 0) {
         UI.toast('El mazo ya está vacío', 'info');
         return;
       }
-      if(confirm('¿Vaciar todas las cartas del mazo actual?')){
+      if (confirm('¿Vaciar todas las cartas del mazo actual?')) {
         state.cards = [];
         render();
         UI.toast('Mazo vaciado', 'success');
@@ -1535,7 +1532,7 @@ const Saved = (() => {
     input.addEventListener('input', () => {
       clearTimeout(searchTimer);
       const val = input.value.trim().toLowerCase();
-      
+
       searchTimer = setTimeout(async () => {
         renderCollections(val);
 
@@ -1589,7 +1586,7 @@ const Saved = (() => {
     document.getElementById('exportAllCollectionsTxt')?.addEventListener('click', async () => {
       const saved = await Storage.loadNamedCollections();
       if (!saved.length) { UI.toast('No hay colecciones para exportar', 'info'); return; }
-      
+
       let text = '=== COLECCIONES GUARDADAS ===\n\n';
       saved.forEach(col => {
         text += `--- ${col.name} ---\n`;
@@ -1647,12 +1644,12 @@ const Saved = (() => {
     container.innerHTML = all.map(c => {
       const total = (c.data || []).reduce((s, x) => s + (x.count || 0), 0);
       const isCurrent = c.id === 'current';
-      
+
       let matchesHtml = '';
       if (c.matchingCards && c.matchingCards.length > 0) {
         matchesHtml = `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;">
           <div style="color:var(--holo-a);font-weight:600;margin-bottom:4px;">Cartas encontradas (${c.matchingCards.length}):</div>
-          ${c.matchingCards.slice(0, 5).map(m => `<div style="color:var(--text);">${escapeHtml(m.name)} (x${m.count||1})</div>`).join('')}
+          ${c.matchingCards.slice(0, 5).map(m => `<div style="color:var(--text);">${escapeHtml(m.name)} (x${m.count || 1})</div>`).join('')}
         </div>`;
       }
 
