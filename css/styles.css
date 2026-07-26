@@ -554,6 +554,32 @@ button.ghost:hover, label.ghost:hover {
   text-align: right;
 }
 
+tr.row-evo-warning {
+  background: rgba(248, 113, 113, 0.18) !important;
+  border-left: 3px solid var(--fire);
+}
+tr.row-evo-warning td {
+  color: #fca5a5;
+}
+
+.info-warn-btn {
+  padding: 1px 5px;
+  margin-left: 6px;
+  border-color: var(--fire) !important;
+  color: var(--fire) !important;
+  background: rgba(248, 113, 113, 0.22) !important;
+  font-size: 11px;
+  cursor: pointer;
+  vertical-align: middle;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.info-warn-btn:hover {
+  background: rgba(248, 113, 113, 0.4) !important;
+}
+
 .tcg-sym {
   font-family: "EssentiarumTCG", sans-serif;
   font-style: normal;

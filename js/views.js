@@ -1096,16 +1096,72 @@ const Wizard = (() => {
     return `<span class="type-tag">${symbolHtml}</span>`;
   }
 
+  function checkEvolutionLineValidity(c, currentDeckCards = state.cards) {
+    const card = getCardDetails(c.name) || c;
+    const supertype = (card.supertype || c.category || '').toLowerCase();
+    if (!supertype.includes('pok')) return { valid: true, warning: '' };
+
+    const stageCat = getStageCategory(card);
+    const evolvesFrom = card.evolvesFrom || '';
+    const deckPokemon = currentDeckCards.filter(x => (x.category || '').toLowerCase() === 'pokemon').map(x => getCardDetails(x.name) || x);
+    const deckNames = currentDeckCards.map(x => (x.name || '').toLowerCase());
+
+    const hasRareCandy = deckNames.some(n => n.includes('rare candy') || n.includes('caramelo raro'));
+
+    if (stageCat === 'stage1') {
+      const hasBasic = deckPokemon.some(p => {
+        const pStage = getStageCategory(p);
+        if (pStage !== 'basic') return false;
+        const pName = (p.name || '').toLowerCase();
+        if (evolvesFrom && (pName.includes(evolvesFrom.toLowerCase()) || evolvesFrom.toLowerCase().includes(pName))) return true;
+        return shareFamily(card.name, p.name);
+      });
+      if (!hasBasic) {
+        return {
+          valid: false,
+          warning: `Falta el Pokémon Básico ${evolvesFrom ? `(${evolvesFrom}) ` : ''}en el mazo para poder evolucionar.`
+        };
+      }
+    } else if (stageCat === 'stage2') {
+      const hasBasic = deckPokemon.some(p => getStageCategory(p) === 'basic' && shareFamily(card.name, p.name));
+      const hasStage1 = deckPokemon.some(p => getStageCategory(p) === 'stage1' && shareFamily(card.name, p.name));
+      const hasStage1OrCandy = hasStage1 || hasRareCandy;
+
+      if (!hasBasic && !hasStage1OrCandy) {
+        return {
+          valid: false,
+          warning: `Falta el Pokémon Básico y (Nivel 1 o Rare Candy / Caramelo Raro) en el mazo.`
+        };
+      } else if (!hasBasic) {
+        return {
+          valid: false,
+          warning: `Falta el Pokémon Básico en el mazo para completar la línea evolutiva.`
+        };
+      } else if (!hasStage1OrCandy) {
+        return {
+          valid: false,
+          warning: `Falta Nivel 1 o Rare Candy (Caramelo Raro) en el mazo para evolucionar.`
+        };
+      }
+    }
+
+    return { valid: true, warning: '' };
+  }
+
   function renderCardRow(c) {
     const owned = countOwned(c.name);
     const needed = Number(c.count || 0);
     const missing = Math.max(0, needed - owned);
     const typeBadge = getTypeBadge(c);
     const stageBadge = getStageBadge(c);
+    const evoCheck = checkEvolutionLineValidity(c, state.cards);
+
+    const rowClass = evoCheck.valid ? '' : 'row-evo-warning';
+    const warningBtn = evoCheck.valid ? '' : `<button type="button" class="ghost info-warn-btn" title="${escapeHtml(evoCheck.warning)}" onclick="UI.toast('${escapeHtml(evoCheck.warning)}', 'error')"><span class="warn-icon">⚠️</span></button>`;
 
     return `
-    <tr data-id="${c.id}">
-      <td class="col-name">${escapeHtml(c.name)}</td>
+    <tr data-id="${c.id}" class="${rowClass}">
+      <td class="col-name">${escapeHtml(c.name)} ${warningBtn}</td>
       <td class="col-type">${typeBadge}</td>
       <td class="col-stage">${stageBadge}</td>
       <td class="col-qty"><button type="button" class="ghost wizard-qty" data-qty="-1" data-id="${c.id}">−</button> <span class="qty-num">${c.count}</span> <button type="button" class="ghost wizard-qty" data-qty="1" data-id="${c.id}">+</button></td>
