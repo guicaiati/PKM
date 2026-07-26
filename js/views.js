@@ -946,6 +946,34 @@ const Wizard = (() => {
 
     let ownedCandidates = colCards.filter(c => isSupertypeMatch(c, filterSupertype));
 
+    // Dynamic Missing candidates catalog from IndexedDB database and collections
+    let fallbackMissingCatalog = [];
+    const dbCatalog = API.getDbCards ? API.getDbCards() : [];
+
+    if (filterSupertype === 'pokemon') {
+      const deckPokemon = currentDeck.filter(c => c.category === 'pokemon').map(c => getCardDetails(c.name) || c);
+      const deckTypes = [...new Set(deckPokemon.flatMap(p => p.types || []))];
+
+      const dbPokemon = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('pok'));
+      const matchingTypes = dbPokemon.filter(c => (c.types || []).some(t => deckTypes.includes(t)));
+
+      const familyCandidates = [];
+      deckPokemon.forEach(p => {
+        if (p.evolvesFrom) {
+          const match = dbPokemon.find(c => (c.name || '').toLowerCase() === p.evolvesFrom.toLowerCase());
+          if (match) familyCandidates.push(match);
+        }
+      });
+
+      fallbackMissingCatalog = [...familyCandidates, ...matchingTypes, ...dbPokemon].slice(0, 50);
+    } else if (filterSupertype === 'energy') {
+      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('energ')).slice(0, 20);
+    } else {
+      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('train')).slice(0, 30);
+    }
+
+    let missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0 && !alreadyAdded.has(c.name.toLowerCase()));
+
     if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
       ownedCandidates = ownedCandidates.filter(c => matchesStageOrRoleFilter(c, state.stageFilter));
       missingCandidates = missingCandidates.filter(c => matchesStageOrRoleFilter(c, state.stageFilter));
@@ -962,6 +990,13 @@ const Wizard = (() => {
       ownedCandidates = ownedCandidates.filter(isElemMatch);
       missingCandidates = missingCandidates.filter(isElemMatch);
     }
+
+    const ownedScored = ownedCandidates.map(c => {
+      const compat = calculateCompatibility(c, currentDeck);
+      return { ...c, score: compat.score, reason: compat.reason };
+    }).sort((a, b) => b.score - a.score);
+
+    const topOwned = ownedScored.slice(0, 50);
 
     const missingScored = missingCandidates.map(c => {
       const compat = calculateCompatibility(c, currentDeck);
