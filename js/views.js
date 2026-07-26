@@ -631,6 +631,7 @@ const Collection = (() => {
       return Object.values(data).find(c => c.name.toLowerCase() === target);
     },
 
+    getCards() { return Object.values(data); },
     render,
     getCurrentName() { return currentCollectionName; },
     setCurrentName(name) { currentCollectionName = name || ''; renderSavedCollections(); }
@@ -914,10 +915,16 @@ const Wizard = (() => {
     const alreadyAdded = new Set(currentDeck.map(c => c.name.toLowerCase()));
 
     // Filter collection cards
-    let ownedCandidates = colCards;
-    if (filterSupertype === 'pokemon') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Pok'));
-    else if (filterSupertype === 'energy') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Energ'));
-    else if (filterSupertype === 'trainer') ownedCandidates = colCards.filter(c => (c.supertype || '').includes('Train'));
+    const isSupertypeMatch = (c, type) => {
+      const details = getCardDetails(c.name) || c;
+      const supertype = (details.supertype || c.supertype || c.category || '').toLowerCase();
+      if (type === 'pokemon') return supertype.includes('pok') || (!supertype.includes('train') && !supertype.includes('energ'));
+      if (type === 'energy') return supertype.includes('energ');
+      if (type === 'trainer') return supertype.includes('train');
+      return true;
+    };
+
+    let ownedCandidates = colCards.filter(c => isSupertypeMatch(c, filterSupertype));
 
     if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
       ownedCandidates = ownedCandidates.filter(c => matchesStageOrRoleFilter(c, state.stageFilter));

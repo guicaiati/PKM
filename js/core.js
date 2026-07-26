@@ -819,17 +819,30 @@ const API = (() => {
 
     autocomplete(partial) {
       if (!partial || partial.length < 2) return [];
+      const q = partial.toLowerCase();
+      const results = [];
+      const seen = new Set();
+
+      // 1. Search in User Collection first so owned cards like Cinderace always appear
+      if (typeof Collection !== 'undefined' && Collection.getCards) {
+        const userCards = Collection.getCards();
+        userCards.forEach(c => {
+          if (c.name && c.name.toLowerCase().includes(q) && !seen.has(c.name)) {
+            seen.add(c.name);
+            results.push(c.name);
+          }
+        });
+      }
+
+      // 2. Search in IndexedDB database
       if (dbReady) {
-        const q = partial.toLowerCase();
-        const results = [];
         let lo = 0, hi = sortedNames.length;
         while (lo < hi) {
           const mid = (lo + hi) >> 1;
           if (sortedNames[mid].toLowerCase().localeCompare(q) < 0) lo = mid + 1;
           else hi = mid;
         }
-        const seen = new Set();
-        for (let i = lo; i < sortedNames.length && results.length < 8; i++) {
+        for (let i = lo; i < sortedNames.length && results.length < 12; i++) {
           if (!sortedNames[i].toLowerCase().includes(q)) break;
           if (!seen.has(sortedNames[i])) {
             seen.add(sortedNames[i]);
@@ -838,9 +851,14 @@ const API = (() => {
         }
         return results;
       }
-      return fetchJSON(`${BASE}/cards?q=name:${encodeURIComponent(partial)}&pageSize=5&select=name`)
-        .then(d => [...new Set((d.data || []).map(c => c.name))])
-        .catch(() => []);
+
+      return fetchJSON(`${BASE}/cards?q=name:${encodeURIComponent(partial)}&pageSize=8&select=name`)
+        .then(d => {
+          const apiNames = (d.data || []).map(c => c.name);
+          apiNames.forEach(n => { if (!seen.has(n)) { seen.add(n); results.push(n); } });
+          return results;
+        })
+        .catch(() => results);
     },
 
     fetchThumb(cardName) {
