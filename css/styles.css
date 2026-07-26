@@ -995,6 +995,14 @@ button.ghost:hover, label.ghost:hover {
   border-top-color: var(--dragon) !important;
 }
 
+.t-trainer {
+  border-top-color: var(--holo-c) !important;
+}
+
+.t-energy {
+  border-top-color: var(--holo-a) !important;
+}
+
 /* TCG Symbol Font Variants */
 .tcg-sym.type-icon {
   width: 1.2em;

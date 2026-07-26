@@ -1019,9 +1019,13 @@ const UI = (() => {
     return enName;
   }
 
-  function typeClass(types) {
-    const t = types && types[0];
-    return TYPE_BORDER[t] || '';
+  function typeClass(card) {
+    if (!card) return 't-colorless';
+    const supertype = card.supertype || card.category || '';
+    if (supertype === 'Trainer') return 't-trainer';
+    if (supertype === 'Energy') return 't-energy';
+    const t = card.types && card.types[0];
+    return TYPE_BORDER[t] || 't-colorless';
   }
 
   async function loadCachedImage(imgEl, cardId, apiUrl) {
@@ -1051,7 +1055,7 @@ const UI = (() => {
 
     renderCard(card, opts = {}) {
       const div = document.createElement('div');
-      div.className = 'pkcard ' + typeClass(card.types);
+      div.className = 'pkcard ' + typeClass(card);
       let qtyHTML = '';
       if (opts.showQty) {
         qtyHTML = `
