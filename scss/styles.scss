@@ -412,8 +412,55 @@ button, label {
     white-space: nowrap;
   }
 
-  .col-name { font-weight: 600; }
+  .col-name { font-weight: 600; overflow: visible; }
   .col-type { font-size: 12px; }
+
+.card-thumb-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+
+  .card-row-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.card-mini-thumb {
+  width: 28px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+  position: relative;
+  cursor: zoom-in;
+
+  &:hover {
+    transform: scale(3.2) translateY(-2px);
+    z-index: 999;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+    border-color: var(--holo-a);
+  }
+}
+
+.card-mini-placeholder {
+  width: 28px;
+  height: 38px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
   .col-stage { font-size: 11px; }
 
   .col-qty {

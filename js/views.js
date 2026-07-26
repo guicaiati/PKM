@@ -754,7 +754,7 @@ const Wizard = (() => {
     const fromDb = API.findCardInDb ? API.findCardInDb(name) : null;
     if (fromDb) return fromDb;
 
-    return { name, supertype: 'Pokémon', subtypes: ['Basic'], evolvesFrom: '' };
+    return null;
   }
 
   function getEvolutionBase(card) {
@@ -1184,7 +1184,7 @@ const Wizard = (() => {
     if (name.includes('fire') || name.includes('fuego')) return 'Fire';
     if (name.includes('water') || name.includes('agua')) return 'Water';
     if (name.includes('grass') || name.includes('planta')) return 'Grass';
-    if (name.includes('light') || name.includes('electr') || name.includes('rayo')) return 'Lightning';
+    if (name.includes('light') || name.includes('electr') || name.includes('rayo') || name.includes('relámpago') || name.includes('relampago')) return 'Lightning';
     if (name.includes('psych') || name.includes('psí') || name.includes('psi')) return 'Psychic';
     if (name.includes('fight') || name.includes('lucha')) return 'Fighting';
     if (name.includes('dark') || name.includes('oscu')) return 'Darkness';
@@ -1259,6 +1259,7 @@ const Wizard = (() => {
 
   function renderCardRow(c) {
     const card = getCardDetails(c.name) || c;
+    const imgUrl = card.imageUrl || (card.images && (card.images.small || card.images.large)) || c.imageUrl || '';
     const supertype = (card.supertype || c.category || '').toLowerCase();
     const isTrainer = supertype.includes('train') || c.category === 'trainer';
     const isEnergy = supertype.includes('energ') || c.category === 'energy';
@@ -1289,9 +1290,11 @@ const Wizard = (() => {
     const rowClass = evoCheck.valid ? '' : 'row-evo-warning';
     const warningBtn = evoCheck.valid ? '' : `<button type="button" class="ghost info-warn-btn" title="${escapeHtml(evoCheck.warning)}" onclick="UI.toast('${escapeHtml(evoCheck.warning)}', 'error')"><span class="warn-icon">⚠️</span></button>`;
 
+    const thumbHtml = imgUrl ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(c.name)}" class="card-mini-thumb" loading="lazy" />` : `<span class="card-mini-placeholder">🃏</span>`;
+
     return `
     <tr data-id="${c.id}" class="${rowClass}">
-      <td class="col-name">${escapeHtml(c.name)} ${warningBtn}</td>
+      <td class="col-name"><div class="card-thumb-wrap">${thumbHtml}<span class="card-row-name">${escapeHtml(c.name)}</span> ${warningBtn}</div></td>
       <td class="col-type">${typeBadge}</td>
       <td class="col-stage">${stageBadge}</td>
       <td class="col-qty"><button type="button" class="ghost wizard-qty" data-qty="-1" data-id="${c.id}">−</button> <span class="qty-num">${c.count}</span> <button type="button" class="ghost wizard-qty" data-qty="1" data-id="${c.id}">+</button></td>
