@@ -860,16 +860,16 @@ const Wizard = (() => {
 
   function getStageCategory(c) {
     const card = getCardDetails(c.name) || c;
-    const subtypes = (card.subtypes || []).map(s => s.toLowerCase());
-    const evoFrom = card.evolvesFrom;
+    const subtypes = (card.subtypes || []).map(s => String(s).toLowerCase());
+    const evoFrom = (card.evolvesFrom || '').trim();
 
     if (subtypes.some(s => s.includes('ex') || s.includes('vstar') || s.includes('vmax') || s.includes('v') || s.includes('gx'))) {
       return 'ex';
     }
-    if (subtypes.some(s => s.includes('stage 2'))) {
+    if (subtypes.some(s => s.includes('stage 2') || s.includes('fase 2'))) {
       return 'stage2';
     }
-    if (subtypes.some(s => s.includes('stage 1')) || evoFrom) {
+    if (subtypes.some(s => s.includes('stage 1') || s.includes('fase 1')) || Boolean(evoFrom)) {
       return 'stage1';
     }
     return 'basic';
@@ -1084,15 +1084,15 @@ const Wizard = (() => {
   function getStageBadge(c) {
     const card = getCardDetails(c.name) || c;
     const subtypes = (card.subtypes || []).map(s => String(s).toLowerCase());
-    const evoFrom = card.evolvesFrom;
+    const evoFrom = (card.evolvesFrom || '').trim();
 
     if (subtypes.some(s => s.includes('ex') || s.includes('vstar') || s.includes('vmax') || s.includes('v'))) {
       return '<span class="stage-tag tag-ex">ex</span>';
     }
-    if (subtypes.some(s => s.includes('stage 2') || s.includes('fase 2') || s.includes('nivel 2'))) {
+    if (subtypes.some(s => s.includes('stage 2') || s.includes('fase 2'))) {
       return '<span class="stage-tag tag-stage2">Fase 2</span>';
     }
-    if (subtypes.some(s => s.includes('stage 1') || s.includes('fase 1') || s.includes('nivel 1')) || Boolean(evoFrom)) {
+    if (subtypes.some(s => s.includes('stage 1') || s.includes('fase 1')) || Boolean(evoFrom)) {
       return '<span class="stage-tag tag-stage1">Fase 1</span>';
     }
     return '<span class="stage-tag tag-basic">Básico</span>';

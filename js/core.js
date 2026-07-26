@@ -866,6 +866,8 @@ const API = (() => {
         const list = nameIndex.get(target);
         if (list && list.length > 0) return list[0];
       }
+      const exactMatch = (dbCards || []).find(c => (c.name || '').toLowerCase().trim() === target);
+      if (exactMatch) return exactMatch;
       return (dbCards || []).find(c => (c.name || '').toLowerCase().includes(target)) || null;
     },
 
