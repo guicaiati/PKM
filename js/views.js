@@ -757,6 +757,23 @@ const Wizard = (() => {
     return { name, supertype: 'Pokémon', subtypes: ['Basic'], evolvesFrom: '' };
   }
 
+  function getEvolutionBase(card) {
+    if (!card) return '';
+    let current = getCardDetails(card.name || card) || (typeof card === 'string' ? { name: card } : card);
+    let visited = new Set();
+    let name = (current.name || '').toLowerCase().trim();
+
+    while (current && current.evolvesFrom && !visited.has(name)) {
+      visited.add(name);
+      const parentName = current.evolvesFrom.trim();
+      const parentCard = getCardDetails(parentName);
+      if (!parentCard || parentCard.name.toLowerCase().trim() === name) break;
+      current = parentCard;
+      name = current.name.toLowerCase().trim();
+    }
+    return name;
+  }
+
   function isEvolutionPartner(cardA, cardB) {
     if (!cardA || !cardB) return false;
     const detailsA = getCardDetails(cardA.name || cardA) || (typeof cardA === 'string' ? { name: cardA } : cardA);
@@ -769,21 +786,15 @@ const Wizard = (() => {
     const evoA = (detailsA.evolvesFrom || '').toLowerCase().trim();
     const evoB = (detailsB.evolvesFrom || '').toLowerCase().trim();
 
-    // 1. Direct evolution link (e.g. Pupitar evolves from Larvitar)
+    // Direct evolution link (e.g. Cinderace evolves from Raboot / Raboot evolves from Scorbunny)
     if (evoA && (evoA === nameB || nameB.includes(evoA))) return true;
     if (evoB && (evoB === nameA || nameA.includes(evoB))) return true;
 
-    // 2. Shared evolution base (e.g. Pupitar and Tyranitar both belong to Larvitar)
-    if (evoA && evoB && (evoA === evoB || evoA.includes(evoB) || evoB.includes(evoA))) return true;
-
-    // If neither card evolves from anything, they are basic standalone cards and not evolution partners
-    if (!evoA && !evoB) return false;
-
-    // 3. Strict prefix family check for root names of length >= 5 only when at least one evolvesFrom exists
-    const baseA = nameA.replace(/\s*(ex|vstar|vmax|v|gx)\s*/gi, '').trim();
-    const baseB = nameB.replace(/\s*(ex|vstar|vmax|v|gx)\s*/gi, '').trim();
-    if ((evoA || evoB) && baseA.length >= 5 && baseB.length >= 5 && baseA.slice(0, 5) === baseB.slice(0, 5)) {
-      return true;
+    // Chain evolution base link (e.g. Cinderace, Raboot, and Scorbunny all trace to Scorbunny base)
+    if (evoA || evoB) {
+      const baseA = getEvolutionBase(detailsA);
+      const baseB = getEvolutionBase(detailsB);
+      if (baseA && baseB && baseA === baseB) return true;
     }
 
     return false;
