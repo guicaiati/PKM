@@ -546,6 +546,7 @@ const Collection = (() => {
 
     async init() {
       data = await Storage.loadCollection();
+      render();
 
       document.getElementById('collectionFilterType')?.addEventListener('change', render);
       document.getElementById('collectionFilterElement')?.addEventListener('change', render);
