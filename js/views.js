@@ -980,13 +980,7 @@ const Wizard = (() => {
     }
 
     if (state.elementFilter && state.elementFilter !== 'all' && (filterSupertype === 'pokemon' || filterSupertype === 'energy')) {
-      const isElemMatch = (cardItem) => {
-        const details = getCardDetails(cardItem.name) || cardItem;
-        const types = details.types || cardItem.types || [];
-        if (types.includes(state.elementFilter)) return true;
-        if (cardItem.energyType === state.elementFilter) return true;
-        return false;
-      };
+      const isElemMatch = (cardItem) => detectCardType(cardItem) === state.elementFilter;
       ownedCandidates = ownedCandidates.filter(isElemMatch);
       missingCandidates = missingCandidates.filter(isElemMatch);
     }
@@ -1006,8 +1000,7 @@ const Wizard = (() => {
     const topMissing = missingScored.slice(0, 6);
 
     const renderChip = (c) => {
-      const card = getCardDetails(c.name) || c;
-      const typeRaw = (card.types && card.types[0]) || c.energyType || 'Colorless';
+      const typeRaw = detectCardType(c);
       const typeVarMap = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
       const typeCharMap = { Fire: 'r', Water: 'w', Grass: 'g', Lightning: 'l', Psychic: 'p', Fighting: 'f', Darkness: 'd', Metal: 'm', Colorless: 'c', Dragon: 'n', Fairy: 'y' };
 
@@ -1169,9 +1162,40 @@ const Wizard = (() => {
     Colorless: { name: 'Incoloro', effective: 'Neutro (Adaptable)', weakness: 'Lucha 👊', synergy: 'Todos los elementos (Pidgeot ex, Archeops, Lugia VSTAR)' }
   };
 
-  function getTypeBadge(c) {
+  function detectCardType(c) {
+    if (!c) return 'Colorless';
     const card = getCardDetails(c.name) || c;
-    const typeRaw = (card.types && card.types[0]) || c.energyType || 'Colorless';
+    if (card.types && card.types.length > 0) return card.types[0];
+
+    if (c.energyType) {
+      const e = String(c.energyType).toLowerCase();
+      if (e.includes('fire') || e.includes('fuego')) return 'Fire';
+      if (e.includes('water') || e.includes('agua')) return 'Water';
+      if (e.includes('grass') || e.includes('planta')) return 'Grass';
+      if (e.includes('light') || e.includes('electr') || e.includes('rayo')) return 'Lightning';
+      if (e.includes('psych') || e.includes('psí') || e.includes('psi')) return 'Psychic';
+      if (e.includes('fight') || e.includes('lucha')) return 'Fighting';
+      if (e.includes('dark') || e.includes('oscu')) return 'Darkness';
+      if (e.includes('metal')) return 'Metal';
+      if (e.includes('drag')) return 'Dragon';
+    }
+
+    const name = String(card.name || c.name || '').toLowerCase();
+    if (name.includes('fire') || name.includes('fuego')) return 'Fire';
+    if (name.includes('water') || name.includes('agua')) return 'Water';
+    if (name.includes('grass') || name.includes('planta')) return 'Grass';
+    if (name.includes('light') || name.includes('electr') || name.includes('rayo')) return 'Lightning';
+    if (name.includes('psych') || name.includes('psí') || name.includes('psi')) return 'Psychic';
+    if (name.includes('fight') || name.includes('lucha')) return 'Fighting';
+    if (name.includes('dark') || name.includes('oscu')) return 'Darkness';
+    if (name.includes('metal')) return 'Metal';
+    if (name.includes('dragon') || name.includes('dragón')) return 'Dragon';
+
+    return 'Colorless';
+  }
+
+  function getTypeBadge(c) {
+    const typeRaw = detectCardType(c);
     const matchup = META_TYPE_MATCHUPS[typeRaw] || { name: typeRaw, effective: 'Variado', weakness: 'Variada', synergy: 'Incoloro ⭐' };
     const tooltipText = `⚡ COMPATIBILIDAD Y META (${matchup.name}):\n• Ventaja contra: ${matchup.effective}\n• Debilidad contra: ${matchup.weakness}\n• Sinergia de Mazo: ${matchup.synergy}`;
 
