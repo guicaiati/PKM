@@ -282,6 +282,19 @@ button, label {
   &.active { background: var(--holo-b); color: var(--bg); border-color: var(--holo-b); font-weight: 600; }
 }
 
+.type-tag.type-meta-hover {
+  cursor: help;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+
+  &:hover {
+    transform: scale(1.15);
+    filter: brightness(1.25);
+    box-shadow: 0 0 10px rgba(56, 224, 123, 0.5);
+  }
+}
+
 /* Pokémon Cards Grid */
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-top: 16px; }
 

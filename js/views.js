@@ -1156,11 +1156,27 @@ const Wizard = (() => {
     return '<span class="stage-tag tag-basic">Básico</span>';
   }
 
+  const META_TYPE_MATCHUPS = {
+    Fire: { name: 'Fuego', effective: 'Planta 🍃, Metal ⚙️', weakness: 'Agua 💧', synergy: 'Incoloro ⭐, Dragón 🐲 (Armarouge, Charizard ex, Pidgeot ex)' },
+    Water: { name: 'Agua', effective: 'Fuego 🔥, Lucha 👊', weakness: 'Rayo ⚡, Planta 🍃', synergy: 'Incoloro ⭐ (Chien-Pao ex, Baxcalibur, Blastoise ex)' },
+    Grass: { name: 'Planta', effective: 'Agua 💧, Oscuridad 🌙', weakness: 'Fuego 🔥', synergy: 'Incoloro ⭐ (Teal Mask Ogerpon ex, Venusaur ex)' },
+    Lightning: { name: 'Rayo', effective: 'Agua 💧, Incoloro ⭐', weakness: 'Lucha 👊', synergy: 'Metal ⚙️, Incoloro ⭐ (Miraidon ex, Iron Hands ex)' },
+    Psychic: { name: 'Psíquico', effective: 'Lucha 👊, Oscuridad 🌙', weakness: 'Oscuridad 🌙, Metal ⚙️', synergy: 'Incoloro ⭐, Dragón 🐲 (Gardevoir ex, Alakazam ex)' },
+    Fighting: { name: 'Lucha', effective: 'Rayo ⚡, Oscuridad 🌙, Incoloro ⭐', weakness: 'Planta 🍃, Psíquico 🔮', synergy: 'Incoloro ⭐ (Terapagos ex, Ting-Lu ex)' },
+    Darkness: { name: 'Oscuridad', effective: 'Psíquico 🔮', weakness: 'Planta 🍃, Lucha 👊', synergy: 'Fuego 🔥, Incoloro ⭐ (Roaring Moon ex, Darkrai)' },
+    Metal: { name: 'Metal', effective: 'Hada 🌸, Psíquico 🔮', weakness: 'Fuego 🔥', synergy: 'Rayo ⚡, Incoloro ⭐ (Gholdengo ex, Dialga VSTAR)' },
+    Dragon: { name: 'Dragón', effective: 'Variado / Multi-tipo', weakness: 'Sin debilidad en Estándar', synergy: 'Fuego 🔥, Planta 🍃, Psíquico 🔮 (Regidrago VSTAR, Dragapult ex)' },
+    Colorless: { name: 'Incoloro', effective: 'Neutro (Adaptable)', weakness: 'Lucha 👊', synergy: 'Todos los elementos (Pidgeot ex, Archeops, Lugia VSTAR)' }
+  };
+
   function getTypeBadge(c) {
     const card = getCardDetails(c.name) || c;
     const typeRaw = (card.types && card.types[0]) || c.energyType || 'Colorless';
+    const matchup = META_TYPE_MATCHUPS[typeRaw] || { name: typeRaw, effective: 'Variado', weakness: 'Variada', synergy: 'Incoloro ⭐' };
+    const tooltipText = `⚡ COMPATIBILIDAD Y META (${matchup.name}):\n• Ventaja contra: ${matchup.effective}\n• Debilidad contra: ${matchup.weakness}\n• Sinergia de Mazo: ${matchup.synergy}`;
+
     const symbolHtml = UI.getEnergySymbol ? UI.getEnergySymbol(typeRaw) : escapeHtml(typeRaw);
-    return `<span class="type-tag">${symbolHtml}</span>`;
+    return `<span class="type-tag type-meta-hover" title="${escapeHtml(tooltipText)}">${symbolHtml}</span>`;
   }
 
   function checkEvolutionLineValidity(c, currentDeckCards = state.cards) {
