@@ -1358,7 +1358,11 @@ const UI = (() => {
 
       if (hp) html += '<div class="cd-stat"><span class="cd-label">HP</span><span class="cd-value">' + hp + '</span></div>';
       if (rarity) html += '<div class="cd-stat"><span class="cd-label">Rareza</span><span class="cd-value">' + (RARITY_ES[rarity] || rarity) + '</span></div>';
-      if (evoFrom) html += '<div class="cd-stat"><span class="cd-label">Evoluciona de</span><span class="cd-value">' + evoFrom + '</span></div>';
+      if (evoFrom) {
+        html += '<div class="cd-stat"><span class="cd-label">Evoluciona de</span><span class="cd-value">' + evoFrom + '</span></div>';
+      } else {
+        html += '<div class="cd-stat"><span class="cd-label">Evolución</span><span class="cd-value">Sin pre-evolución (Básico)</span></div>';
+      }
       if (retreatN > 0) html += '<div class="cd-stat"><span class="cd-label">Coste de retirada</span><span class="cd-value">' + '<span class="cost-colorless"><span class="tcg-sym">c</span></span>'.repeat(retreatN) + '</span></div>';
 
       if (abilities.length > 0) {

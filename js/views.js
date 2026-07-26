@@ -1083,17 +1083,16 @@ const Wizard = (() => {
 
   function getStageBadge(c) {
     const card = getCardDetails(c.name) || c;
-    const name = (card.name || '').toLowerCase();
-    const subtypes = (card.subtypes || []).map(s => s.toLowerCase());
+    const subtypes = (card.subtypes || []).map(s => String(s).toLowerCase());
     const evoFrom = card.evolvesFrom;
 
     if (subtypes.some(s => s.includes('ex') || s.includes('vstar') || s.includes('vmax') || s.includes('v'))) {
       return '<span class="stage-tag tag-ex">ex</span>';
     }
-    if (subtypes.some(s => s.includes('stage 2')) || name.includes('dragonite') || name.includes('charizard') || name.includes('gardevoir') || name.includes('pidgeot')) {
+    if (subtypes.some(s => s.includes('stage 2') || s.includes('fase 2') || s.includes('nivel 2'))) {
       return '<span class="stage-tag tag-stage2">Nivel 2</span>';
     }
-    if (subtypes.some(s => s.includes('stage 1')) || evoFrom || name.includes('dragonair') || name.includes('charmeleon') || name.includes('kirlia') || name.includes('raichu') || name.includes('flaaffy')) {
+    if (subtypes.some(s => s.includes('stage 1') || s.includes('fase 1') || s.includes('nivel 1')) || Boolean(evoFrom)) {
       return '<span class="stage-tag tag-stage1">Nivel 1</span>';
     }
     return '<span class="stage-tag tag-basic">Básico</span>';
