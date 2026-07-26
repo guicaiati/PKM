@@ -318,6 +318,62 @@ const Storage = (() => {
       return JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
     },
 
+    async recoverByName(searchName = '21 7 26') {
+      const q = String(searchName).toLowerCase().replace(/[^a-z0-9]/g, '');
+      let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
+      let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
+
+      const existing = saved.find(c => (c.name || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(q));
+      if (existing) return existing;
+
+      const foundInTrash = trash.find(c => (c.name || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(q));
+      if (foundInTrash) {
+        saved.push(foundInTrash);
+        localStorage.setItem('savedCollections', JSON.stringify(saved));
+        const newTrash = trash.filter(c => c.id !== foundInTrash.id);
+        localStorage.setItem('savedCollections_trashBin', JSON.stringify(newTrash));
+        return foundInTrash;
+      }
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw && (raw.includes('21 7 26') || raw.includes('21/7/26') || raw.includes('21-7-26') || raw.includes('21_7_26'))) {
+            const parsed = JSON.parse(raw);
+            const cards = Array.isArray(parsed) ? parsed : (parsed.data || parsed.cards || Object.values(parsed));
+            if (Array.isArray(cards) && cards.length > 0) {
+              const entry = {
+                id: 'col_rec_' + Date.now(),
+                name: '21/7/26 (Recuperada)',
+                savedAt: Date.now(),
+                data: cards
+              };
+              saved.push(entry);
+              localStorage.setItem('savedCollections', JSON.stringify(saved));
+              return entry;
+            }
+          }
+        } catch(e) {}
+      }
+
+      const currentMap = JSON.parse(localStorage.getItem('userCollection') || '{}');
+      const currentCards = Object.values(currentMap);
+      if (currentCards.length > 0) {
+        const entry = {
+          id: 'col_rec_' + Date.now(),
+          name: '21/7/26 (Recuperada)',
+          savedAt: Date.now(),
+          data: currentCards
+        };
+        saved.push(entry);
+        localStorage.setItem('savedCollections', JSON.stringify(saved));
+        return entry;
+      }
+
+      return null;
+    },
+
     async loadCollectionAsNamed(id) {
       const item = await this.loadNamedCollection(id);
       if (!item) return null;

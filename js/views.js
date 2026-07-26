@@ -1768,12 +1768,14 @@ const Saved = (() => {
 
       return `
         <div class="saved-card" data-id="${c.id}">
-          <div class="saved-card-header">
-            <div class="saved-card-name">${escapeHtml(c.name)} ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Actual)</span>' : ''}</div>
+          <div>
+            <div class="saved-card-header">
+              <div class="saved-card-name">📂 ${escapeHtml(c.name)} ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Actual)</span>' : ''}</div>
+            </div>
+            <div class="saved-card-stats"><span class="sc-stat">✨ ${total} cartas</span></div>
+            ${matchesHtml}
           </div>
-          <div class="saved-card-stats"><span class="sc-stat">${total} cartas</span></div>
-          ${matchesHtml}
-          <div class="saved-card-actions" style="margin-top:10px;">
+          <div class="saved-card-actions">
             <button class="action saved-card-load">${isCurrent ? 'Actualizar' : 'Cargar'}</button>
             ${!isCurrent ? '<button class="ghost saved-card-delete">Eliminar</button>' : ''}
           </div>
