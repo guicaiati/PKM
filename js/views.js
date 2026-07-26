@@ -1045,17 +1045,17 @@ const Wizard = (() => {
     const stageFiltersHtml = (filterSupertype === 'pokemon' || filterSupertype === 'energy') ? `
       <div class="element-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px;">
         <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Tipo:</span>
-        <button type="button" class="type-filter-btn ${(!state.elementFilter || state.elementFilter === 'all') ? 'active' : ''}" data-elem="all" title="Todos los elementos">★</button>
-        <button type="button" class="type-filter-btn cost-typed cost-fire ${state.elementFilter === 'Fire' ? 'active' : ''}" data-elem="Fire" title="Fuego"><span class="tcg-sym">r</span></button>
-        <button type="button" class="type-filter-btn cost-typed cost-water ${state.elementFilter === 'Water' ? 'active' : ''}" data-elem="Water" title="Agua"><span class="tcg-sym">w</span></button>
-        <button type="button" class="type-filter-btn cost-typed cost-grass ${state.elementFilter === 'Grass' ? 'active' : ''}" data-elem="Grass" title="Planta"><span class="tcg-sym">g</span></button>
-        <button type="button" class="type-filter-btn cost-typed cost-electric ${state.elementFilter === 'Lightning' ? 'active' : ''}" data-elem="Lightning" title="Rayo"><span class="tcg-sym">l</span></button>
-        <button type="button" class="type-filter-btn cost-typed cost-psychic ${state.elementFilter === 'Psychic' ? 'active' : ''}" data-elem="Psychic" title="Psíquico"><span class="tcg-sym">p</span></button>
-        <button type="button" class="type-filter-btn cost-typed cost-fighting ${state.elementFilter === 'Fighting' ? 'active' : ''}" data-elem="Fighting" title="Lucha"><span class="tcg-sym">f</span></button>
-        <button type="button" class="type-filter-btn cost-typed cost-darkness ${state.elementFilter === 'Darkness' ? 'active' : ''}" data-elem="Darkness" title="Oscuridad"><span class="tcg-sym">d</span></button>
-        <button type="button" class="type-filter-btn cost-typed cost-metal ${state.elementFilter === 'Metal' ? 'active' : ''}" data-elem="Metal" title="Metal"><span class="tcg-sym">m</span></button>
-        <button type="button" class="type-filter-btn cost-typed cost-dragon ${state.elementFilter === 'Dragon' ? 'active' : ''}" data-elem="Dragon" title="Dragón"><span class="tcg-sym">n</span></button>
-        <button type="button" class="type-filter-btn cost-colorless ${state.elementFilter === 'Colorless' ? 'active' : ''}" data-elem="Colorless" title="Incoloro"><span class="tcg-sym">c</span></button>
+        <button type="button" class="filter-chip wiz-stage-btn ${(!state.elementFilter || state.elementFilter === 'all') ? 'active' : ''}" data-elem="all">Todos</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Fire' ? 'active' : ''}" data-elem="Fire"><span class="chip-type-circle cost-typed cost-fire"><span class="tcg-sym">r</span></span> Fuego</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Water' ? 'active' : ''}" data-elem="Water"><span class="chip-type-circle cost-typed cost-water"><span class="tcg-sym">w</span></span> Agua</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Grass' ? 'active' : ''}" data-elem="Grass"><span class="chip-type-circle cost-typed cost-grass"><span class="tcg-sym">g</span></span> Planta</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Lightning' ? 'active' : ''}" data-elem="Lightning"><span class="chip-type-circle cost-typed cost-electric"><span class="tcg-sym">l</span></span> Rayo</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Psychic' ? 'active' : ''}" data-elem="Psychic"><span class="chip-type-circle cost-typed cost-psychic"><span class="tcg-sym">p</span></span> Psíquico</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Fighting' ? 'active' : ''}" data-elem="Fighting"><span class="chip-type-circle cost-typed cost-fighting"><span class="tcg-sym">f</span></span> Lucha</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Darkness' ? 'active' : ''}" data-elem="Darkness"><span class="chip-type-circle cost-typed cost-darkness"><span class="tcg-sym">d</span></span> Oscuridad</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Metal' ? 'active' : ''}" data-elem="Metal"><span class="chip-type-circle cost-typed cost-metal"><span class="tcg-sym">m</span></span> Metal</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Dragon' ? 'active' : ''}" data-elem="Dragon"><span class="chip-type-circle cost-typed cost-dragon"><span class="tcg-sym">n</span></span> Dragón</button>
+        <button type="button" class="filter-chip wiz-stage-btn ${state.elementFilter === 'Colorless' ? 'active' : ''}" data-elem="Colorless"><span class="chip-type-circle cost-colorless"><span class="tcg-sym">c</span></span> Incoloro</button>
       </div>
       ${filterSupertype === 'pokemon' ? `
       <div class="stage-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 10px;">
