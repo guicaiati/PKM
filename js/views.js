@@ -1503,6 +1503,17 @@ const Wizard = (() => {
       UI.toast(res.msg, res.ok ? 'success' : 'info');
       if(res.ok) render();
     });
+    document.getElementById('wizClearBtn')?.addEventListener('click', ()=>{
+      if(state.cards.length === 0){
+        UI.toast('El mazo ya está vacío', 'info');
+        return;
+      }
+      if(confirm('¿Vaciar todas las cartas del mazo actual?')){
+        state.cards = [];
+        render();
+        UI.toast('Mazo vaciado', 'success');
+      }
+    });
     render();
   }
 
