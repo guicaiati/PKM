@@ -632,6 +632,7 @@ const Collection = (() => {
     },
 
     getCards() { return Object.values(data); },
+    getMap() { return data; },
     render,
     getCurrentName() { return currentCollectionName; },
     setCurrentName(name) { currentCollectionName = name || ''; renderSavedCollections(); }
@@ -672,7 +673,11 @@ const Wizard = (() => {
   let nextId = 1;
 
   function getCollectionCards() {
-    try { return Object.values(Collection.getMap()); } catch(e) { return []; }
+    try {
+      if (Collection.getCards) return Collection.getCards();
+      if (Collection.getMap) return Object.values(Collection.getMap());
+      return [];
+    } catch(e) { return []; }
   }
 
   function countOwned(name) {
