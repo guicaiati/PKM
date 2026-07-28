@@ -159,12 +159,8 @@
   .filter-chip.active { background: rgba(139,127,232,.14); border-color: #8B7FE8; color: #EDEDF2; }
 
   /* ===== Type dots / cost icons (fusión de cost-typed) ===== */
-  .type-dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #0B0D12; flex-shrink: 0; }
-  .type-dot.fire { background: #E5533D; } .type-dot.water { background: #3D8BE5; } .type-dot.grass { background: #3DAE5C; }
-  .type-dot.lightning { background: #EF9F27; } .type-dot.psychic { background: #B15FE0; } .type-dot.fighting { background: #C97A3D; }
-  .type-dot.darkness { background: #6B6F84; } .type-dot.metal { background: #8C97A6; }
-  .type-dot.dragon { background: #8B7FE8; } .type-dot.colorless { background: #9AA0AC; }
-  .type-dot.sm { width: 18px; height: 18px; font-size: 9px; }
+  .type-dot { display: inline-flex; align-items: center; justify-content: center; font-weight: 700; color: inherit; flex-shrink: 0; }
+  .type-dot.sm { font-size: 12px; }
 
   /* ===== Card grid (Buscar / Colección) ===== */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 6px; }

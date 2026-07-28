@@ -306,64 +306,18 @@
  }
 
  /* ===== Type dots / cost icons (fusión de cost-typed) ===== */
- .type-dot {
-     width: 24px;
-     height: 24px;
-     border-radius: 50%;
-     display: inline-flex;
-     align-items: center;
-     justify-content: center;
-     font-size: 12px;
-     font-weight: 700;
-     color: #0B0D12;
-     flex-shrink: 0;
- }
-
- .type-dot.fire {
-     background: var(--fire);
- }
-
- .type-dot.water {
-     background: var(--water);
- }
-
- .type-dot.grass {
-     background: var(--grass);
- }
-
- .type-dot.lightning {
-     background: var(--lightning);
- }
-
- .type-dot.psychic {
-     background: var(--psychic);
- }
-
- .type-dot.fighting {
-     background: var(--fighting);
- }
-
-.type-dot.darkness {
-  background: var(--darkness);
+.type-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: inherit;
+  flex-shrink: 0;
 }
 
-.type-dot.metal {
-  background: var(--metal);
+.type-dot.sm {
+  font-size: 12px;
 }
-
-.type-dot.dragon {
-  background: var(--dragon);
-}
-
- .type-dot.colorless {
-     background: var(--colorless);
- }
-
- .type-dot.sm {
-     width: 18px;
-     height: 18px;
-     font-size: 9px;
- }
 
  /* ===== Card grid (Buscar / Colección) ===== */
  .grid {
