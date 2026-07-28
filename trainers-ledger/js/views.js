@@ -1001,27 +1001,6 @@ const Wizard = (() => {
     if (subtypes.some(s => s.includes('stage 1') || s.includes('fase 1')) || Boolean(evoFrom)) {
       return 'stage1';
     }
-
-    const name = (card.name || '').trim();
-    if (name) {
-      const dbCard = typeof API !== 'undefined' && API.findCardInDb ? API.findCardInDb(name) : null;
-      if (dbCard && dbCard !== card) {
-        const dbRaw = dbCard.subtypes || [];
-        const dbSubtypes = (typeof dbRaw === 'string' ? dbRaw.split(',').map(s => s.trim()) : dbRaw).map(s => String(s).toLowerCase());
-        const dbEvo = (dbCard.evolvesFrom || '').trim();
-        if (dbSubtypes.some(s => s.includes('stage 2') || s.includes('fase 2'))) return 'stage2';
-        if (dbSubtypes.some(s => s.includes('stage 1') || s.includes('fase 1')) || Boolean(dbEvo)) return 'stage1';
-      }
-      const baseGuess = name.replace(/ ?[2-9]$/, '').replace(/ ?ex$/i, '').replace(/ ?v(max|star)?$/i, '').replace(/ ?gx$/i, '').trim();
-      if (baseGuess && baseGuess !== name) {
-        const baseCard = typeof API !== 'undefined' && API.findCardInDb ? API.findCardInDb(baseGuess) : null;
-        if (baseCard) {
-          const baseSubtypes = (typeof baseCard.subtypes === 'string' ? baseCard.subtypes.split(',').map(s => s.trim()) : (baseCard.subtypes || [])).map(s => String(s).toLowerCase());
-          if (baseSubtypes.some(s => s.includes('basic'))) return 'stage1';
-        }
-      }
-    }
-
     return 'basic';
   }
 
