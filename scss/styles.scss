@@ -196,99 +196,96 @@ button, label {
   gap: 6px;
 }
 
-.smart-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 8px;
+.pick-chip {
   text-align: left;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--text);
+  font-family: var(--body);
+  cursor: pointer;
+  font-size: 13px;
+  transition: .15s ease;
 
-  .chip-left-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+  &:hover {
+    border-color: var(--border-strong);
   }
 
-  .chip-card-thumb {
-    width: 24px;
-    height: 33px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid var(--line);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-    flex-shrink: 0;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      transform: scale(2.8) translateY(-2px);
-      z-index: 999;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
-    }
-  }
-
-  .chip-type-circle {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-    line-height: 1;
-
-    .tcg-sym {
-      margin-right: 0;
-      font-size: 13px;
-    }
+  &.active {
+    border-color: var(--draw);
+    background: var(--draw-dim);
   }
 
   .chip-body {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
+    gap: 3px;
+    min-width: 0;
   }
 
   .chip-top {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
     gap: 6px;
-    width: 100%;
-  }
-
-  .chip-name {
+    font-size: 13px;
     font-weight: 600;
-    font-size: 12px;
-    line-height: 1.2;
   }
 
   .chip-owned {
-    font-size: 10px;
-    font-weight: 700;
-    color: #38e07b;
-    background: rgba(56, 224, 123, 0.18);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-family: var(--mono);
-    line-height: 1.1;
+    font-size: 10.5px;
+    color: var(--text-faint);
+    font-weight: 500;
   }
 
   .chip-added {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--holo-b);
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--draw);
   }
 
   .chip-reason {
-    font-size: 10px;
-    opacity: 0.75;
-    font-family: var(--mono);
-    margin-top: 1px;
-    line-height: 1;
+    font-size: 11.5px;
+    color: var(--text-dim);
   }
+
+  &.missing {
+    border-style: dashed;
+    opacity: .8;
+  }
+}
+
+.type-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0B0D12;
+  flex-shrink: 0;
+}
+
+.type-dot.fire { background: var(--fire); }
+.type-dot.water { background: var(--water); }
+.type-dot.grass { background: var(--grass); }
+.type-dot.lightning { background: var(--lightning); }
+.type-dot.psychic { background: var(--psychic); }
+.type-dot.fighting { background: var(--fighting); }
+.type-dot.darkness { background: var(--darkness); color: #fff; }
+.type-dot.metal { background: var(--metal); }
+.type-dot.dragon { background: var(--dragon); color: #fff; }
+.type-dot.colorless { background: var(--colorless); }
+
+.type-dot.sm {
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
 }
 
 .filter-chip {

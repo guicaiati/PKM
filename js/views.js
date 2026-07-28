@@ -1156,37 +1156,24 @@ const Wizard = (() => {
     const renderChip = (c) => {
       const typeRaw = detectCardType(c);
       const typeColorMap = { Fire: '#F87171', Water: '#38BDF8', Grass: '#4ADE80', Lightning: '#FACC15', Psychic: '#E879F9', Fighting: '#FB923C', Darkness: '#A78BFA', Metal: '#94A3B8', Colorless: '#D4D4D8', Dragon: '#FDE68A' };
-      const typeVarMap = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
-      const typeCharMap = { Fire: 'r', Water: 'w', Grass: 'g', Lightning: 'l', Psychic: 'p', Fighting: 'f', Darkness: 'd', Metal: 'm', Colorless: 'c', Dragon: 'n', Fairy: 'y' };
-      const color = typeColorMap[typeRaw] || '#D4D4D8';
-      const typeClass = typeVarMap[typeRaw] || 'colorless';
-      const typeChar = typeCharMap[typeRaw] || 'c';
-      const isColorless = typeClass === 'colorless';
+      const typeDotMap = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'lightning', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
+      const typeEmojiMap = { Fire: '🔥', Water: '💧', Grass: '🌿', Lightning: '⚡', Psychic: '🔮', Fighting: '👊', Darkness: '🌑', Metal: '⚙️', Colorless: '⭐', Dragon: '🐉', Fairy: '🧚' };
+
+      const dotClass = typeDotMap[typeRaw] || 'colorless';
+      const emoji = typeEmojiMap[typeRaw] || '⭐';
 
       const added = alreadyAdded.has(c.name.toLowerCase());
       const owned = countOwned(c.name);
 
-      const circleStyle = added ? '' : `background:transparent;border:1px solid ${color};`;
-      const symStyle = added ? '' : `color:${color};`;
-      const chipStyle = added ? `background:transparent;color:${color};border-color:${color};` : '';
-      const typeIconHtml = `<span class="chip-type-circle ${isColorless ? 'cost-colorless' : 'cost-typed cost-' + typeClass}" title="${typeRaw}"${circleStyle ? ` style="${circleStyle}"` : ''}><span class="tcg-sym"${symStyle ? ` style="${symStyle}"` : ''}>${typeChar}</span></span>`;
-
-      const imgUrl = getCardImageUrl(c);
-      const thumbHtml = typeIconHtml;
+      const extraClass = added ? 'active' : '';
       const ownedBadge = owned > 0 ? `<span class="chip-owned">Tenés ${owned}</span>` : '';
       const addedBadge = added ? `<span class="chip-added">✓</span>` : '';
-      return `<button type="button" class="filter-chip wiz-suggest-chip smart-chip ${added ? 'active' : ''}" style="${chipStyle}" data-suggest-name="${escapeHtml(c.name)}">
-        <div class="chip-left-icon">
-          ${thumbHtml}
-        </div>
-        <div class="chip-body">
-          <div class="chip-top">
-            <span class="chip-name">${escapeHtml(c.name)}</span>
-            ${ownedBadge}
-            ${addedBadge}
-          </div>
-          <span class="chip-reason" style="font-weight:lighter;">${escapeHtml(c.reason)}</span>
-        </div>
+      return `<button type="button" class="pick-chip ${extraClass}" data-suggest-name="${escapeHtml(c.name)}">
+        <span class="type-dot ${dotClass} sm">${emoji}</span>
+        <span class="chip-body">
+          <span class="chip-top">${escapeHtml(c.name)} ${ownedBadge} ${addedBadge}</span>
+          <span class="chip-reason">${escapeHtml(c.reason)}</span>
+        </span>
       </button>`;
     };
 
@@ -1850,7 +1837,7 @@ const Wizard = (() => {
       });
     });
 
-    body.querySelectorAll('.wiz-suggest-chip').forEach(chip => {
+    body.querySelectorAll('.pick-chip[data-suggest-name]').forEach(chip => {
       chip.addEventListener('click', () => {
         const name = chip.dataset.suggestName;
         let cat = state.step === 3 ? 'energy' : (state.step >= 4 && state.step <= 6) ? 'trainer' : 'pokemon';
