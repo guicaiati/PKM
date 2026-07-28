@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trainer's Ledger v2.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+   <link rel="stylesheet" href="css/styles.css">
+   <style>
+    :root {
+      --bg: #0B0D12;
+      --surface: #14161D;
+      --surface-2: #1B1E27;
+      --line: #2A2E45;
+      --text: #EDEDF2;
+      --text-dim: #8A8D9A;
+      --accent: #8B7FE8;
+      --accent-dim: rgba(139, 127, 232, .14);
+      --draw: #22B08A;
+      --draw-dim: rgba(34, 176, 138, .14);
+      --support: #E0568C;
+      --support-dim: rgba(224, 86, 140, .14);
+      --fire: #E5533D;
+      --water: #3D8BE5;
+      --grass: #3DAE5C;
+      --electric: #EF9F27;
+      --psychic: #B15FE0;
+      --fighting: #C97A3D;
+      --darkness: #6B6F84;
+      --metal: #8C97A6;
+      --colorless: #9AA0AC;
+      --dragon: #8B7FE8;
+    }
+
+    .ledger-head h1 .name-sub {
+      background: linear-gradient(135deg, var(--accent), var(--support));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    #app { max-width: 980px; padding: 28px 20px 80px; }
+
+    .sim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .sim-stat { background: var(--surface-2); border-radius: var(--radius); padding: 12px; text-align: center; }
+    .sim-stat .num { font-family: var(--display); font-size: 20px; font-weight: 700; }
+    .sim-stat .label { font-size: 10.5px; color: var(--text-dim); margin-top: 2px; }
+
+    .threat-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 9px 13px; margin-bottom: 8px; font-size: 13px; }
+    .threat-row.ok { border-color: var(--draw); background: var(--draw-dim); }
+    .threat-row.bad { border-color: var(--support); background: var(--support-dim); }
+    .threat-row .verdict { font-size: 11.5px; font-weight: 700; }
+    .threat-row.ok .verdict { color: var(--draw); }
+    .threat-row.bad .verdict { color: var(--support); }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <div class="ledger-head">
+      <h1><span class="thraex-title name-sub">PKM</span> Trainer's Ledger</h1>
+      <div class="tag">buscá · cataloga · armá tu mazo</div>
+    </div>
+
+    <nav class="tabs">
+      <button data-tab="scan" class="active">Buscar</button>
+      <button data-tab="build">Armar mazo</button>
+      <button data-tab="collection">Colección</button>
+      <button data-tab="saved">Guardado</button>
+    </nav>
+
+    <!-- ===================== BUSCAR ===================== -->
+    <section class="panel active" id="panel-scan">
+      <div class="card-box">
+        <h2>Buscar carta</h2>
+        <p class="hint">Escribí el nombre, número o ID de la carta. Funciona con: "Charizard", "Charizard 110",
+          "sv3pt5-110"</p>
+        <div class="search-wrap">
+          <input type="text" id="searchInput" placeholder="ej: Charizard ex 110" autocomplete="off" />
+          <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+        <div class="row">
+          <button class="action" id="searchBtn">Buscar</button>
+          <button class="ghost" id="clearSearchBtn">Limpiar</button>
+        </div>
+        <div class="status" id="searchStatus"></div>
+        <div class="search-filters" id="searchFilters">
+          <button class="filter-chip active" data-filter="all">Todos</button>
+          <button class="filter-chip" data-filter="Pokémon">Pokémon</button>
+          <button class="filter-chip" data-filter="Trainer">Trainer</button>
+          <button class="filter-chip" data-filter="Energy">Energy</button>
+        </div>
+        <div class="grid" id="searchResults"></div>
+        <div class="search-history" id="searchHistory">
+          <div class="deck-sub-h">Búsquedas recientes</div>
+          <div class="search-filters history-chips" id="historyChips"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== COLECCIÓN ===================== -->
+    <section class="panel" id="panel-collection">
+      <div class="card-box">
+        <h2>Mi colección</h2>
+        <div class="collection-stats" id="collectionStats"></div>
+        <div class="saved-collections" id="savedCollections"></div>
+        <div class="collection-controls">
+          <div class="filter-row">
+            <select id="collectionFilterType">
+              <option value="all">Todos los tipos</option>
+              <option value="Pokémon">Pokémon</option>
+              <option value="Trainer">Trainer</option>
+              <option value="Energy">Energy</option>
+            </select>
+            <select id="collectionFilterElement">
+              <option value="all">Todos los elementos</option>
+              <option value="Fire">Fire</option>
+              <option value="Water">Water</option>
+              <option value="Grass">Grass</option>
+              <option value="Lightning">Lightning</option>
+              <option value="Psychic">Psychic</option>
+              <option value="Fighting">Fighting</option>
+              <option value="Darkness">Darkness</option>
+              <option value="Metal">Metal</option>
+              <option value="Colorless">Colorless</option>
+            </select>
+            <select id="collectionSort">
+              <option value="name">Nombre</option>
+              <option value="copies-desc">Más copias</option>
+              <option value="copies-asc">Menos copias</option>
+              <option value="date">Fecha agregada</option>
+            </select>
+          </div>
+          <div class="row">
+            <input type="text" id="collectionSearch" placeholder="Filtrar por nombre..." />
+          </div>
+          <div class="row">
+            <input type="text" id="collectionNameInput" placeholder="Nombre de la colección" />
+            <button class="action" id="saveCollectionBtn">Guardar colección</button>
+            <button class="ghost" id="enrichAllBtn"
+              title="Actualizar datos de todas las colecciones guardadas desde la API">Actualizar datos</button>
+            <button class="ghost" id="exportCollectionBtn">Exportar JSON</button>
+            <label class="ghost btn-label">
+              Importar JSON
+              <input type="file" accept=".json" id="importCollectionInput" class="hidden" />
+            </label>
+          </div>
+        </div>
+        <div class="grid" id="collectionGrid"></div>
+        <div class="empty" id="collectionEmpty">Todavía no agregaste cartas. Andá a "Buscar".</div>
+      </div>
+    </section>
+
+    <!-- ===================== ARMAR MAZO ===================== -->
+    <section class="panel" id="panel-build">
+      <div class="card-box">
+        <h2>Armar mazo — paso a paso</h2>
+        <p class="hint">Un método de 8 pasos para armar un mazo consistente a partir de tu colección: plan, Pokémon,
+          energía, robo, apoyo, consistencia simulada y cobertura de amenazas. En cada paso vas a ver sugerencias según
+          lo que ya tenés.</p>
+        <div class="row">
+          <button class="action" id="wizImportBtn">Importar desde mi colección</button>
+          <button class="ghost" id="wizClearBtn" title="Vaciar todas las cartas del mazo actual">Limpiar mazo</button>
+        </div>
+        <div class="status" id="wizImportStatus"></div>
+      </div>
+      <div class="card-box">
+        <div class="search-filters" id="wizardStepChips"></div>
+        <div id="wizardTotalBar" style="margin-top:12px;"></div>
+      </div>
+      <div class="card-box" id="wizardStepBody"></div>
+      <details class="sidebar-box card-box" id="tenesComprarDetails">
+        <summary class="accordion-header">Tenés / falta comprar</summary>
+        <div class="next-steps-grid" style="margin-top:12px;">
+          <div>
+            <h3>Ya tenés</h3>
+            <div id="removeList"></div>
+          </div>
+          <div>
+            <h3>Falta comprar</h3>
+            <div id="buyList"></div>
+          </div>
+        </div>
+      </details>
+      <div id="deckResults" class="hidden">
+        <div class="card-box">
+          <h2>Puntaje del mazo</h2>
+          <div class="deck-score" id="deckScore"></div>
+          <div class="score-total" id="scoreTotal"></div>
+        </div>
+        <div class="card-box">
+          <h2>Mazo completo — <span id="deckCardCount">60</span> cartas</h2>
+          <div class="deck-section" id="deckPokemonSection"></div>
+          <div class="deck-section" id="deckTrainerSection"></div>
+          <div class="deck-section" id="deckEnergySection"></div>
+        </div>
+        <div class="card-box">
+          <div class="row">
+            <input type="text" id="deckNameInput" placeholder="Nombre del mazo" />
+            <button class="action" id="saveDeckBtn">Guardar mazo</button>
+            <button class="ghost" id="exportDeckBtn">Exportar TXT</button>
+          </div>
+          <div class="saved-decks" id="savedDecks"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== GUARDADO ===================== -->
+    <section class="panel" id="panel-saved">
+      <div class="card-box">
+        <h2>Mis mazos</h2>
+        <p class="hint">Mazos guardados. Cargalos para verlos o modificá la variante.</p>
+        <div id="savedDecksFull"></div>
+        <div class="empty" id="savedDecksEmpty">No tenés mazos guardados. Andá a "Armar mazo" y generá uno para
+          guardarlo.</div>
+      </div>
+      <div class="card-box">
+        <h2>Mis colecciones</h2>
+        <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminalas.</p>
+        <div class="mb-12">
+          <div class="search-wrap">
+            <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..."
+              autocomplete="off" />
+            <div class="autocomplete-list" id="savedSearchAutocomplete"></div>
+          </div>
+        </div>
+        <div class="row mb-12">
+          <button class="ghost" id="exportAllCollectionsTxt">Exportar colecciones TXT</button>
+        </div>
+        <div id="savedCollectionsFull"></div>
+        <div class="empty" id="savedCollectionsEmpty">No tenés colecciones guardadas. Andá a "Colección" y guardá una.
+        </div>
+      </div>
+    </section>
+
+    <!-- DB Sidebar Accordion Section -->
+    <section class="db-sidebar" id="dbSidebar">
+      <details class="sidebar-box card-box">
+        <summary class="accordion-header">Base de datos y Sets Locales</summary>
+        <div class="db-status" id="dbStatus" style="margin-top:12px;"></div>
+      </details>
+    </section>
+
+  </div>
+
+  <!-- Card Explanation Modal -->
+  <div class="modal-overlay hidden" id="cardModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/core.js"></script>
+  <script src="js/views.js"></script>
+</body>
+
+</html>

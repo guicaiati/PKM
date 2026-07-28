@@ -664,6 +664,21 @@ const Wizard = (() => {
     { id: 'mill', name: 'Decking-out', desc: 'Forzar a que el rival se quede sin cartas para robar.' },
   ];
 
+  // Rangos de cantidad recomendados por arquetipo, para las barras de progreso
+  // de los pasos 2 (Pokémon), 3 (Energía), 4 (Robo) y 5 (Apoyo).
+  const ARCHETYPE_TARGETS = {
+    rush:    { pokemon: [8, 12],  energy: [9, 13],  draw: [6, 9],  support: [4, 7] },
+    control: { pokemon: [10, 14], energy: [10, 14], draw: [5, 8],  support: [8, 12] },
+    combo:   { pokemon: [12, 16], energy: [8, 12],  draw: [8, 12], support: [4, 8] },
+    mill:    { pokemon: [6, 10],  energy: [6, 10],  draw: [6, 10], support: [10, 16] },
+  };
+  const DEFAULT_TARGETS = { pokemon: [8, 12], energy: [9, 13], draw: [6, 9], support: [4, 7] };
+  function getTargets() { return ARCHETYPE_TARGETS[state.archetype] || DEFAULT_TARGETS; }
+
+  // Un color fijo por categoría, reutilizado en la barra de rango de cada paso
+  // y en la barra total segmentada, para que de un vistazo se identifique de qué está hecho el mazo.
+  const CAT_COLORS = { pokemon: '#7F77DD', energy: '#EF9F27', draw: '#1D9E75', support: '#D4537E' };
+
   let state = {
     step: 1,
     archetype: null,
@@ -673,16 +688,67 @@ const Wizard = (() => {
   };
   let nextId = 1;
 
+  function getAllCollectionCards() {
+    const map = new Map();
+    try {
+      const activeData = Collection.getData ? Collection.getData() : {};
+      Object.values(activeData).forEach(c => {
+        if (!c || !c.name) return;
+        const key = (c.name).toLowerCase().trim();
+        const existing = map.get(key);
+        if (existing) {
+          existing.count = (existing.count || 1) + (c.count || 1);
+        } else {
+          map.set(key, { ...c, count: c.count || 1 });
+        }
+      });
+    } catch (e) {}
+
+    try {
+      const saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
+      const activeName = (Collection.getCurrentName ? Collection.getCurrentName() : '').toLowerCase().trim();
+      
+      saved.forEach(col => {
+        if (activeName && col.name && col.name.toLowerCase().trim() === activeName) {
+          return;
+        }
+        if (Array.isArray(col.data)) {
+          col.data.forEach(c => {
+            if (!c || !c.name) return;
+            const key = (c.name).toLowerCase().trim();
+            const existing = map.get(key);
+            if (existing) {
+              existing.count = (existing.count || 1) + (c.count || 1);
+            } else {
+              map.set(key, { ...c, count: c.count || 1 });
+            }
+          });
+        }
+      });
+    } catch (e) {}
+
+    return Array.from(map.values());
+  }
+
   function getCollectionCards() {
     try {
-      if (Collection.getCards) return Collection.getCards();
-      if (Collection.getMap) return Object.values(Collection.getMap());
-      return [];
+      return getAllCollectionCards();
     } catch (e) { return []; }
   }
 
   function countOwned(name) {
-    try { return Collection.countByName(name); } catch (e) { return 0; }
+    if (!name) return 0;
+    try {
+      const target = name.toLowerCase().trim();
+      const allCards = getAllCollectionCards();
+      let total = 0;
+      allCards.forEach(c => {
+        if (c && c.name && c.name.toLowerCase().trim() === target) {
+          total += Number(c.count || 1);
+        }
+      });
+      return total;
+    } catch (e) { return 0; }
   }
 
   function save() {
@@ -748,13 +814,53 @@ const Wizard = (() => {
 
   function getCardDetails(name) {
     if (!name) return null;
-    const fromCol = Collection.findByName(name);
+    let fromCol = Collection.findByName(name);
+    if (!fromCol && typeof API !== 'undefined' && API.translateToEnglish) {
+      fromCol = Collection.findByName(API.translateToEnglish(name));
+    }
     if (fromCol) return fromCol;
 
-    const fromDb = API.findCardInDb ? API.findCardInDb(name) : null;
+    let fromDb = (typeof API !== 'undefined' && API.findCardInDb) ? API.findCardInDb(name) : null;
+    if (!fromDb && typeof API !== 'undefined' && API.translateToEnglish && API.findCardInDb) {
+      fromDb = API.findCardInDb(API.translateToEnglish(name));
+    }
     if (fromDb) return fromDb;
 
     return null;
+  }
+
+  function getCardImageUrl(c) {
+    if (!c) return '';
+    const name = typeof c === 'string' ? c : (c.name || '');
+    const card = (getCardDetails(name) || (typeof c === 'object' ? c : {})) || {};
+
+    let url = (typeof c === 'object' && (c.image || c.imageUrl || (c.images && (c.images.small || c.images.large)))) ||
+              card.imageUrl ||
+              (card.images && (card.images.small || card.images.large)) ||
+              card.image ||
+              '';
+
+    if (!url && name && typeof API !== 'undefined' && API.fetchThumb) {
+      url = API.fetchThumb(name) || (API.translateToEnglish ? API.fetchThumb(API.translateToEnglish(name)) : '') || '';
+    }
+
+    if (!url && name && typeof API !== 'undefined' && API.findCardInDb) {
+      const dbMatch = API.findCardInDb(name) || (API.translateToEnglish ? API.findCardInDb(API.translateToEnglish(name)) : null);
+      if (dbMatch) {
+        url = dbMatch.imageUrl || (dbMatch.images && (dbMatch.images.small || dbMatch.images.large)) || dbMatch.image || '';
+      }
+    }
+
+    if (!url && (card || typeof c === 'object')) {
+      const obj = card || c;
+      const setId = obj.setId || (obj.set && obj.set.id) || (typeof obj.set === 'string' ? obj.set : '');
+      const num = obj.number;
+      if (setId && num) {
+        url = `https://images.pokemontcg.io/${String(setId).toLowerCase()}/${num}.png`;
+      }
+    }
+
+    return url || '';
   }
 
   function getEvolutionBase(card) {
@@ -972,7 +1078,7 @@ const Wizard = (() => {
       fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('train')).slice(0, 30);
     }
 
-    let missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0 && !alreadyAdded.has(c.name.toLowerCase()));
+    let missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0);
 
     if (state.stageFilter && state.stageFilter !== 'all' && filterSupertype === 'pokemon') {
       ownedCandidates = ownedCandidates.filter(c => matchesStageOrRoleFilter(c, state.stageFilter));
@@ -1008,13 +1114,16 @@ const Wizard = (() => {
       const typeChar = typeCharMap[typeRaw] || 'c';
       const typeIconHtml = `<span class="chip-type-circle cost-typed cost-${typeClass}" title="${typeRaw}"><span class="tcg-sym">${typeChar}</span></span>`;
 
+      const imgUrl = getCardImageUrl(c);
+      const thumbHtml = typeIconHtml;
+
       const added = alreadyAdded.has(c.name.toLowerCase());
       const owned = countOwned(c.name);
       const ownedBadge = owned > 0 ? `<span class="chip-owned">Tenés ${owned}</span>` : '';
       const addedBadge = added ? `<span class="chip-added">✓</span>` : '';
       return `<button type="button" class="filter-chip wiz-suggest-chip smart-chip ${added ? 'active' : ''}" data-suggest-name="${escapeHtml(c.name)}">
         <div class="chip-left-icon">
-          ${typeIconHtml}
+          ${thumbHtml}
         </div>
         <div class="chip-body">
           <div class="chip-top">
@@ -1098,7 +1207,11 @@ const Wizard = (() => {
       const group = items.filter(i => (i.category || 'pokemon') === cat.key);
       if (!group.length) continue;
       html += `<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;margin:8px 0 4px;font-weight:600;letter-spacing:0.5px;">${cat.label} (${group.reduce((s, x) => s + x.qty, 0)})</div>`;
-      html += group.map(i => `<div class="list-item"><span class="li-name">${escapeHtml(i.name)}</span><span class="li-qty">x${i.qty}</span></div>`).join('');
+      html += group.map(i => {
+        const imgUrl = getCardImageUrl(i);
+        const thumbHtml = imgUrl ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(i.name)}" class="card-mini-thumb-small" loading="lazy" />` : '';
+        return `<div class="list-item" style="display:flex;align-items:center;gap:8px;">${thumbHtml}<span class="li-name">${escapeHtml(i.name)}</span><span class="li-qty">x${i.qty}</span></div>`;
+      }).join('');
     }
     return html || '<div class="empty">Sin cartas.</div>';
   }
@@ -1259,7 +1372,7 @@ const Wizard = (() => {
 
   function renderCardRow(c) {
     const card = getCardDetails(c.name) || c;
-    const imgUrl = card.imageUrl || (card.images && (card.images.small || card.images.large)) || c.imageUrl || '';
+    const imgUrl = getCardImageUrl(c);
     const supertype = (card.supertype || c.category || '').toLowerCase();
     const isTrainer = supertype.includes('train') || c.category === 'trainer';
     const isEnergy = supertype.includes('energ') || c.category === 'energy';
@@ -1297,9 +1410,17 @@ const Wizard = (() => {
       <td class="col-name"><div class="card-thumb-wrap">${thumbHtml}<span class="card-row-name">${escapeHtml(c.name)}</span> ${warningBtn}</div></td>
       <td class="col-type">${typeBadge}</td>
       <td class="col-stage">${stageBadge}</td>
-      <td class="col-qty"><button type="button" class="ghost wizard-qty" data-qty="-1" data-id="${c.id}">−</button> <span class="qty-num">${c.count}</span> <button type="button" class="ghost wizard-qty" data-qty="1" data-id="${c.id}">+</button></td>
-      <td class="col-owned ${missing > 0 ? 'owned-missing' : 'owned-complete'}">${missing > 0 ? `Falta ${missing}` : `✔ ${owned}`}</td>
-      <td class="col-action"><button type="button" class="ghost wizard-remove" data-remove="${c.id}">✕</button></td>
+      <td class="col-qty">
+        <div class="qty-row" style="display:flex; align-items:center; gap:6px; margin:0; border:none; background:none; padding:0;">
+          <div class="qty-controls" style="display:flex; align-items:center; gap:4px;">
+            <button type="button" class="ghost dec" data-id="${c.id}" style="padding:4px 8px; font-size:12px;">&minus;</button>
+            <span class="qty-num" style="width:20px; text-align:center; font-weight:700; font-family:var(--mono);">${c.count}</span>
+            <button type="button" class="ghost inc" data-id="${c.id}" style="padding:4px 8px; font-size:12px;">+</button>
+          </div>
+          <button type="button" class="ghost remove-btn" data-remove="${c.id}" style="padding:4px 8px; font-size:12px;">Quitar</button>
+        </div>
+      </td>
+      <td class="col-owned ${missing > 0 ? 'owned-missing' : 'owned-complete'}" style="text-align:center;">${missing > 0 ? `Falta ${missing}` : `✔ ${owned}`}</td>
     </tr>`;
   }
 
@@ -1322,11 +1443,10 @@ const Wizard = (() => {
             <thead>
               <tr>
                 <th style="width:30%;">Nombre</th>
-                <th style="width:20%;">Tipo</th>
-                <th style="width:16%;">Nivel</th>
-                <th style="width:16%;text-align:center;">Cant.</th>
-                <th style="width:12%;text-align:center;">Tenés</th>
-                <th style="width:6%;text-align:right;"></th>
+                <th style="width:18%;">Tipo</th>
+                <th style="width:14%;">Nivel</th>
+                <th style="width:28%;">Cantidad / Acción</th>
+                <th style="width:10%;text-align:center;">Tenés</th>
               </tr>
             </thead>
             <tbody>
@@ -1343,17 +1463,89 @@ const Wizard = (() => {
         <thead>
           <tr>
             <th style="width:30%;">Nombre</th>
-            <th style="width:20%;">Tipo</th>
-            <th style="width:16%;">Nivel</th>
-            <th style="width:16%;text-align:center;">Cant.</th>
-            <th style="width:12%;text-align:center;">Tenés</th>
-            <th style="width:6%;text-align:right;"></th>
+            <th style="width:18%;">Tipo</th>
+            <th style="width:14%;">Nivel</th>
+            <th style="width:28%;">Cantidad / Acción</th>
+            <th style="width:10%;text-align:center;">Tenés</th>
           </tr>
         </thead>
         <tbody>
           ${list.map(renderCardRow).join('')}
         </tbody>
       </table>`;
+  }
+
+  // Barra de rango recomendado, coloreada por categoría. count es la cantidad actual
+  // en el mazo para esa categoría; el color de fondo es fijo (identidad de categoría),
+  // el texto "llevás X" cambia de color según si estás dentro del rango o no.
+  function renderTargetBar(catKey, label, count) {
+    const [min, max] = getTargets()[catKey];
+    const color = CAT_COLORS[catKey];
+    const pct = Math.max(0, Math.min(100, Math.round((count / max) * 100)));
+    const inRange = count >= min && count <= max;
+    const statusColor = inRange ? 'var(--grass)' : 'var(--fire)';
+    return `
+      <div class="wiz-target-bar" style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px;">
+          <span style="color:var(--text-dim);">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px;vertical-align:1px;"></span>
+            ${escapeHtml(label)} — recomendado ${min}–${max}
+          </span>
+          <span style="font-weight:700;color:${statusColor};">llevás ${count}</span>
+        </div>
+        <div style="height:6px;background:var(--line);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width .2s ease;"></div>
+        </div>
+      </div>`;
+  }
+
+  // Panel "Tenés / falta comprar" acotado a la lista de cartas del paso actual
+  // (Pokémon, Energía, Robo o Apoyo), en vez de solo mostrarse al final en el paso 8.
+  function renderMiniHaveNeed(list) {
+    if (!list.length) return '';
+    const have = [], need = [];
+    list.forEach(c => {
+      const owned = countOwned(c.name);
+      const needed = Number(c.count || 0);
+      if (owned >= needed) have.push(c.name);
+      else if (owned > 0) { have.push(`${c.name} (${owned}/${needed})`); need.push(`${c.name} x${needed - owned}`); }
+      else need.push(`${c.name} x${needed}`);
+    });
+    return `
+      <details open class="card-box" style="margin-top:14px;">
+        <summary class="accordion-header">Tenés / falta comprar</summary>
+        <div class="next-steps-grid" style="margin-top:12px;">
+          <div>
+            <h3>Ya tenés (${have.length})</h3>
+            <p class="hint" style="margin:0;">${have.length ? have.map(escapeHtml).join(', ') : '—'}</p>
+          </div>
+          <div>
+            <h3>Falta comprar</h3>
+            <p class="hint" style="margin:0;">${need.length ? need.map(escapeHtml).join(', ') : '¡Tenés todo lo que necesitás!'}</p>
+          </div>
+        </div>
+      </details>`;
+  }
+
+  // Barra total del mazo (60 cartas), segmentada por categoría con el mismo color
+  // que las barras de rango de cada paso. Vive junto a la navegación de pasos,
+  // así queda visible sin importar en qué paso estés parado.
+  function renderTotalBar() {
+    const pk = sumCount(cardsBy('pokemon'));
+    const en = sumCount(cardsBy('energy'));
+    const trainerCards = cardsBy('trainer');
+    const draw = sumCount(trainerCards.filter(c => c.isDraw));
+    const support = sumCount(trainerCards.filter(c => !c.isDraw));
+    const total = pk + en + draw + support;
+    const seg = (n, color) => `<div style="height:100%;width:${Math.min(100, Math.round(n / 60 * 100))}%;background:${color};"></div>`;
+    return `
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
+        <span style="color:var(--text-dim);">Mazo total</span>
+        <span style="font-weight:700;">${total} / 60</span>
+      </div>
+      <div style="height:8px;background:var(--line);border-radius:4px;overflow:hidden;display:flex;">
+        ${seg(pk, CAT_COLORS.pokemon)}${seg(en, CAT_COLORS.energy)}${seg(draw, CAT_COLORS.draw)}${seg(support, CAT_COLORS.support)}
+      </div>`;
   }
 
   function renderStepBody(n) {
@@ -1364,41 +1556,94 @@ const Wizard = (() => {
         </div>`;
     }
     if (n === 2) {
-      return `<p class="hint">Buscá Pokémon para agregar:</p>${buildSuggestionsHtml('pokemon')}
+      const pkCards = cardsBy('pokemon');
+      return `<p class="hint">Buscá Pokémon para agregar:</p>
+        ${renderTargetBar('pokemon', 'Pokémon', sumCount(pkCards))}
+        ${buildSuggestionsHtml('pokemon')}
         <div class="row" style="gap:8px;align-items:center;">
           ${buildSearchInputHtml('wizPkSearch', 'wizPkAutocomplete', 'Buscar Pokémon...')}
           <input type="number" id="wizPkCount" min="1" max="4" value="1" style="width:70px;">
           <button class="action" id="wizAddPk">Agregar</button>
         </div>
-        ${renderCardTable(cardsBy('pokemon'), 'pokemon')}`;
+        ${renderCardTable(pkCards, 'pokemon')}
+        ${renderMiniHaveNeed(pkCards)}`;
     }
     if (n === 3) {
-      return `<p class="hint">Buscá Energías:</p>${buildSuggestionsHtml('energy')}
+      const enCards = cardsBy('energy');
+      return `<p class="hint">Buscá Energías:</p>
+        ${renderTargetBar('energy', 'Energía', sumCount(enCards))}
+        ${buildSuggestionsHtml('energy')}
         <div class="row" style="gap:8px;align-items:center;">
           ${buildSearchInputHtml('wizEnSearch', 'wizEnAutocomplete', 'Buscar Energía...')}
           <input type="number" id="wizEnCount" min="1" max="20" value="1" style="width:70px;">
           <button class="action" id="wizAddEn">Agregar</button>
         </div>
-        ${renderCardTable(cardsBy('energy'), 'energy')}`;
+        ${renderCardTable(enCards, 'energy')}
+        ${renderMiniHaveNeed(enCards)}`;
     }
     if (n === 4) {
-      return `<p class="hint">Cartas de robo:</p>${renderCardTable(cardsBy('trainer').filter(c => c.isDraw), 'trainer')}`;
+      const drawCards = cardsBy('trainer').filter(c => c.isDraw);
+      return `<p class="hint">Cartas de robo (buscá y agregá desde tu colección):</p>
+        ${renderTargetBar('draw', 'Robo', sumCount(drawCards))}
+        ${buildSuggestionsHtml('trainer')}
+        <div class="row" style="gap:8px;align-items:center;">
+          ${buildSearchInputHtml('wizDrSearch', 'wizDrAutocomplete', 'Buscar Trainer de robo...')}
+          <input type="number" id="wizDrCount" min="1" max="4" value="1" style="width:70px;">
+          <button class="action" id="wizAddDr">Agregar</button>
+        </div>
+        ${renderCardTable(drawCards, 'trainer')}
+        ${renderMiniHaveNeed(drawCards)}`;
     }
     if (n === 5) {
-      return `<p class="hint">Buscá Entrenadores / Apoyo:</p>${buildSuggestionsHtml('trainer')}
+      const allTrainerCards = cardsBy('trainer');
+      const supportCards = allTrainerCards.filter(c => !c.isDraw);
+      return `<p class="hint">Buscá Entrenadores / Apoyo:</p>
+        ${renderTargetBar('support', 'Apoyo', sumCount(supportCards))}
+        ${buildSuggestionsHtml('trainer')}
         <div class="row" style="gap:8px;align-items:center;">
           ${buildSearchInputHtml('wizTrSearch', 'wizTrAutocomplete', 'Buscar Trainer...')}
           <input type="number" id="wizTrCount" min="1" max="4" value="1" style="width:70px;">
           <label><input type="checkbox" id="wizTrDraw"> Es robo</label>
           <button class="action" id="wizAddTr">Agregar</button>
         </div>
-        ${renderCardTable(cardsBy('trainer'), 'trainer')}`;
+        ${renderCardTable(allTrainerCards, 'trainer')}
+        ${renderMiniHaveNeed(allTrainerCards)}`;
     }
     if (n === 6) {
-      return `<div class="status">Total mazo: <strong>${totalDeckCount()}</strong> / 60 cartas.</div>`;
+      const total = totalDeckCount();
+      const basics = sumCount(state.cards.filter(c => c.category === 'pokemon' && c.subtypes && c.subtypes.includes('Basic')));
+      const energies = sumCount(state.cards.filter(c => c.category === 'energy'));
+      const mainAttacker = basics > 0 ? Math.round(Math.min(100, (basics / 4) * 100)) : 0;
+      function hypergeo(N, K, n) { if (K < 1 || n < 1 || N < 1) return 0; let p = 1; for (let i = 0; i < n; i++) p *= (N - K - i) / (N - i); return Math.round((1 - p) * 100); }
+      const basicPct = hypergeo(total, basics, 7);
+      const energyPct = hypergeo(total, energies, 7);
+      return `<div class="status" style="margin-bottom:12px;">Total mazo: <strong>${total}</strong> / 60 cartas &nbsp; <span style="color:var(--text-faint);font-size:11px;">${basics} básicos · ${energies} energías · ${total - basics - energies} entrenadores</span></div>
+        <p class="hint">Simulá manos iniciales y las primeras rondas con las cartas que llevás hasta ahora.</p>
+        <button type="button" class="action" id="wizSimBtn">▶ Simular 1000 manos</button>
+        <div class="sim-grid">
+          <div class="sim-stat"><div class="num">${basicPct}%</div><div class="label">básico en mano inicial</div></div>
+          <div class="sim-stat"><div class="num">${mainAttacker}%</div><div class="label">atacante activo turno 2</div></div>
+          <div class="sim-stat"><div class="num">${energyPct}%</div><div class="label">energía turno 1</div></div>
+        </div>`;
     }
     if (n === 7) {
-      return `<p class="hint">Amenazas y respuestas:</p>
+      const pokeCards = state.cards.filter(c => c.category === 'pokemon');
+      const typeSet = new Set();
+      pokeCards.forEach(c => { if (c.types) c.types.forEach(t => typeSet.add(t)); });
+      const weaknessMap = { Grass: 'Fire', Fire: 'Water', Water: 'Lightning', Lightning: 'Fighting', Psychic: 'Darkness', Fighting: 'Psychic', Darkness: 'Grass', Metal: 'Fire', Colorless: 'Fighting', Dragon: 'Fairyg' };
+      const threatRows = [];
+      typeSet.forEach(t => {
+        const weakTo = weaknessMap[t];
+        if (!weakTo) return;
+        const hasAnswer = state.cards.some(c => c.types && c.types.includes(weakTo));
+        const verdict = hasAnswer ? 'ok' : 'bad';
+        const verdictText = hasAnswer ? 'Cubierto' : 'Débil — sin respuesta';
+        threatRows.push({ type: t, weakTo, verdict, verdictText });
+      });
+      return `<p class="hint">Análisis de debilidades de tus Pokémon:</p>
+        ${threatRows.map(r => `<div class="threat-row ${r.verdict}"><span>${r.type} → débil a ${r.weakTo}</span><span class="verdict">${r.verdictText}</span></div>`).join('')}
+        ${threatRows.length === 0 ? '<div class="empty">No hay Pokémon en el mazo para analizar.</div>' : ''}
+        <p class="hint-small" style="margin-top:14px;">Amenazas personalizadas:</p>
         ${state.threats.map((t, i) => `<div class="row"><input type="text" class="wizThreatInput" value="${escapeHtml(t.threat)}" placeholder="Amenaza"/><input type="text" class="wizAnswerInput" value="${escapeHtml(t.answer)}" placeholder="Tech"/><button type="button" class="ghost" data-remove-threat="${i}">✕</button></div>`).join('')}
         <button type="button" class="ghost" id="wizAddThreat">+ Amenaza</button>`;
     }
@@ -1414,10 +1659,22 @@ const Wizard = (() => {
 
   function render() {
     renderChips();
+    const totalBarEl = document.getElementById('wizardTotalBar');
+    if (totalBarEl) totalBarEl.innerHTML = renderTotalBar();
     const body = document.getElementById('wizardStepBody');
     if (body) body.innerHTML = renderStepBody(state.step);
     attachStepListeners();
     updateHaveNeedPanel();
+    
+    const details = document.getElementById('tenesComprarDetails');
+    if (details) {
+      if (state.step === 8) {
+        details.open = true;
+      } else {
+        details.open = false;
+      }
+    }
+
     save();
   }
 
@@ -1453,6 +1710,12 @@ const Wizard = (() => {
 
   async function addCardByName(name, category, countInputId, extraOpts) {
     if (!name) return;
+    const idx = state.cards.findIndex(c => c.name.toLowerCase() === name.toLowerCase());
+    if (idx !== -1) {
+      state.cards.splice(idx, 1);
+      render();
+      return;
+    }
     const count = countInputId ? (Number(document.getElementById(countInputId)?.value) || 1) : 1;
     const details = getCardDetails(name);
     state.cards.push({
@@ -1475,14 +1738,24 @@ const Wizard = (() => {
     const body = document.getElementById('wizardStepBody');
     if (!body) return;
 
-    body.querySelectorAll('.wizard-qty').forEach(btn => {
+    body.querySelectorAll('.inc').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id = Number(btn.dataset.id), delta = Number(btn.dataset.qty);
+        const id = Number(btn.dataset.id);
         const card = state.cards.find(c => c.id === id);
-        if (card) { card.count = Math.max(1, Number(card.count) + delta); render(); }
+        if (card) { card.count++; render(); }
       });
     });
-    body.querySelectorAll('.wizard-remove').forEach(btn => {
+    body.querySelectorAll('.dec').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.dataset.id);
+        const card = state.cards.find(c => c.id === id);
+        if (card) {
+          card.count = Math.max(1, card.count - 1);
+          render();
+        }
+      });
+    });
+    body.querySelectorAll('.remove-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         state.cards = state.cards.filter(c => c.id !== Number(btn.dataset.remove));
         render();
@@ -1506,8 +1779,9 @@ const Wizard = (() => {
     body.querySelectorAll('.wiz-suggest-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const name = chip.dataset.suggestName;
-        let cat = state.step === 3 ? 'energy' : state.step === 5 ? 'trainer' : 'pokemon';
-        addCardByName(name, cat, null, null);
+        let cat = state.step === 3 ? 'energy' : (state.step === 4 || state.step === 5) ? 'trainer' : 'pokemon';
+        const opts = state.step === 4 ? { isDraw: true } : null;
+        addCardByName(name, cat, null, opts);
       });
     });
 
@@ -1530,6 +1804,13 @@ const Wizard = (() => {
         if (name) addCardByName(name, 'energy', 'wizEnCount');
       });
     }
+    if (state.step === 4) {
+      setupAutocomplete('wizDrSearch', 'wizDrAutocomplete');
+      document.getElementById('wizAddDr')?.addEventListener('click', () => {
+        const name = document.getElementById('wizDrSearch')?.value?.trim();
+        if (name) addCardByName(name, 'trainer', 'wizDrCount', { isDraw: true });
+      });
+    }
     if (state.step === 5) {
       setupAutocomplete('wizTrSearch', 'wizTrAutocomplete');
       document.getElementById('wizAddTr')?.addEventListener('click', () => {
@@ -1537,6 +1818,9 @@ const Wizard = (() => {
         const isDraw = document.getElementById('wizTrDraw')?.checked || false;
         if (name) addCardByName(name, 'trainer', 'wizTrCount', { isDraw });
       });
+    }
+    if (state.step === 6) {
+      document.getElementById('wizSimBtn')?.addEventListener('click', () => render());
     }
     if (state.step === 7) {
       document.getElementById('wizAddThreat')?.addEventListener('click', () => { state.threats.push({ threat: '', answer: '' }); render(); });
@@ -1715,9 +1999,9 @@ const Saved = (() => {
     const liveData = Collection.getMap();
     const liveName = Collection.getCurrentName();
 
-    const currentEntry = liveName ? { id: 'current', name: liveName, savedAt: Date.now(), data: Object.values(liveData) } : null;
+    const currentEntry = { id: 'current', name: liveName || 'Mi Colección', savedAt: Date.now(), data: Object.values(liveData) };
     const others = liveName ? saved.filter(c => c.name !== liveName) : saved;
-    let all = currentEntry ? [currentEntry, ...others] : others;
+    let all = [currentEntry, ...others];
 
     if (searchQuery) {
       all = all.map(col => {
@@ -1758,7 +2042,23 @@ const Saved = (() => {
     if (empty) empty.style.display = 'none';
 
     container.innerHTML = restoreBannerHtml + all.map(c => {
-      const total = (c.data || []).reduce((s, x) => s + (x.count || 0), 0);
+      const dataItems = c.data || [];
+      const total = dataItems.reduce((s, x) => s + (x.count || 0), 0);
+      const uniqueCount = dataItems.length;
+
+      const pokemonCount = dataItems.filter(x => {
+        const sup = (x.supertype || '').toLowerCase();
+        return sup.includes('pok') || (!sup.includes('train') && !sup.includes('energ'));
+      }).reduce((s, x) => s + (x.count || 0), 0);
+
+      const trainerCount = dataItems.filter(x => (x.supertype || '').toLowerCase().includes('train')).reduce((s, x) => s + (x.count || 0), 0);
+      const energyCount = dataItems.filter(x => (x.supertype || '').toLowerCase().includes('energ')).reduce((s, x) => s + (x.count || 0), 0);
+
+      const pokePct = total > 0 ? Math.round((pokemonCount / total) * 100) : 0;
+      const trainPct = total > 0 ? Math.round((trainerCount / total) * 100) : 0;
+      const energyPct = total > 0 ? Math.round((energyCount / total) * 100) : 0;
+
+      const dateStr = new Date(c.savedAt || Date.now()).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: '2-digit' });
       const isCurrent = c.id === 'current';
 
       let matchesHtml = '';
@@ -1773,14 +2073,36 @@ const Saved = (() => {
         <div class="saved-card" data-id="${c.id}">
           <div>
             <div class="saved-card-header">
-              <div class="saved-card-name">📂 ${escapeHtml(c.name)} ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Actual)</span>' : ''}</div>
+              <div class="saved-card-icon">📦</div>
+              <div class="saved-card-info">
+                <div class="saved-card-name">${escapeHtml(c.name)} ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Actual)</span>' : ''}</div>
+                <div class="saved-card-date">${dateStr}</div>
+              </div>
             </div>
-            <div class="saved-card-stats"><span class="sc-stat">✨ ${total} cartas</span></div>
+            <div class="saved-card-stats">
+              <span class="sc-stat"><span class="sc-stat-val">${total}</span> cartas</span>
+              <span class="sc-stat"><span class="sc-stat-val">${uniqueCount}</span> únicas</span>
+              <span class="sc-stat sc-pokemon">⚡ ${pokemonCount}</span>
+              <span class="sc-stat sc-trainer">🎴 ${trainerCount}</span>
+              <span class="sc-stat sc-energy">💎 ${energyCount}</span>
+            </div>
+            <div class="collection-bar">
+              <div class="collection-bar-fill poke-bar" style="width:${pokePct}%"></div>
+              <div class="collection-bar-fill train-bar" style="width:${trainPct}%"></div>
+              <div class="collection-bar-fill energy-bar" style="width:${energyPct}%"></div>
+            </div>
+            <div class="collection-bar-labels">
+              <span class="cbl-item poke-label">${pokePct}% Pokémon</span>
+              <span class="cbl-item train-label">${trainPct}% Trainer</span>
+              <span class="cbl-item energy-label">${energyPct}% Energía</span>
+            </div>
             ${matchesHtml}
           </div>
           <div class="saved-card-actions">
             <button class="action saved-card-load">${isCurrent ? 'Actualizar' : 'Cargar'}</button>
+            <button class="ghost saved-card-rename">Renombrar</button>
             ${!isCurrent ? '<button class="ghost saved-card-delete">Eliminar</button>' : ''}
+            <button class="ghost saved-card-new" title="Nueva colección">➕</button>
           </div>
         </div>`;
     }).join('');
@@ -1796,13 +2118,41 @@ const Saved = (() => {
     container.querySelectorAll('.saved-card-load').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.closest('.saved-card').dataset.id;
-        if (id === 'current') return;
+        if (id === 'current') {
+          UI.toast('La colección ya está activa', 'info');
+          return;
+        }
         const loaded = await Storage.loadCollectionAsNamed(id);
         if (loaded) {
           await Storage.saveCollection(loaded);
           Collection.setCurrentName(id);
           Collection.init();
+          renderCollections(searchQuery);
           UI.toast('Colección cargada', 'success');
+        }
+      });
+    });
+
+    container.querySelectorAll('.saved-card-rename').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const cardEl = btn.closest('.saved-card');
+        const id = cardEl.dataset.id;
+        if (id === 'current') {
+          const newName = prompt('Nuevo nombre para la colección actual:', Collection.getCurrentName() || 'Mi colección');
+          if (newName) {
+            Collection.setCurrentName(newName);
+            renderCollections(searchQuery);
+            UI.toast('Colección renombrada', 'success');
+          }
+          return;
+        }
+        const saved = await Storage.loadNamedCollections();
+        const col = saved.find(x => x.id === id);
+        const newName = prompt('Renombrar colección:', col ? col.name : '');
+        if (newName) {
+          await Storage.renameNamedCollection(id, newName);
+          renderCollections(searchQuery);
+          UI.toast('Colección renombrada', 'success');
         }
       });
     });
@@ -1815,6 +2165,20 @@ const Saved = (() => {
           const searchVal = document.getElementById('savedCollectionSearch')?.value?.trim().toLowerCase() || '';
           renderCollections(searchVal);
           UI.toast('Colección enviada a la papelera. Podés restaurarla.', 'info');
+        }
+      });
+    });
+
+    container.querySelectorAll('.saved-card-new').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const name = prompt('Nombre de la nueva colección:', 'Colección ' + new Date().toLocaleDateString('es-AR'));
+        if (name) {
+          await Storage.saveNamedCollection(name, {});
+          Collection.setCurrentName(name);
+          await Storage.saveCollection({});
+          Collection.init();
+          renderCollections(searchQuery);
+          UI.toast(`Nueva colección "${name}" creada`, 'success');
         }
       });
     });
