@@ -987,12 +987,11 @@ const Wizard = (() => {
 
   function getStageCategory(c) {
     const card = getCardDetails(c.name) || c;
-    const subtypes = (card.subtypes || []).map(s => String(s).toLowerCase());
+    let raw = card.subtypes || [];
+    if (typeof raw === 'string') raw = raw.split(',').map(s => s.trim());
+    const subtypes = raw.map(s => String(s).toLowerCase());
     const evoFrom = (card.evolvesFrom || '').trim();
 
-    if (subtypes.some(s => s.includes('ex') || s.includes('vstar') || s.includes('vmax') || s.includes('v') || s.includes('gx'))) {
-      return 'ex';
-    }
     if (subtypes.some(s => s.includes('stage 2') || s.includes('fase 2'))) {
       return 'stage2';
     }
@@ -1244,7 +1243,9 @@ const Wizard = (() => {
 
   function getStageBadge(c) {
     const card = getCardDetails(c.name) || c;
-    const subtypes = (card.subtypes || []).map(s => String(s).toLowerCase());
+    let raw = card.subtypes || [];
+    if (typeof raw === 'string') raw = raw.split(',').map(s => s.trim());
+    const subtypes = raw.map(s => String(s).toLowerCase());
     const evoFrom = (card.evolvesFrom || '').trim();
 
     if (subtypes.some(s => s.includes('ex') || s.includes('vstar') || s.includes('vmax') || s.includes('v'))) {
@@ -1322,7 +1323,7 @@ const Wizard = (() => {
     if (!supertype.includes('pok')) return { valid: true, warning: '' };
 
     const stageCat = getStageCategory(card);
-    if (stageCat === 'basic' || stageCat === 'ex') return { valid: true, warning: '' };
+    if (stageCat === 'basic') return { valid: true, warning: '' };
 
     const evolvesFrom = (card.evolvesFrom || '').trim();
     const deckPokemon = currentDeckCards.filter(x => (x.category || '').toLowerCase() === 'pokemon').map(x => getCardDetails(x.name) || x);
