@@ -814,17 +814,17 @@ const Wizard = (() => {
 
   function getCardDetails(name) {
     if (!name) return null;
-    let fromCol = Collection.findByName(name);
-    if (!fromCol && typeof API !== 'undefined' && API.translateToEnglish) {
-      fromCol = Collection.findByName(API.translateToEnglish(name));
-    }
-    if (fromCol) return fromCol;
-
     let fromDb = (typeof API !== 'undefined' && API.findCardInDb) ? API.findCardInDb(name) : null;
     if (!fromDb && typeof API !== 'undefined' && API.translateToEnglish && API.findCardInDb) {
       fromDb = API.findCardInDb(API.translateToEnglish(name));
     }
     if (fromDb) return fromDb;
+
+    let fromCol = Collection.findByName(name);
+    if (!fromCol && typeof API !== 'undefined' && API.translateToEnglish) {
+      fromCol = Collection.findByName(API.translateToEnglish(name));
+    }
+    if (fromCol) return fromCol;
 
     return null;
   }
