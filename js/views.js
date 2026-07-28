@@ -1153,9 +1153,8 @@ const Wizard = (() => {
 
     const topMissing = missingScored.slice(0, 6);
 
-    const renderChip = (c) => {
+    const renderChip = (c, isMissing) => {
       const typeRaw = detectCardType(c);
-      const typeColorMap = { Fire: '#F87171', Water: '#38BDF8', Grass: '#4ADE80', Lightning: '#FACC15', Psychic: '#E879F9', Fighting: '#FB923C', Darkness: '#A78BFA', Metal: '#94A3B8', Colorless: '#D4D4D8', Dragon: '#FDE68A' };
       const typeDotMap = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'lightning', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
       const typeCharMap = { Fire: 'r', Water: 'w', Grass: 'g', Lightning: 'l', Psychic: 'p', Fighting: 'f', Darkness: 'd', Metal: 'm', Colorless: 'c', Dragon: 'n', Fairy: 'y' };
 
@@ -1165,7 +1164,7 @@ const Wizard = (() => {
       const added = alreadyAdded.has(c.name.toLowerCase());
       const owned = countOwned(c.name);
 
-      const extraClass = added ? 'active' : '';
+      const extraClass = added ? 'active' : isMissing ? 'missing' : '';
       const ownedBadge = owned > 0 ? `<span class="chip-owned">${owned}</span>` : '';
       return `<button type="button" class="pick-chip ${extraClass}" data-suggest-name="${escapeHtml(c.name)}">
         <span class="type-dot ${dotClass} sm"><span class="tcg-sym">${typeChar}</span></span>
@@ -1181,7 +1180,7 @@ const Wizard = (() => {
       : '<div class="empty" style="font-size:11px;padding:6px;">No tenés cartas disponibles para este filtro.</div>';
 
     const missingHtml = topMissing.length > 0
-      ? topMissing.map(renderChip).join('')
+      ? topMissing.map(c => renderChip(c, true)).join('')
       : '<div class="empty" style="font-size:11px;padding:6px;">No hay sugerencias para este filtro.</div>';
 
     const stageFiltersHtml = (filterSupertype === 'pokemon' || filterSupertype === 'energy') ? `
