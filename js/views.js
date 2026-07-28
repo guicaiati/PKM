@@ -1181,11 +1181,11 @@ const Wizard = (() => {
         </div>
         <div class="chip-body">
           <div class="chip-top">
-            <span class="chip-name"${added ? '' : ` style="color:${color};"`}>${escapeHtml(c.name)}</span>
+            <span class="chip-name">${escapeHtml(c.name)}</span>
             ${ownedBadge}
             ${addedBadge}
           </div>
-          <span class="chip-reason" style="${added ? '' : `color:${color};`}font-weight:lighter;">${escapeHtml(c.reason)}</span>
+          <span class="chip-reason" style="font-weight:lighter;">${escapeHtml(c.reason)}</span>
         </div>
       </button>`;
     };
