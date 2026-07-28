@@ -284,6 +284,33 @@ button, label {
   &.active { background: var(--holo-b); color: var(--bg); border-color: var(--holo-b); font-weight: 600; }
 }
 
+.element-filter-row .filter-chip {
+  background: none; border: none; padding: 4px;
+  .cost-typed, .cost-colorless {
+    background: none; border: none;
+    width: 22px; height: 22px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: rgb(237, 237, 242); .tcg-sym { color: rgb(237, 237, 242); font-size: 13px; margin-right: 0; line-height: 1; }
+  }
+  &:hover .cost-typed, &.active .cost-typed {
+    width: 22px; height: 22px;
+    &.cost-fire { background: var(--fire); }
+    &.cost-water { background: var(--water); }
+    &.cost-grass { background: var(--grass); }
+    &.cost-electric { background: var(--electric); color: #000; .tcg-sym { color: #000; } }
+    &.cost-psychic { background: var(--psychic); }
+    &.cost-fighting { background: var(--fighting); }
+    &.cost-darkness { background: var(--darkness); }
+    &.cost-metal { background: var(--metal); color: #000; .tcg-sym { color: #000; } }
+    &.cost-dragon { background: var(--dragon); }
+  }
+  &:hover .cost-colorless, &.active .cost-colorless {
+    width: 22px; height: 22px;
+    background: #fff; border: 2px solid #aaa; color: #000; .tcg-sym { color: #000; }
+  }
+  .tcg-sym { margin-right: 0; }
+}
+
 .type-tag.type-meta-hover {
   cursor: help;
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
@@ -708,11 +735,11 @@ tr.row-evo-warning {
 
 /* Attack & Energy Cost Badges */
 .cost-free {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 18px;
   height: 18px;
-  line-height: 18px;
-  text-align: center;
   font-size: 16px;
   color: #888;
   background: var(--colorless);
@@ -721,11 +748,11 @@ tr.row-evo-warning {
 }
 
 .cost-colorless {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 18px;
   height: 18px;
-  line-height: 18px;
-  text-align: center;
   background: #fff;
   border-radius: 50%;
   border: 2px solid #aaa;
@@ -733,11 +760,11 @@ tr.row-evo-warning {
 }
 
 .cost-typed {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 18px;
   height: 18px;
-  line-height: 18px;
-  text-align: center;
   border-radius: 50%;
   color: #fff;
 
