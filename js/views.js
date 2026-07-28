@@ -1155,9 +1155,10 @@ const Wizard = (() => {
 
     const renderChip = (c) => {
       const typeRaw = detectCardType(c);
+      const typeColorMap = { Fire: '#F87171', Water: '#38BDF8', Grass: '#4ADE80', Lightning: '#FACC15', Psychic: '#E879F9', Fighting: '#FB923C', Darkness: '#A78BFA', Metal: '#94A3B8', Colorless: '#D4D4D8', Dragon: '#FDE68A' };
       const typeVarMap = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
       const typeCharMap = { Fire: 'r', Water: 'w', Grass: 'g', Lightning: 'l', Psychic: 'p', Fighting: 'f', Darkness: 'd', Metal: 'm', Colorless: 'c', Dragon: 'n', Fairy: 'y' };
-
+      const color = typeColorMap[typeRaw] || '#D4D4D8';
       const typeClass = typeVarMap[typeRaw] || 'colorless';
       const typeChar = typeCharMap[typeRaw] || 'c';
       const isColorless = typeClass === 'colorless';
@@ -1170,17 +1171,18 @@ const Wizard = (() => {
       const owned = countOwned(c.name);
       const ownedBadge = owned > 0 ? `<span class="chip-owned">Tenés ${owned}</span>` : '';
       const addedBadge = added ? `<span class="chip-added">✓</span>` : '';
-      return `<button type="button" class="filter-chip wiz-suggest-chip smart-chip ${added ? 'active' : ''}" data-suggest-name="${escapeHtml(c.name)}">
+      const chipStyle = added ? `background:transparent;color:${color};border-color:${color};` : `background:transparent;border:1px solid ${color};`;
+      return `<button type="button" class="filter-chip wiz-suggest-chip smart-chip ${added ? 'active' : ''}" style="${chipStyle}" data-suggest-name="${escapeHtml(c.name)}">
         <div class="chip-left-icon">
           ${thumbHtml}
         </div>
         <div class="chip-body">
           <div class="chip-top">
-            <span class="chip-name">${escapeHtml(c.name)}</span>
+            <span class="chip-name"${added ? '' : ` style="color:${color};"`}>${escapeHtml(c.name)}</span>
             ${ownedBadge}
             ${addedBadge}
           </div>
-          <span class="chip-reason">${escapeHtml(c.reason)}</span>
+          <span class="chip-reason" style="color:${color};font-weight:lighter;">${escapeHtml(c.reason)}</span>
         </div>
       </button>`;
     };
