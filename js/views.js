@@ -1372,9 +1372,10 @@ const Wizard = (() => {
 
     const hasRareCandy = deckNames.some(n => n.includes('rare candy') || n.includes('caramelo raro'));
 
+    const currentName = (c.name || '').toLowerCase();
     const hasPreEvoInDeck = (name) => deckAll.some(x => {
       const xName = (x.name || '').toLowerCase();
-      if (!name || !xName) return false;
+      if (!name || !xName || xName === currentName) return false;
       return xName.includes(name.toLowerCase()) || name.toLowerCase().includes(xName);
     });
 
@@ -1383,6 +1384,7 @@ const Wizard = (() => {
         const pStage = getStageCategory(p);
         if (pStage !== 'basic') return false;
         const pName = (p.name || '').toLowerCase();
+        if (pName === currentName) return false;
         if (evolvesFrom && (pName.includes(evolvesFrom.toLowerCase()) || evolvesFrom.toLowerCase().includes(pName))) return true;
         return shareFamily(card.name, p.name);
       }) || (evolvesFrom && hasPreEvoInDeck(evolvesFrom));

@@ -1328,6 +1328,7 @@ const Wizard = (() => {
     const evolvesFrom = (card.evolvesFrom || '').trim();
     const deckPokemon = currentDeckCards.filter(x => (x.category || '').toLowerCase() === 'pokemon').map(x => getCardDetails(x.name) || x);
     const deckNames = currentDeckCards.map(x => (x.name || '').toLowerCase());
+    const currentName = (c.name || '').toLowerCase();
 
     const hasRareCandy = deckNames.some(n => n.includes('rare candy') || n.includes('caramelo raro'));
 
@@ -1336,6 +1337,7 @@ const Wizard = (() => {
         const pStage = getStageCategory(p);
         if (pStage !== 'basic') return false;
         const pName = (p.name || '').toLowerCase();
+        if (pName === currentName) return false;
         if (evolvesFrom && (pName.includes(evolvesFrom.toLowerCase()) || evolvesFrom.toLowerCase().includes(pName))) return true;
         return shareFamily(card.name, p.name);
       });
@@ -1346,8 +1348,18 @@ const Wizard = (() => {
         };
       }
     } else if (stageCat === 'stage2') {
-      const hasBasic = deckPokemon.some(p => getStageCategory(p) === 'basic' && shareFamily(card.name, p.name));
-      const hasStage1 = deckPokemon.some(p => getStageCategory(p) === 'stage1' && shareFamily(card.name, p.name));
+      const hasBasic = deckPokemon.some(p => {
+        if (getStageCategory(p) !== 'basic') return false;
+        const pName = (p.name || '').toLowerCase();
+        if (pName === currentName) return false;
+        return shareFamily(card.name, p.name);
+      });
+      const hasStage1 = deckPokemon.some(p => {
+        if (getStageCategory(p) !== 'stage1') return false;
+        const pName = (p.name || '').toLowerCase();
+        if (pName === currentName) return false;
+        return shareFamily(card.name, p.name);
+      });
       const hasStage1OrCandy = hasStage1 || hasRareCandy;
 
       if (!hasBasic && !hasStage1OrCandy) {
