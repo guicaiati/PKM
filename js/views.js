@@ -1157,21 +1157,20 @@ const Wizard = (() => {
       const typeRaw = detectCardType(c);
       const typeColorMap = { Fire: '#F87171', Water: '#38BDF8', Grass: '#4ADE80', Lightning: '#FACC15', Psychic: '#E879F9', Fighting: '#FB923C', Darkness: '#A78BFA', Metal: '#94A3B8', Colorless: '#D4D4D8', Dragon: '#FDE68A' };
       const typeDotMap = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'lightning', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
-      const typeEmojiMap = { Fire: '🔥', Water: '💧', Grass: '🌿', Lightning: '⚡', Psychic: '🔮', Fighting: '👊', Darkness: '🌑', Metal: '⚙️', Colorless: '⭐', Dragon: '🐉', Fairy: '🧚' };
+      const typeCharMap = { Fire: 'r', Water: 'w', Grass: 'g', Lightning: 'l', Psychic: 'p', Fighting: 'f', Darkness: 'd', Metal: 'm', Colorless: 'c', Dragon: 'n', Fairy: 'y' };
 
       const dotClass = typeDotMap[typeRaw] || 'colorless';
-      const emoji = typeEmojiMap[typeRaw] || '⭐';
+      const typeChar = typeCharMap[typeRaw] || 'c';
 
       const added = alreadyAdded.has(c.name.toLowerCase());
       const owned = countOwned(c.name);
 
       const extraClass = added ? 'active' : '';
-      const ownedBadge = owned > 0 ? `<span class="chip-owned">Tenés ${owned}</span>` : '';
-      const addedBadge = added ? `<span class="chip-added">✓</span>` : '';
+      const ownedBadge = owned > 0 ? `<span class="chip-owned">${owned}</span>` : '';
       return `<button type="button" class="pick-chip ${extraClass}" data-suggest-name="${escapeHtml(c.name)}">
-        <span class="type-dot ${dotClass} sm">${emoji}</span>
+        <span class="type-dot ${dotClass} sm"><span class="tcg-sym">${typeChar}</span></span>
         <span class="chip-body">
-          <span class="chip-top">${escapeHtml(c.name)} ${ownedBadge} ${addedBadge}</span>
+          <span class="chip-top">${escapeHtml(c.name)} ${ownedBadge}</span>
           <span class="chip-reason">${escapeHtml(c.reason)}</span>
         </span>
       </button>`;
