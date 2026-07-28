@@ -1162,16 +1162,19 @@ const Wizard = (() => {
       const typeClass = typeVarMap[typeRaw] || 'colorless';
       const typeChar = typeCharMap[typeRaw] || 'c';
       const isColorless = typeClass === 'colorless';
-      const typeIconHtml = `<span class="chip-type-circle ${isColorless ? 'cost-colorless' : 'cost-typed cost-' + typeClass}" title="${typeRaw}"><span class="tcg-sym">${typeChar}</span></span>`;
-
-      const imgUrl = getCardImageUrl(c);
-      const thumbHtml = typeIconHtml;
 
       const added = alreadyAdded.has(c.name.toLowerCase());
       const owned = countOwned(c.name);
+
+      const circleStyle = added ? '' : `background:transparent;border:1px solid ${color};`;
+      const symStyle = added ? '' : `color:${color};`;
+      const chipStyle = added ? `background:transparent;color:${color};border-color:${color};` : '';
+      const typeIconHtml = `<span class="chip-type-circle ${isColorless ? 'cost-colorless' : 'cost-typed cost-' + typeClass}" title="${typeRaw}"${circleStyle ? ` style="${circleStyle}"` : ''}><span class="tcg-sym"${symStyle ? ` style="${symStyle}"` : ''}>${typeChar}</span></span>`;
+
+      const imgUrl = getCardImageUrl(c);
+      const thumbHtml = typeIconHtml;
       const ownedBadge = owned > 0 ? `<span class="chip-owned">Tenés ${owned}</span>` : '';
       const addedBadge = added ? `<span class="chip-added">✓</span>` : '';
-      const chipStyle = added ? `background:transparent;color:${color};border-color:${color};` : `background:transparent;border:1px solid ${color};`;
       return `<button type="button" class="filter-chip wiz-suggest-chip smart-chip ${added ? 'active' : ''}" style="${chipStyle}" data-suggest-name="${escapeHtml(c.name)}">
         <div class="chip-left-icon">
           ${thumbHtml}
@@ -1182,7 +1185,7 @@ const Wizard = (() => {
             ${ownedBadge}
             ${addedBadge}
           </div>
-          <span class="chip-reason" style="color:${color};font-weight:lighter;">${escapeHtml(c.reason)}</span>
+          <span class="chip-reason" style="${added ? '' : `color:${color};`}font-weight:lighter;">${escapeHtml(c.reason)}</span>
         </div>
       </button>`;
     };
