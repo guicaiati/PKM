@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trainer's Ledger — Guía de estilos (fusión)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0D12;
+    --surface-1: #14161D;
+    --surface-2: #1B1E27;
+    --surface-3: #22252F;
+    --border: rgba(255, 255, 255, .08);
+    --border-strong: rgba(255, 255, 255, .16);
+    --text: #EDEDF2;
+    --text-dim: #8A8D9A;
+    --text-faint: #5B5E6B;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --accent: #8B7FE8;
+    --accent-dim: rgba(139, 127, 232, .14);
+    --energy: #EF9F27;
+    --energy-dim: rgba(239, 159, 39, .14);
+    --draw: #22B08A;
+    --draw-dim: rgba(34, 176, 138, .14);
+    --support: #E0568C;
+    --support-dim: rgba(224, 86, 140, .14);
+    --grass: #3DAE5C;
+    --fire: #E5533D;
+    --water: #3D8BE5;
+    --lightning: #EF9F27;
+    --psychic: #B15FE0;
+    --fighting: #C97A3D;
+    --darkness: #6B6F84;
+    --metal: #8C97A6;
+    --colorless: #9AA0AC;
+    --dragon: #8B7FE8;
+    --trainer: #4FB6C9;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  #app { max-width: 1000px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  /* ===== Header ===== */
+  .ledger-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .ledger-head h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; letter-spacing: -.02em; }
+  .ledger-head h1 .name-sub { background: linear-gradient(135deg, var(--accent), var(--support)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .ledger-head .tag { font-family: var(--mono); font-size: 12px; color: var(--text-faint); }
+
+  /* ===== Tabs ===== */
+  nav.tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  nav.tabs button { font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--text-dim); background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; cursor: pointer; transition: .15s ease; }
+  nav.tabs button:hover { border-color: var(--border-strong); color: var(--text); }
+  nav.tabs button.active { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
+
+  /* ===== Panels & cards ===== */
+  .card-box { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 16px; }
+  .card-box h2 { font-family: var(--display); font-size: 17px; margin: 0 0 8px; font-weight: 700; }
+  .card-box h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); margin: 0 0 8px; font-weight: 600; }
+  .hint { font-size: 12.5px; color: var(--text-dim); margin: 0 0 12px; line-height: 1.5; }
+
+  /* ===== Inputs / buttons ===== */
+  input[type=text], input[type=number], select {
+    font-family: var(--body); font-size: 13px; color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 12px; outline: none;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  .input-qty { width: 70px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  button { font-family: var(--body); cursor: pointer; border-radius: 8px; font-size: 13px; transition: .15s ease; border: none; }
+  button.action { background: var(--accent); color: #fff; border: 1px solid var(--accent); padding: 9px 16px; font-weight: 600; }
+  button.action:hover { filter: brightness(1.1); }
+  button.ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); padding: 9px 14px; }
+  button.ghost:hover { border-color: var(--border-strong); color: var(--text); }
+  .btn-full { width: 100%; text-align: center; }
+  label.btn-label { display: inline-flex; }
+  .hidden { display: none; }
+  .mb-12 { margin-bottom: 12px; }
+
+  /* ===== Autocomplete (fusión) ===== */
+  .search-wrap { position: relative; }
+  .autocomplete-list { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; z-index: 10; }
+  .autocomplete-list.show { display: block; }
+  .autocomplete-item { padding: 8px 12px; font-size: 13px; display: flex; justify-content: space-between; cursor: pointer; }
+  .autocomplete-item:hover { background: var(--surface-3); }
+  .ac-owned { font-size: 11px; color: var(--draw); font-weight: 600; }
+
+  /* ===== Filter chips ===== */
+  .search-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .filter-chip { background: var(--surface-2); border: 1px solid var(--border); color: var(--text-dim); padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+  .filter-chip:hover { border-color: var(--border-strong); }
+  .filter-chip.active { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
+
+  /* ===== Type dots / cost icons (fusión de cost-typed) ===== */
+  .type-dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #0B0D12; flex-shrink: 0; }
+  .type-dot.fire { background: var(--fire); } .type-dot.water { background: var(--water); } .type-dot.grass { background: var(--grass); }
+  .type-dot.lightning { background: var(--lightning); } .type-dot.psychic { background: var(--psychic); } .type-dot.fighting { background: var(--fighting); }
+  .type-dot.darkness { background: var(--darkness); color: #fff; } .type-dot.metal { background: var(--metal); }
+  .type-dot.dragon { background: var(--dragon); color: #fff; } .type-dot.colorless { background: var(--colorless); }
+  .type-dot.sm { width: 18px; height: 18px; font-size: 9px; }
+
+  /* ===== Card grid (Buscar / Colección) ===== */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 6px; }
+  .pkcard { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; border-left: 3px solid var(--colorless); }
+  .pkcard.t-fire { border-left-color: var(--fire); } .pkcard.t-water { border-left-color: var(--water); }
+  .pkcard.t-grass { border-left-color: var(--grass); } .pkcard.t-lightning { border-left-color: var(--lightning); }
+  .pkcard.t-psychic { border-left-color: var(--psychic); } .pkcard.t-fighting { border-left-color: var(--fighting); }
+  .pkcard.t-darkness { border-left-color: var(--darkness); } .pkcard.t-metal { border-left-color: var(--metal); }
+  .pkcard.t-dragon { border-left-color: var(--dragon); } .pkcard.t-trainer { border-left-color: var(--trainer); }
+  .pkcard.t-energy { border-left-color: var(--energy); } .pkcard.t-colorless { border-left-color: var(--colorless); }
+  .card-thumb-ph { width: 100%; aspect-ratio: 5/7; background: var(--surface-3); display: flex; align-items: center; justify-content: center; color: var(--text-faint); font-size: 22px; }
+  .pkcard .meta { padding: 10px; }
+  .pkcard .name { font-weight: 600; font-size: 13px; }
+  .pkcard .set { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .pkcard .card-info { font-family: var(--mono); font-size: 10.5px; color: var(--text-faint); margin-top: 1px; }
+  .card-owned-tag { display: inline-block; margin-top: 8px; font-size: 11px; color: var(--draw); font-weight: 600; }
+
+  /* ===== Collection stats ===== */
+  .collection-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; text-align: center; }
+  .stat-label { font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .04em; }
+  .stat-value { font-family: var(--display); font-size: 20px; font-weight: 700; margin-top: 2px; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .qty-controls { display: flex; align-items: center; gap: 6px; }
+  .qty-controls button { background: var(--surface-3); border: 1px solid var(--border); color: var(--text); padding: 3px 9px; }
+
+  /* ===== Wizard: step nav ===== */
+  .step-nav { display: flex; flex-wrap: wrap; gap: 6px; }
+  .step-btn { background: var(--surface-2); border: 1px solid var(--border); color: var(--text-dim); padding: 6px 13px; border-radius: 8px; font-size: 12.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .step-btn:hover { border-color: var(--border-strong); }
+  .step-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--text); font-weight: 600; }
+  .step-badge { background: var(--surface-3); color: var(--text-dim); border-radius: 999px; font-size: 10.5px; padding: 1px 7px; font-family: var(--mono); }
+  .step-btn.active .step-badge { background: var(--accent); color: #fff; }
+  .step-check { color: var(--draw); font-size: 12px; }
+
+  /* ===== Barra segmentada (total del mazo / composición de colección guardada) ===== */
+  .total-bar-wrap { margin-top: 14px; }
+  .total-bar-labels { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-dim); margin-bottom: 5px; }
+  .total-bar-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; display: flex; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 11px; color: var(--text-dim); }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  /* ===== Wizard: target bar per step ===== */
+  .target-bar { margin-bottom: 16px; }
+  .target-bar-labels { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+  .target-bar-labels .cat-name { color: var(--text-dim); }
+  .target-bar-labels .cat-status { font-weight: 700; }
+  .target-bar-track { height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+  .target-bar-fill { height: 100%; border-radius: 3px; transition: width .25s ease; }
+
+  /* ===== Wizard: sub-filter block ===== */
+  .subfilter-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; }
+  .subfilter-block .label { font-size: 11.5px; color: var(--text-dim); font-weight: 600; margin: 0 0 8px; }
+  .subfilter-block .label:not(:first-child) { margin-top: 12px; }
+
+  /* ===== Wizard: suggestion chips (fusión de smart-chip) ===== */
+  .suggest-title { font-size: 12.5px; font-weight: 700; margin: 14px 0 8px; display: flex; align-items: center; gap: 6px; }
+  .chip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 6px; }
+  .pick-chip { text-align: left; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; color: var(--text); }
+  .pick-chip:hover { border-color: var(--border-strong); }
+  .pick-chip.active { border-color: var(--draw); background: var(--draw-dim); }
+  .pick-chip .chip-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .pick-chip .chip-top { display: flex; justify-content: space-between; gap: 6px; font-size: 13px; font-weight: 600; }
+  .pick-chip .chip-owned { font-size: 10.5px; color: var(--text-faint); font-weight: 500; }
+  .pick-chip .chip-added { font-size: 10.5px; font-weight: 500; color: var(--draw); }
+  .pick-chip .chip-reason { font-size: 11.5px; color: var(--text-dim); }
+  .pick-chip.missing { border-style: dashed; opacity: .8; }
+
+  /* ===== Wizard: table ===== */
+  .wizard-ledger { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 6px; }
+  .wizard-ledger th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-faint); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); overflow: hidden; }
+  .wizard-ledger td { height: 46px; padding: 0 8px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; overflow: hidden; }
+  .card-thumb-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .card-thumb-wrap span.card-row-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .card-mini-thumb, .card-mini-placeholder { width: 28px; height: 39px; border-radius: 4px; background: var(--surface-3); object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .type-tag { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 5px; }
+  .stage-tag { font-size: 10.5px; padding: 2px 7px; border-radius: 999px; background: var(--surface-3); color: var(--text-dim); }
+  .stage-tag.tag-ex { background: var(--support-dim); color: var(--support); }
+  .stage-tag.tag-basic { background: var(--draw-dim); color: var(--draw); }
+  .stage-tag.tag-stage1 { background: var(--accent-dim); color: var(--accent); }
+  .status-complete { color: var(--draw); font-weight: 600; font-size: 12px; }
+  .status-missing { color: var(--fire); font-weight: 600; font-size: 12px; }
+  .qty-action-cell { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 4px; height: 100%; }
+  .qty-action-cell .qty-controls { display: flex; align-items: center; gap: 4px; }
+  .qty-action-cell .qty-controls button { background: var(--surface-3); border: 1px solid var(--border); color: var(--text); padding: 3px 8px; flex-shrink: 0; }
+  .qty-action-cell button.ghost { padding: 3px 8px; font-size: 11.5px; white-space: nowrap; flex-shrink: 0; }
+  .group-label { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; margin: 14px 0 6px; }
+
+  /* fila de advertencia — evolución sin base agregada */
+  tr.row-evo-warning td { background: var(--support-dim); }
+  .info-warn-btn { font-size: 10px; color: var(--support); background: none; border: 1px solid var(--support); border-radius: 999px; padding: 1px 8px; margin-left: 8px; cursor: pointer; }
+
+  /* ===== Wizard: tenés/falta comprar ===== */
+  details.card-box { padding: 14px 18px; }
+  summary.accordion-header { font-size: 13px; font-weight: 600; cursor: pointer; list-style: none; }
+  summary.accordion-header::-webkit-details-marker { display: none; }
+  summary.accordion-header::before { content: '▾ '; color: var(--text-dim); }
+  .next-steps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; }
+  .next-steps-grid h3.have { color: var(--draw); }
+  .next-steps-grid h3.need { color: var(--support); }
+  .list-item { display: flex; justify-content: space-between; font-size: 12.5px; padding: 4px 0; }
+
+  /* ===== Threat / consistency ===== */
+  .threat-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); border-radius: var(--radius); padding: 9px 13px; margin-bottom: 8px; font-size: 13px; }
+  .threat-row.ok { background: var(--draw-dim); } .threat-row.bad { background: var(--support-dim); }
+  .threat-row .verdict { font-size: 11.5px; font-weight: 700; }
+  .threat-row.ok .verdict { color: var(--draw); } .threat-row.bad .verdict { color: var(--support); }
+  .sim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+  .sim-stat { background: var(--surface-2); border-radius: var(--radius); padding: 12px; text-align: center; }
+  .sim-stat .num { font-family: var(--display); font-size: 20px; font-weight: 700; }
+  .sim-stat .label { font-size: 10.5px; color: var(--text-dim); margin-top: 2px; }
+
+  /* ===== Detalle de carta (fusión de cd-*) ===== */
+  .detail-panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; max-width: 420px; }
+  .detail-panel h3 { font-family: var(--display); font-size: 18px; margin: 0 0 10px; }
+  .cd-header { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .cd-type-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; }
+  .cd-badge-lightning { background: var(--energy-dim); color: var(--lightning); }
+  .cd-badge-fighting { background: rgba(201,122,61,.15); color: var(--fighting); }
+  .cd-subtype { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-dim); color: var(--accent); }
+  .cd-stat { display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .cd-label { color: var(--text-dim); }
+  .cd-section { margin-top: 14px; }
+  .cd-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-faint); font-weight: 700; margin-bottom: 6px; }
+  .cd-ability { background: var(--surface-3); border-radius: var(--radius); padding: 10px; }
+  .cd-ability-name { font-weight: 600; font-size: 13px; display: block; margin-bottom: 3px; }
+  .cd-ability-text { font-size: 12px; color: var(--text-dim); }
+  .cd-attack { background: var(--surface-3); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; }
+  .cd-attack-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .cd-attack-name { font-weight: 600; font-size: 13px; }
+  .cd-attack-cost { display: flex; gap: 3px; flex-shrink: 0; }
+  .cd-attack-damage { font-family: var(--display); font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .cd-attack-text { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ===== Saved decks/collections (fusión: incluye barra de composición) ===== */
+  .saved-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+  .saved-card-row { display: flex; align-items: center; justify-content: space-between; }
+  .saved-card-header { display: flex; align-items: center; gap: 10px; }
+  .saved-card-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--surface-3); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .saved-card-name { font-weight: 600; font-size: 13px; }
+  .saved-card-date { font-size: 11px; color: var(--text-faint); }
+  .saved-card-stats { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+  .saved-card-actions { display: flex; gap: 6px; }
+
+  /* ===== Feedback: toasts ===== */
+  .toast { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 10px 14px; font-size: 12.5px; margin-bottom: 8px; }
+  .toast.success { border-left-color: var(--draw); }
+  .toast.error { border-left-color: var(--support); }
+
+  /* ===== DB sidebar: set-status ===== */
+  .set-status-list { display: flex; flex-direction: column; gap: 2px; }
+  .set-status-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .set-status-row .set-name { flex: 1; }
+  .set-status-row .set-count { font-family: var(--mono); font-size: 11px; color: var(--text-faint); }
+
+  .empty { font-size: 12.5px; color: var(--text-faint); padding: 10px 0; }
+
+  /* ===== Solo-guía: scaffolding de esta página ===== */
+  .sg-section-title { font-family: var(--display); font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+  .sg-section-desc { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint); margin: 0 0 16px; }
+  .sg-subtitle { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--accent); margin: 20px 0 10px; }
+  .sg-swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .sg-swatch { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+  .sg-swatch-color { height: 52px; }
+  .sg-swatch-label { padding: 7px 10px; font-family: var(--mono); font-size: 10.5px; color: var(--text-dim); }
+  .sg-swatch-label b { display: block; font-size: 12px; color: var(--text); }
+  .sg-toc { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sg-toc a { font-family: var(--mono); font-size: 12px; color: var(--text-dim); text-decoration: none; background: var(--surface-2); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; }
+  .sg-toc a:hover { color: var(--text); border-color: var(--accent); }
+  .sg-note { font-size: 12px; color: var(--text-dim); background: var(--surface-2); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 6px 6px 0; margin-top: 8px; }
+  .sg-badge-new { font-family: var(--mono); font-size: 9.5px; background: var(--draw-dim); color: var(--draw); padding: 2px 7px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+
+  @media (max-width:600px) { .next-steps-grid { grid-template-columns: 1fr; } .sim-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="ledger-head">
+    <h1><span class="name-sub">PKM</span> Trainer's Ledger</h1>
+    <div class="tag">guía de estilos · fusión v1 + v2</div>
+  </div>
+
+  <div class="card-box">
+    <h2>Índice</h2>
+    <p class="hint" style="margin-bottom:12px;">Todo lo que ya tenías en <span style="color:var(--text);">styles.css</span> real, más lo nuevo del wizard, unificado bajo una sola estética. Lo marcado <span class="sg-badge-new">nuevo</span> no existía en tu CSS original.</p>
+    <div class="sg-toc">
+      <a href="#colores">Colores</a>
+      <a href="#tipografia">Tipografía</a>
+      <a href="#botones">Botones &amp; inputs</a>
+      <a href="#tabs">Tabs &amp; chips</a>
+      <a href="#tipos">Tipos &amp; costos</a>
+      <a href="#suggest">Chips de sugerencia</a>
+      <a href="#cartas">Cartas &amp; grillas</a>
+      <a href="#stats">Stat boxes</a>
+      <a href="#wizard-nav">Nav del wizard &amp; barras</a>
+      <a href="#tablas">Tablas del wizard</a>
+      <a href="#tenes">Tenés / falta comprar</a>
+      <a href="#amenazas">Amenazas &amp; consistencia</a>
+      <a href="#detalle">Detalle de carta</a>
+      <a href="#guardado">Tarjetas guardadas</a>
+      <a href="#feedback">Toasts, acordeón &amp; sets</a>
+    </div>
+  </div>
+
+  <!-- ===================== COLORES ===================== -->
+  <section class="card-box" id="colores">
+    <h2 class="sg-section-title">Colores</h2>
+    <p class="sg-section-desc">Base + acentos por categoría de mazo (nuevo) + tipos elementales</p>
+
+    <p class="sg-subtitle">Base</p>
+    <div class="sg-swatch-grid">
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--bg);"></div><div class="sg-swatch-label"><b>--bg</b>#0B0D12</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--surface-1);"></div><div class="sg-swatch-label"><b>--surface-1</b>#14161D</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--surface-2);"></div><div class="sg-swatch-label"><b>--surface-2</b>#1B1E27</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--surface-3);"></div><div class="sg-swatch-label"><b>--surface-3</b>#22252F</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--text);"></div><div class="sg-swatch-label"><b>--text</b>#EDEDF2</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--text-dim);"></div><div class="sg-swatch-label"><b>--text-dim</b>#8A8D9A</div></div>
+    </div>
+
+    <p class="sg-subtitle">Categorías del mazo <span class="sg-badge-new">nuevo</span></p>
+    <div class="sg-swatch-grid">
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--accent);"></div><div class="sg-swatch-label"><b>--accent</b>Pokémon</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--energy);"></div><div class="sg-swatch-label"><b>--energy</b>Energía</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--draw);"></div><div class="sg-swatch-label"><b>--draw</b>Robo</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--support);"></div><div class="sg-swatch-label"><b>--support</b>Apoyo</div></div>
+    </div>
+
+    <p class="sg-subtitle">Tipos elementales</p>
+    <div class="sg-swatch-grid">
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--fire);"></div><div class="sg-swatch-label"><b>--fire</b>Fuego</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--water);"></div><div class="sg-swatch-label"><b>--water</b>Agua</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--grass);"></div><div class="sg-swatch-label"><b>--grass</b>Planta</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--lightning);"></div><div class="sg-swatch-label"><b>--lightning</b>Rayo</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--psychic);"></div><div class="sg-swatch-label"><b>--psychic</b>Psíquico</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--fighting);"></div><div class="sg-swatch-label"><b>--fighting</b>Lucha</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--darkness);"></div><div class="sg-swatch-label"><b>--darkness</b>Oscuridad</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--metal);"></div><div class="sg-swatch-label"><b>--metal</b>Metal</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--dragon);"></div><div class="sg-swatch-label"><b>--dragon</b>Dragón</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--colorless);"></div><div class="sg-swatch-label"><b>--colorless</b>Incoloro</div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--trainer);"></div><div class="sg-swatch-label"><b>--trainer</b>Trainer</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== TIPOGRAFIA ===================== -->
+  <section class="card-box" id="tipografia">
+    <h2 class="sg-section-title">Tipografía</h2>
+    <div class="row" style="flex-direction:column;align-items:flex-start;gap:14px;">
+      <div><span style="font-family:var(--mono);font-size:11px;color:var(--accent);">--display: Space Grotesk</span><div style="font-family:var(--display);font-weight:700;font-size:22px;margin-top:4px;">Armar mazo — paso a paso</div></div>
+      <div><span style="font-family:var(--mono);font-size:11px;color:var(--accent);">--body: Inter</span><div style="font-family:var(--body);font-size:14px;margin-top:4px;">Escribí el nombre, número o ID de la carta.</div></div>
+      <div><span style="font-family:var(--mono);font-size:11px;color:var(--accent);">--mono: IBM Plex Mono</span><div style="font-family:var(--mono);font-size:13px;margin-top:4px;">buscá · cataloga · armá tu mazo</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== BOTONES / INPUTS ===================== -->
+  <section class="card-box" id="botones">
+    <h2 class="sg-section-title">Botones &amp; inputs</h2>
+    <p class="sg-subtitle">Botones</p>
+    <div class="row">
+      <button class="action">Agregar</button>
+      <button class="ghost">Limpiar</button>
+      <button class="action btn-full" style="max-width:160px;">Ancho completo</button>
+    </div>
+    <p class="sg-subtitle">Inputs</p>
+    <div class="row">
+      <input type="text" placeholder="ej: Charizard ex 110" style="max-width:220px;">
+      <input type="number" class="input-qty" value="1">
+      <select><option>Todos los tipos</option><option>Pokémon</option><option>Trainer</option><option>Energy</option></select>
+    </div>
+    <p class="sg-subtitle">Búsqueda con autocompletado</p>
+    <div class="search-wrap" style="max-width:320px;">
+      <input type="text" placeholder="Buscar Pokémon...">
+      <div class="autocomplete-list show">
+        <div class="autocomplete-item">Pikachu <span class="ac-owned">Tenés 1</span></div>
+        <div class="autocomplete-item">Pichu</div>
+        <div class="autocomplete-item">Raichu <span class="ac-owned">Tenés 1</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TABS ===================== -->
+  <section class="card-box" id="tabs">
+    <h2 class="sg-section-title">Tabs &amp; filter chips</h2>
+    <p class="sg-subtitle">Navegación principal</p>
+    <nav class="tabs" style="margin-bottom:0;">
+      <button class="active">Buscar</button>
+      <button>Armar mazo</button>
+      <button>Colección</button>
+      <button>Guardado</button>
+    </nav>
+    <p class="sg-subtitle">Filter chips</p>
+    <div class="search-filters">
+      <button class="filter-chip active">Todos</button>
+      <button class="filter-chip">Pokémon</button>
+      <button class="filter-chip">Trainer</button>
+      <button class="filter-chip">Energy</button>
+    </div>
+  </section>
+
+  <!-- ===================== TIPOS Y COSTOS ===================== -->
+  <section class="card-box" id="tipos">
+    <h2 class="sg-section-title">Íconos de tipo &amp; costo</h2>
+    <p class="sg-section-desc">Fusión: los círculos <span class="sg-code">cost-typed</span> de tu CSS original, reconstruidos como <span style="color:var(--text);">.type-dot</span> con la paleta nueva</p>
+    <div class="row">
+      <span class="type-dot fire">🔥</span>
+      <span class="type-dot water">💧</span>
+      <span class="type-dot grass">🌿</span>
+      <span class="type-dot lightning">⚡</span>
+      <span class="type-dot psychic">🔮</span>
+      <span class="type-dot fighting">👊</span>
+      <span class="type-dot darkness">🌑</span>
+      <span class="type-dot metal">⚙️</span>
+      <span class="type-dot dragon">🐉</span>
+      <span class="type-dot colorless">⭐</span>
+    </div>
+    <p class="sg-subtitle">Tamaño chico (usado en filas de tabla / chips)</p>
+    <div class="row">
+      <span class="type-dot lightning sm">⚡</span>
+      <span class="type-tag"><span class="type-dot lightning sm">⚡</span> Rayo</span>
+    </div>
+  </section>
+
+  <!-- ===================== SUGGEST CHIPS ===================== -->
+  <section class="card-box" id="suggest">
+    <h2 class="sg-section-title">Chips de sugerencia</h2>
+    <p class="sg-section-desc">Fusión de <span class="sg-code" style="font-family:var(--mono);color:var(--accent);">.smart-chip</span> (original) con <span style="color:var(--text);">.pick-chip</span> (nuevo) — ahora con ícono de tipo a la izquierda</p>
+    <div class="suggest-title">⭐ De tu colección</div>
+    <div class="chip-grid">
+      <button class="pick-chip active">
+        <span class="type-dot lightning sm">⚡</span>
+        <span class="chip-body">
+          <span class="chip-top">Pikachu <span class="chip-added">en el mazo</span></span>
+          <span class="chip-reason">Completa evolución de Raichu · tenés 1</span>
+        </span>
+      </button>
+      <button class="pick-chip">
+        <span class="type-dot lightning sm">⚡</span>
+        <span class="chip-body">
+          <span class="chip-top">Pawmi <span class="chip-owned">tenés 1</span></span>
+          <span class="chip-reason">Mismo tipo (Rayo)</span>
+        </span>
+      </button>
+    </div>
+    <div class="suggest-title">💎 Mejoras sugeridas</div>
+    <div class="chip-grid">
+      <button class="pick-chip missing">
+        <span class="type-dot lightning sm">⚡</span>
+        <span class="chip-body">
+          <span class="chip-top">Rotom ex</span>
+          <span class="chip-reason">Mismo tipo (Rayo) · falta comprar</span>
+        </span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================== CARTAS / GRILLAS ===================== -->
+  <section class="card-box" id="cartas">
+    <h2 class="sg-section-title">Cartas &amp; grillas</h2>
+    <div class="grid">
+      <div class="pkcard t-fire">
+        <div class="card-thumb-ph">🔥</div>
+        <div class="meta">
+          <div class="name">Cinderace</div>
+          <div class="set">Chilling Reign</div>
+          <div class="card-info">#28</div>
+          <button class="ghost btn-full" style="margin-top:8px;">+ Agregar</button>
+        </div>
+      </div>
+      <div class="pkcard t-lightning">
+        <div class="card-thumb-ph">⚡</div>
+        <div class="meta">
+          <div class="name">Tapu Koko</div>
+          <div class="set">Ascended Heroes</div>
+          <div class="card-info">#67</div>
+          <div class="card-owned-tag">Tenés 1</div>
+        </div>
+      </div>
+      <div class="pkcard t-metal">
+        <div class="card-thumb-ph">⚙️</div>
+        <div class="meta">
+          <div class="name">Iron Treads ex</div>
+          <div class="set">Paldean Fates</div>
+          <div class="card-info">#66</div>
+          <button class="ghost btn-full" style="margin-top:8px;">+ Agregar</button>
+        </div>
+      </div>
+      <div class="pkcard t-trainer">
+        <div class="card-thumb-ph">🎴</div>
+        <div class="meta">
+          <div class="name">Boss's Orders</div>
+          <div class="set">Paldea Evolved</div>
+          <div class="card-info">#172</div>
+          <div class="card-owned-tag">Tenés 1</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== STAT BOXES ===================== -->
+  <section class="card-box" id="stats">
+    <h2 class="sg-section-title">Stat boxes</h2>
+    <div class="collection-stats">
+      <div class="stat-box"><div class="stat-label">Total</div><div class="stat-value">43</div></div>
+      <div class="stat-box"><div class="stat-label">Pokémon</div><div class="stat-value">21</div></div>
+      <div class="stat-box"><div class="stat-label">Trainer</div><div class="stat-value">9</div></div>
+      <div class="stat-box"><div class="stat-label">Energy</div><div class="stat-value">13</div></div>
+      <div class="stat-box"><div class="stat-label">Únicas</div><div class="stat-value">37</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== WIZARD NAV + BARRAS ===================== -->
+  <section class="card-box" id="wizard-nav">
+    <h2 class="sg-section-title">Navegación del wizard &amp; barras <span class="sg-badge-new">nuevo</span></h2>
+    <p class="sg-subtitle">Step nav con badges de conteo</p>
+    <div class="step-nav">
+      <button class="step-btn">1. Plan <span class="step-check">✓</span></button>
+      <button class="step-btn active">2. Pokémon <span class="step-badge">3</span></button>
+      <button class="step-btn">3. Energía <span class="step-badge">10</span></button>
+      <button class="step-btn">4. Robo <span class="step-badge">1</span></button>
+    </div>
+
+    <p class="sg-subtitle">Barra de rango recomendado (por paso)</p>
+    <div class="target-bar">
+      <div class="target-bar-labels"><span class="cat-name"><span class="dot" style="background:var(--accent);"></span> Pokémon — recomendado 8–12</span><span class="cat-status" style="color:var(--energy);">llevás 3</span></div>
+      <div class="target-bar-track"><div class="target-bar-fill" style="width:25%;background:var(--accent);"></div></div>
+    </div>
+
+    <p class="sg-subtitle">Barra total del mazo (segmentada, también sirve para colecciones guardadas)</p>
+    <div class="total-bar-wrap">
+      <div class="total-bar-labels"><span>Mazo total</span><strong style="color:var(--text);">15 / 60</strong></div>
+      <div class="total-bar-track">
+        <div style="width:5%;background:var(--accent);"></div>
+        <div style="width:16.6%;background:var(--energy);"></div>
+        <div style="width:1.6%;background:var(--draw);"></div>
+        <div style="width:1.6%;background:var(--support);"></div>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--accent);"></span>Pokémon</span>
+        <span><span class="dot" style="background:var(--energy);"></span>Energía</span>
+        <span><span class="dot" style="background:var(--draw);"></span>Robo</span>
+        <span><span class="dot" style="background:var(--support);"></span>Apoyo</span>
+      </div>
+    </div>
+
+    <p class="sg-subtitle">Subfiltro por función (Robo / Apoyo)</p>
+    <div class="subfilter-block">
+      <p class="label">Filtrar por función</p>
+      <div class="search-filters">
+        <button class="filter-chip active">Todas</button>
+        <button class="filter-chip">Búsqueda</button>
+        <button class="filter-chip">Evolución rápida</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TABLAS ===================== -->
+  <section class="card-box" id="tablas">
+    <h2 class="sg-section-title">Tablas del wizard</h2>
+    <p class="sg-section-desc">Fusión de <span style="font-family:var(--mono);color:var(--accent);">.aligned-ledger</span> con el stepper +/− y botón Quitar</p>
+    <div class="group-label">⚔️ Atacantes de reserva (3)</div>
+    <table class="wizard-ledger">
+      <thead>
+        <tr>
+          <th style="width:30%;">Nombre</th>
+          <th style="width:18%;">Tipo</th>
+          <th style="width:16%;">Nivel</th>
+          <th style="width:24%;text-align:center;">Cantidad / Acción</th>
+          <th style="width:12%;text-align:center;">Tenés</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="card-thumb-wrap"><span class="card-mini-placeholder">🃏</span><span class="card-row-name">Pikachu</span></div></td>
+          <td><span class="type-tag"><span class="type-dot lightning sm">⚡</span> Rayo</span></td>
+          <td><span class="stage-tag tag-basic">Básico</span></td>
+          <td class="qty-action-cell"><div class="qty-controls"><button>−</button><span>1</span><button>+</button></div><button class="ghost">Quitar</button></td>
+          <td class="status-complete" style="text-align:center;">Tenés (1)</td>
+        </tr>
+        <tr>
+          <td><div class="card-thumb-wrap"><span class="card-mini-placeholder">🃏</span><span class="card-row-name">Rotom ex</span></div></td>
+          <td><span class="type-tag"><span class="type-dot lightning sm">⚡</span> Rayo</span></td>
+          <td><span class="stage-tag tag-ex">ex</span></td>
+          <td class="qty-action-cell"><div class="qty-controls"><button>−</button><span>1</span><button>+</button></div><button class="ghost">Quitar</button></td>
+          <td class="status-missing" style="text-align:center;">Falta 1</td>
+        </tr>
+        <tr class="row-evo-warning">
+          <td><div class="card-thumb-wrap"><span class="card-mini-placeholder">🃏</span><span class="card-row-name">Manectric</span></div><button class="info-warn-btn">⚠ evo</button></td>
+          <td><span class="type-tag"><span class="type-dot lightning sm">⚡</span> Rayo</span></td>
+          <td><span class="stage-tag tag-stage1">Fase 1</span></td>
+          <td class="qty-action-cell"><div class="qty-controls"><button>−</button><span>1</span><button>+</button></div><button class="ghost">Quitar</button></td>
+          <td class="status-missing" style="text-align:center;">Falta 1</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="sg-note">La fila rosa (<span style="font-family:var(--mono);">.row-evo-warning</span>) marca una evolución sin su base agregada al mazo — heredado de tu tabla original.</p>
+  </section>
+
+  <!-- ===================== TENES / FALTA COMPRAR ===================== -->
+  <section class="card-box" id="tenes">
+    <h2 class="sg-section-title">Tenés / falta comprar</h2>
+    <details class="card-box" open style="background:var(--surface-2);">
+      <summary class="accordion-header">Tenés / falta comprar</summary>
+      <div class="next-steps-grid">
+        <div><h3 class="have">Ya tenés (3)</h3><div class="list-item"><span>Pikachu</span><span>x1</span></div><div class="list-item"><span>Raichu</span><span>x1</span></div></div>
+        <div><h3 class="need">Falta comprar</h3><div class="list-item"><span>Rotom ex</span><span>x1</span></div></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===================== AMENAZAS / CONSISTENCIA ===================== -->
+  <section class="card-box" id="amenazas">
+    <h2 class="sg-section-title">Amenazas &amp; consistencia <span class="sg-badge-new">nuevo</span></h2>
+    <p class="sg-subtitle">Cobertura de tipos</p>
+    <div class="threat-row ok"><span>vs. Agua</span><span class="verdict">Favorable</span></div>
+    <div class="threat-row bad"><span>vs. Lucha</span><span class="verdict">Débil — sin plan B</span></div>
+    <p class="sg-subtitle">Simulación de consistencia</p>
+    <div class="sim-grid">
+      <div class="sim-stat"><div class="num">87%</div><div class="label">básico en mano inicial</div></div>
+      <div class="sim-stat"><div class="num">64%</div><div class="label">atacante activo turno 2</div></div>
+      <div class="sim-stat"><div class="num">41%</div><div class="label">energía turno 1</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== DETALLE DE CARTA ===================== -->
+  <section class="card-box" id="detalle">
+    <h2 class="sg-section-title">Detalle de carta</h2>
+    <p class="sg-section-desc">Fusión de tus clases <span style="font-family:var(--mono);color:var(--accent);">cd-*</span> con la paleta nueva</p>
+    <div class="detail-panel">
+      <h3>Tapu Koko</h3>
+      <div class="cd-header">
+        <span class="cd-type-badge cd-badge-lightning"><span class="type-dot lightning sm">⚡</span> Rayo</span>
+        <span class="cd-subtype">VSTAR</span>
+      </div>
+      <div class="cd-stat"><span class="cd-label">HP</span><span>190</span></div>
+      <div class="cd-stat"><span class="cd-label">Rareza</span><span>Ultra Rare</span></div>
+      <div class="cd-section">
+        <div class="cd-section-title">Habilidad</div>
+        <div class="cd-ability">
+          <span class="cd-ability-name">Electric Generator</span>
+          <span class="cd-ability-text">Una vez por turno, buscá en tu mazo una Energía Rayo básica y agregala a la mano.</span>
+        </div>
+      </div>
+      <div class="cd-section">
+        <div class="cd-section-title">Ataques</div>
+        <div class="cd-attack">
+          <div class="cd-attack-header">
+            <span class="cd-attack-name">Thunderbolt Discharge</span>
+            <span class="cd-attack-cost"><span class="type-dot lightning sm">⚡</span><span class="type-dot colorless sm">⭐</span></span>
+          </div>
+          <div class="cd-attack-damage">130</div>
+          <div class="cd-attack-text">Descarta toda la energía adjunta a este Pokémon.</div>
+        </div>
+      </div>
+      <div class="cd-section">
+        <div class="cd-section-title">Debilidades</div>
+        <span class="cd-type-badge cd-badge-fighting"><span class="type-dot fighting sm">👊</span> Lucha ×2</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== GUARDADO ===================== -->
+  <section class="card-box" id="guardado">
+    <h2 class="sg-section-title">Tarjetas guardadas</h2>
+    <p class="sg-section-desc">Fusión: composición del mazo usando la misma barra segmentada del wizard</p>
+    <div class="saved-card">
+      <div class="saved-card-row">
+        <div class="saved-card-header">
+          <div class="saved-card-icon">📂</div>
+          <div>
+            <div class="saved-card-name">Rayo rápido</div>
+            <div class="saved-card-date">Guardado hace 2 días · 60 cartas</div>
+          </div>
+        </div>
+        <div class="saved-card-actions">
+          <button class="action">Cargar</button>
+          <button class="ghost">Eliminar</button>
+        </div>
+      </div>
+      <div class="total-bar-wrap" style="margin-top:12px;">
+        <div class="total-bar-track">
+          <div style="width:20%;background:var(--accent);"></div>
+          <div style="width:16%;background:var(--energy);"></div>
+          <div style="width:8%;background:var(--draw);"></div>
+          <div style="width:6%;background:var(--support);"></div>
+        </div>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--accent);"></span>Pokémon 12</span>
+          <span><span class="dot" style="background:var(--energy);"></span>Energía 10</span>
+          <span><span class="dot" style="background:var(--draw);"></span>Robo 5</span>
+          <span><span class="dot" style="background:var(--support);"></span>Apoyo 4</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEEDBACK ===================== -->
+  <section class="card-box" id="feedback">
+    <h2 class="sg-section-title">Toasts, acordeón &amp; sets locales</h2>
+    <p class="sg-subtitle">Toasts</p>
+    <div class="toast">Colección actualizada.</div>
+    <div class="toast success">Carta agregada al mazo.</div>
+    <div class="toast error">No se pudo conectar con la API.</div>
+
+    <p class="sg-subtitle">Base de datos y sets locales</p>
+    <div class="set-status-list">
+      <div class="set-status-row"><span style="color:var(--draw);">✔</span><span class="set-name">Paldean Fates</span><span class="set-count">245</span></div>
+      <div class="set-status-row"><span style="color:var(--support);">✘</span><span class="set-name">Evolving Skies</span><button class="ghost" style="padding:2px 10px;">↓</button></div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

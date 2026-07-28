@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trainer's Ledger — Guía de estilos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ===== Solo para esta página de guía — no toca tus clases reales ===== */
+    .sg-section {
+      margin-bottom: 36px;
+    }
+
+    .sg-section-title {
+      font-family: var(--display);
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 4px;
+      color: var(--text);
+    }
+
+    .sg-section-desc {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      margin: 0 0 16px;
+    }
+
+    .sg-subtitle {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--holo-a);
+      margin: 20px 0 10px;
+    }
+
+    .sg-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .sg-swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .sg-swatch {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .sg-swatch-color {
+      height: 56px;
+    }
+
+    .sg-swatch-label {
+      padding: 8px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .sg-swatch-label b {
+      display: block;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .sg-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+    }
+
+    .sg-type-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .sg-font-sample {
+      font-size: 22px;
+      margin: 4px 0;
+    }
+
+    .sg-code {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--holo-a);
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .sg-toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sg-toc a {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    .sg-toc a:hover {
+      color: var(--text);
+      border-color: var(--holo-a);
+    }
+
+    .sg-note {
+      font-size: 12px;
+      color: var(--text-dim);
+      background: var(--surface-2);
+      border-left: 3px solid var(--holo-b);
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <div class="ledger-head">
+      <h1><span class="thraex-title name-sub">PKM</span> Trainer's Ledger</h1>
+      <div class="tag">guía de estilos &middot; design system</div>
+    </div>
+
+    <div class="card-box">
+      <h2>Índice</h2>
+      <div class="sg-toc">
+        <a href="#colores">Colores</a>
+        <a href="#tipografia">Tipografía</a>
+        <a href="#botones">Botones &amp; inputs</a>
+        <a href="#tabs">Tabs &amp; chips</a>
+        <a href="#smart-chips">Smart chips</a>
+        <a href="#tipos">Iconos de tipo &amp; costo</a>
+        <a href="#cartas">Cartas &amp; grillas</a>
+        <a href="#stats">Stat boxes</a>
+        <a href="#tablas">Tablas del wizard</a>
+        <a href="#detalle">Detalle de carta</a>
+        <a href="#guardado">Tarjetas guardadas</a>
+        <a href="#feedback">Modal, toast &amp; acordeón</a>
+      </div>
+    </div>
+
+    <!-- ===================== COLORES ===================== -->
+    <section class="card-box sg-section" id="colores">
+      <h2 class="sg-section-title">Colores</h2>
+      <p class="sg-section-desc">Variables definidas en <span class="sg-code">:root</span> de styles.css</p>
+
+      <p class="sg-subtitle">Base</p>
+      <div class="sg-swatch-grid">
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--bg);"></div>
+          <div class="sg-swatch-label"><b>--bg</b>#14172B</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--surface);"></div>
+          <div class="sg-swatch-label"><b>--surface</b>#1D2140</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--surface-2);"></div>
+          <div class="sg-swatch-label"><b>--surface-2</b>#262B52</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--line);"></div>
+          <div class="sg-swatch-label"><b>--line</b>#383F72</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--text);"></div>
+          <div class="sg-swatch-label"><b>--text</b>#EDEBFF</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--text-dim);"></div>
+          <div class="sg-swatch-label"><b>--text-dim</b>#A8ADD6</div>
+        </div>
+      </div>
+
+      <p class="sg-subtitle">Holo (acentos — gradiente de tabs/botones activos)</p>
+      <div class="sg-swatch-grid">
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--holo-a);"></div>
+          <div class="sg-swatch-label"><b>--holo-a</b>#7DD3FC</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--holo-b);"></div>
+          <div class="sg-swatch-label"><b>--holo-b</b>#C084FC</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--holo-c);"></div>
+          <div class="sg-swatch-label"><b>--holo-c</b>#FDBA74</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color"
+            style="background:linear-gradient(100deg, var(--holo-a), var(--holo-b) 55%, var(--holo-c));"></div>
+          <div class="sg-swatch-label"><b>gradiente</b>tabs/botón activo</div>
+        </div>
+      </div>
+
+      <p class="sg-subtitle">Tipos elementales</p>
+      <div class="sg-swatch-grid">
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--fire);"></div>
+          <div class="sg-swatch-label"><b>--fire</b>Fuego</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--water);"></div>
+          <div class="sg-swatch-label"><b>--water</b>Agua</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--grass);"></div>
+          <div class="sg-swatch-label"><b>--grass</b>Planta</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--electric);"></div>
+          <div class="sg-swatch-label"><b>--electric</b>Rayo</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--psychic);"></div>
+          <div class="sg-swatch-label"><b>--psychic</b>Psíquico</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--fighting);"></div>
+          <div class="sg-swatch-label"><b>--fighting</b>Lucha</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--darkness);"></div>
+          <div class="sg-swatch-label"><b>--darkness</b>Oscuridad</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--metal);"></div>
+          <div class="sg-swatch-label"><b>--metal</b>Metal</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--dragon);"></div>
+          <div class="sg-swatch-label"><b>--dragon</b>Dragón</div>
+        </div>
+        <div class="sg-swatch">
+          <div class="sg-swatch-color" style="background:var(--colorless);"></div>
+          <div class="sg-swatch-label"><b>--colorless</b>Incoloro</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TIPOGRAFIA ===================== -->
+    <section class="card-box sg-section" id="tipografia">
+      <h2 class="sg-section-title">Tipografía</h2>
+      <p class="sg-section-desc">3 familias activas + 2 fuentes de íconos personalizadas (requieren los archivos en
+        /fonts)</p>
+      <div class="sg-row" style="flex-direction:column;align-items:flex-start;gap:14px;">
+        <div><span class="sg-code">--display: Space Grotesk</span>
+          <div class="sg-font-sample" style="font-family:var(--display);font-weight:700;">Armar mazo — paso a paso</div>
+        </div>
+        <div><span class="sg-code">--body: Inter</span>
+          <div class="sg-font-sample" style="font-family:var(--body);font-size:14px;">Escribí el nombre, número o ID de
+            la carta.</div>
+        </div>
+        <div><span class="sg-code">--mono: IBM Plex Mono</span>
+          <div class="sg-font-sample" style="font-family:var(--mono);font-size:13px;">buscá · cataloga · armá tu mazo
+          </div>
+        </div>
+        <div><span class="sg-code">--tcg: EssentiarumTCG</span> <span
+            style="color:var(--text-dim);font-size:11px;">(íconos de tipo/costo — fuente en /fonts)</span></div>
+        <div><span class="sg-code">--poke: ThraexMagnus</span> <span
+            style="color:var(--text-dim);font-size:11px;">(título "PKM" con .thraex-title — fuente en /fonts)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BOTONES / INPUTS ===================== -->
+    <section class="card-box sg-section" id="botones">
+      <h2 class="sg-section-title">Botones &amp; inputs</h2>
+      <p class="sg-subtitle">Botones</p>
+      <div class="sg-row">
+        <button class="action">Agregar</button>
+        <button class="ghost">Limpiar</button>
+        <button class="ghost" title="Con tooltip">Con title</button>
+        <label class="action btn-label">Importar JSON<input type="file" class="hidden"></label>
+      </div>
+      <p class="sg-subtitle">Inputs</p>
+      <div class="sg-row">
+        <input type="text" placeholder="ej: Charizard ex 110" style="max-width:220px;">
+        <input type="number" class="input-qty" value="1">
+        <select>
+          <option>Todos los tipos</option>
+          <option>Pokémon</option>
+          <option>Trainer</option>
+          <option>Energy</option>
+        </select>
+      </div>
+      <p class="sg-subtitle">Búsqueda con autocompletado</p>
+      <div class="search-wrap" style="max-width:320px;">
+        <input type="text" placeholder="Buscar Pokémon...">
+        <div class="autocomplete-list show">
+          <div class="autocomplete-item">Pikachu <span class="ac-owned">Tenés 1</span></div>
+          <div class="autocomplete-item">Pichu</div>
+          <div class="autocomplete-item">Raichu <span class="ac-owned">Tenés 1</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TABS / FILTER CHIPS ===================== -->
+    <section class="card-box sg-section" id="tabs">
+      <h2 class="sg-section-title">Tabs &amp; filter chips</h2>
+      <p class="sg-subtitle">Navegación principal</p>
+      <nav class="tabs" style="margin-bottom:0;">
+        <button class="active">Buscar</button>
+        <button>Armar mazo</button>
+        <button>Colección</button>
+        <button>Guardado</button>
+      </nav>
+      <p class="sg-subtitle">Filter chips (tipo, etapa TCG, historial)</p>
+      <div class="search-filters">
+        <button class="filter-chip active">Todos</button>
+        <button class="filter-chip">Pokémon</button>
+        <button class="filter-chip">Trainer</button>
+        <button class="filter-chip">Energy</button>
+        <button class="filter-chip">Pupitar</button>
+      </div>
+    </section>
+
+    <!-- ===================== SMART CHIPS ===================== -->
+    <section class="card-box sg-section" id="smart-chips">
+      <h2 class="sg-section-title">Smart suggestion chips</h2>
+      <p class="sg-section-desc">Usadas en "De tu colección" / "Mejoras sugeridas" dentro del wizard</p>
+      <div class="suggest-section">
+        <div class="suggest-title">⭐ De tu colección</div>
+        <div class="chip-container">
+          <button class="filter-chip smart-chip active">
+            <div class="chip-left-icon"><span class="chip-type-circle cost-typed cost-electric"><span
+                  class="tcg-sym">l</span></span></div>
+            <div class="chip-body">
+              <div class="chip-top"><span class="chip-name">Pikachu</span><span class="chip-owned">Tenés 1</span><span
+                  class="chip-added">✓</span></div>
+              <span class="chip-reason">Completa evolución de Raichu</span>
+            </div>
+          </button>
+          <button class="filter-chip smart-chip">
+            <div class="chip-left-icon"><span class="chip-type-circle cost-typed cost-electric"><span
+                  class="tcg-sym">l</span></span></div>
+            <div class="chip-body">
+              <div class="chip-top"><span class="chip-name">Pawmi</span><span class="chip-owned">Tenés 1</span></div>
+              <span class="chip-reason">Mismo tipo (Rayo)</span>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="suggest-section">
+        <div class="suggest-title">💎 Mejoras</div>
+        <div class="chip-container">
+          <button class="filter-chip smart-chip">
+            <div class="chip-left-icon"><span class="chip-type-circle cost-typed cost-electric"><span
+                  class="tcg-sym">l</span></span></div>
+            <div class="chip-body">
+              <div class="chip-top"><span class="chip-name">Rotom ex</span></div>
+              <span class="chip-reason">Mismo tipo (Rayo)</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ICONOS DE TIPO / COSTO ===================== -->
+    <section class="card-box sg-section" id="tipos">
+      <h2 class="sg-section-title">Íconos de tipo &amp; costo de energía</h2>
+      <p class="sg-subtitle">tcg-sym.type-icon — usado en filtros y encabezados</p>
+      <div class="sg-type-grid">
+        <div class="sg-type-card"><span class="tcg-sym type-icon fire" style="font-size:20px;">r</span>Fuego</div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon water" style="font-size:20px;">w</span>Agua</div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon grass" style="font-size:20px;">g</span>Planta</div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon lightning" style="font-size:20px;">l</span>Rayo</div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon psychic" style="font-size:20px;">p</span>Psíquico</div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon fighting" style="font-size:20px;">f</span>Lucha</div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon darkness" style="font-size:20px;">d</span>Oscuridad
+        </div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon metal" style="font-size:20px;">m</span>Metal</div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon dragon" style="font-size:20px;">n</span>Dragón</div>
+        <div class="sg-type-card"><span class="tcg-sym type-icon colorless" style="font-size:20px;">c</span>Incoloro
+        </div>
+      </div>
+      <p class="sg-subtitle">cost-typed — círculos de costo de ataque</p>
+      <div class="sg-row">
+        <span class="cost-typed cost-fire"><span class="tcg-sym">r</span></span>
+        <span class="cost-typed cost-water"><span class="tcg-sym">w</span></span>
+        <span class="cost-typed cost-grass"><span class="tcg-sym">g</span></span>
+        <span class="cost-typed cost-electric"><span class="tcg-sym">l</span></span>
+        <span class="cost-typed cost-psychic"><span class="tcg-sym">p</span></span>
+        <span class="cost-typed cost-fighting"><span class="tcg-sym">f</span></span>
+        <span class="cost-typed cost-darkness"><span class="tcg-sym">d</span></span>
+        <span class="cost-typed cost-metal"><span class="tcg-sym">m</span></span>
+        <span class="cost-typed cost-dragon"><span class="tcg-sym">n</span></span>
+        <span class="cost-colorless"><span class="tcg-sym">c</span></span>
+        <span class="cost-free">c</span>
+      </div>
+    </section>
+
+    <!-- ===================== CARTAS / GRILLAS ===================== -->
+    <section class="card-box sg-section" id="cartas">
+      <h2 class="sg-section-title">Cartas &amp; grillas</h2>
+      <p class="sg-section-desc">.pkcard con borde superior coloreado por tipo (.t-fire, .t-water, etc.)</p>
+      <div class="cards-grid">
+        <div class="pkcard t-fire">
+          <div class="card-placeholder" style="background:var(--fire);">🔥</div>
+          <div class="meta">
+            <div class="name-row"><span class="name">Cinderace</span></div>
+            <div class="set">Chilling Reign</div>
+            <div class="card-info">#28</div>
+            <div class="card-add-owned-row"><button class="ghost add-btn">+ Agregar</button></div>
+          </div>
+        </div>
+        <div class="pkcard t-lightning">
+          <div class="card-placeholder" style="background:var(--electric);">⚡</div>
+          <div class="meta">
+            <div class="name-row"><span class="name">Tapu Koko</span></div>
+            <div class="set">Ascended Heroes</div>
+            <div class="card-info">#67</div>
+            <div class="card-add-owned-row"><span class="card-owned-tag">Tenés 1</span></div>
+          </div>
+        </div>
+        <div class="pkcard t-metal">
+          <div class="card-placeholder" style="background:var(--metal);">⚙️</div>
+          <div class="meta">
+            <div class="name-row"><span class="name">Iron Treads ex</span></div>
+            <div class="set">Paldean Fates</div>
+            <div class="card-info">#66</div>
+            <div class="card-add-owned-row"><button class="ghost add-btn btn-full">+ Agregar</button></div>
+          </div>
+        </div>
+        <div class="pkcard t-trainer">
+          <div class="card-placeholder" style="background:var(--holo-c);">🎴</div>
+          <div class="meta">
+            <div class="name-row"><span class="name">Boss's Orders</span></div>
+            <div class="set">Paldea Evolved</div>
+            <div class="card-info">#172</div>
+            <div class="card-add-owned-row"><span class="card-owned-tag">Tenés 1</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== STAT BOXES ===================== -->
+    <section class="card-box sg-section" id="stats">
+      <h2 class="sg-section-title">Stat boxes</h2>
+      <p class="sg-section-desc">.collection-stats / .stat-box — resumen de colección</p>
+      <div class="collection-stats">
+        <div class="stat-box">
+          <div class="stat-label">Total</div>
+          <div class="stat-value">43</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Pokémon</div>
+          <div class="stat-value">21</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Trainer</div>
+          <div class="stat-value">9</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Energy</div>
+          <div class="stat-value">13</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Únicas</div>
+          <div class="stat-value">37</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TABLAS ===================== -->
+    <section class="card-box sg-section" id="tablas">
+      <h2 class="sg-section-title">Tablas del wizard</h2>
+
+      <p class="sg-subtitle">.wizard-ledger.aligned-ledger — con stage-tag, cost, tenés/falta</p>
+      <table class="wizard-ledger aligned-ledger">
+        <thead>
+          <tr>
+            <th style="width:30%;">Nombre</th>
+            <th style="width:18%;">Tipo</th>
+            <th style="width:16%;">Nivel</th>
+            <th style="width:16%;text-align:center;">Cant.</th>
+            <th style="width:12%;text-align:center;">Tenés</th>
+            <th style="width:8%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-name">
+              <div class="card-thumb-wrap"><span class="card-mini-placeholder">🃏</span><span class="card-row-name">Iron
+                  Treads ex</span></div>
+            </td>
+            <td class="col-type"><span class="type-tag">Metal</span></td>
+            <td class="col-stage"><span class="stage-tag tag-ex">ex</span></td>
+            <td class="col-qty"><span class="qty-num">1</span></td>
+            <td class="col-owned owned-complete">✔ 1</td>
+            <td class="col-action"><button class="ghost">✕</button></td>
+          </tr>
+          <tr>
+            <td class="col-name">
+              <div class="card-thumb-wrap"><span class="card-mini-placeholder">🃏</span><span
+                  class="card-row-name">Raichu</span></div>
+            </td>
+            <td class="col-type"><span class="type-tag">Rayo</span></td>
+            <td class="col-stage"><span class="stage-tag tag-stage1">Fase 1</span></td>
+            <td class="col-qty"><span class="qty-num">1</span></td>
+            <td class="col-owned owned-complete">✔ 1</td>
+            <td class="col-action"><button class="ghost">✕</button></td>
+          </tr>
+          <tr>
+            <td class="col-name">
+              <div class="card-thumb-wrap"><span class="card-mini-placeholder">🃏</span><span
+                  class="card-row-name">Rotom ex</span></div>
+            </td>
+            <td class="col-type"><span class="type-tag">Rayo</span></td>
+            <td class="col-stage"><span class="stage-tag tag-ex">ex</span></td>
+            <td class="col-qty"><span class="qty-num">1</span></td>
+            <td class="col-owned owned-missing">✘ 0</td>
+            <td class="col-action"><button class="ghost">✕</button></td>
+          </tr>
+          <tr class="row-evo-warning">
+            <td class="col-name">
+              <div class="card-thumb-wrap"><span class="card-mini-placeholder">🃏</span><span
+                  class="card-row-name">Manectric</span></div>
+              <button class="info-warn-btn">⚠ evo</button>
+            </td>
+            <td class="col-type"><span class="type-tag">Rayo</span></td>
+            <td class="col-stage"><span class="stage-tag tag-stage1">Fase 1</span></td>
+            <td class="col-qty"><span class="qty-num">1</span></td>
+            <td class="col-owned owned-missing">✘ 0</td>
+            <td class="col-action"><button class="ghost">✕</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="sg-note">La fila con fondo rojo (<span class="sg-code">.row-evo-warning</span>) marca una evolución sin
+        su base agregada al mazo.</p>
+    </section>
+
+    <!-- ===================== DETALLE DE CARTA ===================== -->
+    <section class="card-box sg-section" id="detalle">
+      <h2 class="sg-section-title">Detalle de carta (modal)</h2>
+      <p class="sg-section-desc">Contenido de #modalBody — cd-header, cd-stat, cd-ability, cd-attack</p>
+      <div class="modal-content" style="max-width:420px;position:static;">
+        <h3 style="font-family:var(--display);margin:0 0 10px;">Tapu Koko</h3>
+        <div class="cd-header">
+          <span class="cd-type-badge cd-badge-electric">⚡ Rayo</span>
+          <span class="cd-subtype vstar">VSTAR</span>
+        </div>
+        <div class="cd-stat"><span class="cd-label">HP</span><span class="cd-value">190</span></div>
+        <div class="cd-stat"><span class="cd-label">Rareza</span><span class="cd-value">Ultra Rare</span></div>
+        <div class="cd-stat"><span class="cd-label">Coste de retirada</span><span class="cd-value"><span
+              class="cost-colorless"><span class="tcg-sym">c</span></span></span></div>
+
+        <div class="cd-section">
+          <div class="cd-section-title">Habilidad</div>
+          <div class="cd-ability">
+            <span class="cd-ability-name">Electric Generator</span>
+            <span class="cd-ability-text">Una vez por turno, podés buscar en tu mazo una carta de Energía Rayo básica y
+              agregarla a la mano.</span>
+          </div>
+        </div>
+
+        <div class="cd-section">
+          <div class="cd-section-title">Ataques</div>
+          <div class="cd-attack">
+            <div class="cd-attack-header">
+              <span class="cd-attack-name">Thunderbolt Discharge</span>
+              <span class="cd-attack-cost"><span class="cost-typed cost-electric"><span
+                    class="tcg-sym">l</span></span><span class="cost-colorless"><span
+                    class="tcg-sym">c</span></span></span>
+            </div>
+            <div class="cd-attack-damage">130</div>
+            <div class="cd-attack-text">Descarta toda la energía adjunta a este Pokémon.</div>
+          </div>
+        </div>
+
+        <div class="cd-section">
+          <div class="cd-section-title">Debilidades</div>
+          <span class="cd-badge-fighting cd-type-badge">👊 Lucha ×2</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TARJETAS GUARDADAS ===================== -->
+    <section class="card-box sg-section" id="guardado">
+      <h2 class="sg-section-title">Tarjetas guardadas (mazos / colecciones)</h2>
+      <div id="savedCollections" style="margin-top:0;">
+        <div class="saved-card">
+          <div class="saved-card-header">
+            <div class="saved-card-icon">📂</div>
+            <div class="saved-card-info">
+              <div class="saved-card-name">Rayo rápido</div>
+              <div class="saved-card-date">Guardado hace 2 días</div>
+            </div>
+          </div>
+          <div class="saved-card-stats">
+            <span class="sc-stat sc-pokemon">Pokémon <span class="sc-stat-val">12</span></span>
+            <span class="sc-stat sc-trainer">Trainer <span class="sc-stat-val">14</span></span>
+            <span class="sc-stat sc-energy">Energy <span class="sc-stat-val">10</span></span>
+          </div>
+          <div class="collection-bar">
+            <div class="collection-bar-fill poke-bar" style="width:34%;"></div>
+            <div class="collection-bar-fill train-bar" style="width:40%;"></div>
+            <div class="collection-bar-fill energy-bar" style="width:26%;"></div>
+          </div>
+          <div class="collection-bar-labels">
+            <span class="cbl-item poke-label">Pokémon</span>
+            <span class="cbl-item train-label">Trainer</span>
+            <span class="cbl-item energy-label">Energy</span>
+          </div>
+          <div class="saved-card-actions">
+            <button class="action">Cargar</button>
+            <button class="ghost">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FEEDBACK: MODAL / TOAST / ACORDEÓN ===================== -->
+    <section class="card-box sg-section" id="feedback">
+      <h2 class="sg-section-title">Modal, toast &amp; acordeón</h2>
+
+      <p class="sg-subtitle">Toasts</p>
+      <div class="sg-row" style="flex-direction:column;align-items:flex-start;">
+        <div class="toast">Colección actualizada.</div>
+        <div class="toast success">Carta agregada al mazo.</div>
+        <div class="toast error">No se pudo conectar con la API.</div>
+      </div>
+
+      <p class="sg-subtitle">Acordeón lateral</p>
+      <details class="sidebar-box card-box" open style="background:var(--surface-2);">
+        <summary class="accordion-header">Tenés / falta comprar</summary>
+        <div class="next-steps-grid" style="margin-top:12px;">
+          <div>
+            <h3>Ya tenés</h3>
+            <div class="list-item"><span>Pikachu</span><span>x1</span></div>
+          </div>
+          <div>
+            <h3>Falta comprar</h3>
+            <div class="list-item"><span>Rotom ex</span><span>x1</span></div>
+          </div>
+        </div>
+      </details>
+
+      <p class="sg-subtitle">Sets locales (set-status-row)</p>
+      <div class="set-status-list">
+        <div class="set-status-row"><span style="color:var(--grass);">✔</span><span class="set-name">Paldean
+            Fates</span><span class="set-count">245</span></div>
+        <div class="set-status-row"><span style="color:var(--fire);">✘</span><span class="set-name">Evolving
+            Skies</span><button class="ghost download-set-btn">↓</button></div>
+      </div>
+    </section>
+
+  </div>
+</body>
+
+</html>

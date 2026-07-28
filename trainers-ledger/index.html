@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trainer's Ledger v2.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B0D12;
+      --surface-1: #14161D;
+      --surface-2: #1B1E27;
+      --surface-3: #22252F;
+      --border: rgba(255, 255, 255, .08);
+      --border-strong: rgba(255, 255, 255, .16);
+      --text: #EDEDF2;
+      --text-dim: #8A8D9A;
+      --text-faint: #5B5E6B;
+      --mono: 'IBM Plex Mono', monospace;
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --accent: #8B7FE8;
+      --accent-dim: rgba(139, 127, 232, .14);
+      --energy: #EF9F27;
+      --energy-dim: rgba(239, 159, 39, .14);
+      --draw: #22B08A;
+      --draw-dim: rgba(34, 176, 138, .14);
+      --support: #E0568C;
+      --support-dim: rgba(224, 86, 140, .14);
+      --grass: #3DAE5C;
+      --fire: #E5533D;
+      --water: #3D8BE5;
+      --lightning: #EF9F27;
+      --psychic: #B15FE0;
+      --fighting: #C97A3D;
+      --darkness: #6B6F84;
+      --metal: #8C97A6;
+      --colorless: #9AA0AC;
+      --dragon: #8B7FE8;
+      --trainer: #4FB6C9;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --tcg: 'EssentiarumTCG', sans-serif;
+      --poke: 'ThraexMagnus', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #app {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 20px 80px;
+    }
+
+    /* ===== Header ===== */
+    .ledger-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ledger-head h1 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 26px;
+      margin: 0;
+      letter-spacing: -.02em;
+    }
+
+    .ledger-head h1 .name-sub {
+      background: linear-gradient(135deg, var(--accent), var(--support));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .ledger-head .tag {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+
+    /* ===== Tabs ===== */
+    nav.tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    nav.tabs button {
+      font-family: var(--body);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: .15s ease;
+    }
+
+    nav.tabs button:hover {
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+
+    nav.tabs button.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* ===== Panels & cards ===== */
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .card-box {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-box h2 {
+      font-family: var(--display);
+      font-size: 17px;
+      margin: 0 0 8px;
+      font-weight: 700;
+    }
+
+    .card-box h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--text-dim);
+      margin: 0 0 8px;
+      font-weight: 600;
+    }
+
+    .hint {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      margin: 0 0 12px;
+      line-height: 1.5;
+    }
+
+    .hint-small {
+      font-size: 11.5px;
+      color: var(--text-faint);
+      margin: -4px 0 10px;
+    }
+
+    /* ===== Inputs / buttons ===== */
+    input[type=text],
+    input[type=number],
+    select {
+      font-family: var(--body);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    button {
+      font-family: var(--body);
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 13px;
+      transition: .15s ease;
+    }
+
+    button.action {
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+      padding: 9px 16px;
+      font-weight: 600;
+    }
+
+    button.action:hover {
+      filter: brightness(1.1);
+    }
+
+    button.ghost {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 9px 14px;
+    }
+
+    button.ghost:hover {
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+
+    /* ===== Filter chips ===== */
+    .search-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .filter-chip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .filter-chip:hover {
+      border-color: var(--border-strong);
+    }
+
+    .filter-chip.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* ===== Card grid (Buscar / Colección) ===== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .pkcard {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border-left: 3px solid var(--colorless);
+    }
+
+    .pkcard.t-fire {
+      border-left-color: var(--fire);
+    }
+
+    .pkcard.t-water {
+      border-left-color: var(--water);
+    }
+
+    .pkcard.t-grass {
+      border-left-color: var(--grass);
+    }
+
+    .pkcard.t-lightning {
+      border-left-color: var(--lightning);
+    }
+
+    .pkcard.t-psychic {
+      border-left-color: var(--psychic);
+    }
+
+    .pkcard.t-fighting {
+      border-left-color: var(--fighting);
+    }
+
+    .pkcard.t-darkness {
+      border-left-color: var(--darkness);
+    }
+
+    .pkcard.t-metal {
+      border-left-color: var(--metal);
+    }
+
+    .pkcard.t-dragon {
+      border-left-color: var(--dragon);
+    }
+
+    .pkcard.t-trainer {
+      border-left-color: var(--trainer);
+    }
+
+    .pkcard.t-energy {
+      border-left-color: var(--energy);
+    }
+
+    .pkcard.t-colorless {
+      border-left-color: var(--colorless);
+    }
+
+    .pkcard img {
+      width: 100%;
+      aspect-ratio: 5/7;
+      object-fit: cover;
+      background: var(--surface-3);
+      display: block;
+    }
+
+    .pkcard .meta {
+      padding: 10px;
+    }
+
+    .pkcard .name {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .pkcard .set {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .pkcard .card-info {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--text-faint);
+      margin-top: 1px;
+    }
+
+    .pkcard .btn-full {
+      width: 100%;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .card-thumb-ph {
+      width: 100%;
+      aspect-ratio: 5/7;
+      background: var(--surface-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-faint);
+      font-size: 22px;
+    }
+
+    /* ===== Collection stats ===== */
+    .collection-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .stat-value {
+      font-family: var(--display);
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qty-controls button {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 3px 9px;
+    }
+
+    /* ===== Wizard: step nav ===== */
+    .step-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .step-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 6px 13px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-btn:hover {
+      border-color: var(--border-strong);
+    }
+
+    .step-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .step-badge {
+      background: var(--surface-3);
+      color: var(--text-dim);
+      border-radius: 999px;
+      font-size: 10.5px;
+      padding: 1px 7px;
+      font-family: var(--mono);
+    }
+
+    .step-btn.active .step-badge {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .step-check {
+      color: var(--draw);
+      font-size: 12px;
+    }
+
+    /* ===== Wizard: total bar ===== */
+    .total-bar-wrap {
+      margin-top: 14px;
+    }
+
+    .total-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+
+    .total-bar-track {
+      height: 8px;
+      background: var(--surface-3);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* ===== Wizard: target bar per step ===== */
+    .target-bar {
+      margin-bottom: 16px;
+    }
+
+    .target-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .target-bar-labels .cat-name {
+      color: var(--text-dim);
+    }
+
+    .target-bar-labels .cat-status {
+      font-weight: 700;
+    }
+
+    .target-bar-track {
+      height: 6px;
+      background: var(--surface-3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .target-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .25s ease;
+    }
+
+    /* ===== Wizard: sub-filter block ===== */
+    .subfilter-block {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .subfilter-block .label {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+
+    .subfilter-block .label:not(:first-child) {
+      margin-top: 12px;
+    }
+
+    /* ===== Wizard: suggestion chips ===== */
+    .suggest-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      margin: 14px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .pick-chip {
+      text-align: left;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      color: var(--text);
+    }
+
+    .pick-chip:hover {
+      border-color: var(--border-strong);
+    }
+
+    .pick-chip.active {
+      border-color: var(--draw);
+      background: var(--draw-dim);
+    }
+
+    .pick-chip .chip-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .pick-chip .chip-added {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--draw);
+    }
+
+    .pick-chip .chip-reason {
+      font-size: 11.5px;
+      color: var(--text-dim);
+    }
+
+    .pick-chip.missing {
+      border-style: dashed;
+      opacity: .8;
+    }
+
+    /* ===== Wizard: table ===== */
+    .wizard-ledger {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+      margin-top: 6px;
+    }
+
+    .wizard-ledger th {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--text-faint);
+      text-align: left;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .wizard-ledger td {
+      height: 47px;
+      padding: 0 8px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      vertical-align: middle;
+      overflow: hidden;
+    }
+
+    .card-thumb-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .card-thumb-wrap span:last-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .card-mini-thumb,
+    .card-mini-placeholder {
+      width: 28px;
+      height: 39px;
+      border-radius: 4px;
+      background: var(--surface-3);
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .type-tag {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .stage-tag {
+      font-size: 10.5px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--surface-3);
+      color: var(--text-dim);
+    }
+
+    .stage-tag.tag-ex {
+      background: var(--support-dim);
+      color: var(--support);
+    }
+
+    .stage-tag.tag-basic {
+      background: var(--draw-dim);
+      color: var(--draw);
+    }
+
+    .col-owned.owned-complete {
+      color: var(--draw);
+      font-weight: 600;
+    }
+
+    .col-owned.owned-missing {
+      color: var(--support);
+      font-weight: 600;
+    }
+
+    .status-complete {
+      color: var(--draw);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .status-missing {
+      color: var(--fire);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .qty-action-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: nowrap;
+      gap: 4px;
+      height: 100%;
+    }
+
+    .qty-action-cell .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .qty-action-cell .qty-controls button {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 3px 8px;
+      flex-shrink: 0;
+    }
+
+    .qty-action-cell button.ghost {
+      padding: 3px 8px;
+      font-size: 11.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .group-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin: 14px 0 6px;
+    }
+
+    /* ===== Wizard: tenés/falta comprar ===== */
+    details.card-box {
+      padding: 14px 18px;
+    }
+
+    summary.accordion-header {
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    summary.accordion-header::-webkit-details-marker {
+      display: none;
+    }
+
+    summary.accordion-header::before {
+      content: '▾ ';
+      color: var(--text-dim);
+    }
+
+    .next-steps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .next-steps-grid h3.have {
+      color: var(--draw);
+    }
+
+    .next-steps-grid h3.need {
+      color: var(--support);
+    }
+
+    /* ===== Threat / consistency ===== */
+    .threat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      padding: 9px 13px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .threat-row.ok {
+      background: var(--draw-dim);
+    }
+
+    .threat-row.bad {
+      background: var(--support-dim);
+    }
+
+    .threat-row .verdict {
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .threat-row.ok .verdict {
+      color: var(--draw);
+    }
+
+    .threat-row.bad .verdict {
+      color: var(--support);
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .sim-stat {
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .sim-stat .num {
+      font-family: var(--display);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .sim-stat .label {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* ===== Saved decks/collections ===== */
+    .saved-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+
+    .saved-card-name {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .saved-card-stats {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .saved-card-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .empty {
+      font-size: 12.5px;
+      color: var(--text-faint);
+      padding: 10px 0;
+    }
+
+    @media (max-width:600px) {
+      .next-steps-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sim-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @font-face {
+      font-family: "EssentiarumTCG";
+      src: url("fonts/EssentiarumTCG-SVG.otf") format("svg"),
+           url("fonts/EssentiarumTCG.otf") format("opentype");
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "ThraexMagnus";
+      src: url("fonts/ThraexMagnus.woff2") format("woff2"),
+           url("fonts/ThraexMagnus.otf") format("opentype");
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    .tcg-sym { font-family: "EssentiarumTCG", sans-serif; font-style: normal; font-weight: normal; line-height: 1; display: inline-block; vertical-align: middle; margin-right: 4px; font-size: 12px; }
+    .thraex-title { font-family: 'ThraexMagnus', sans-serif; }
+    .status { font-size: 12px; padding: 6px 0; }
+    .status.error { color: var(--fire); }
+
+    .search-wrap { position: relative; flex: 1; }
+    .deck-sub-h { font-size: 12px; opacity: .6; margin-bottom: 6px; }
+    .history-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .chip-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+    .pick-chip { display: flex; gap: 10px; align-items: flex-start; }
+    .pick-chip .chip-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .pick-chip .chip-owned { font-size: 10.5px; color: var(--text-faint); font-weight: 500; }
+    .wizard-ledger td { height: 46px; }
+    .card-thumb-wrap span.card-row-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .stage-tag.tag-stage1 { background: var(--accent-dim); color: var(--accent); }
+    tr.row-evo-warning td { background: var(--support-dim); }
+    .info-warn-btn { font-size: 10px; color: var(--support); background: none; border: 1px solid var(--support); border-radius: 999px; padding: 1px 8px; margin-left: 8px; cursor: pointer; }
+    .input-qty { width: 70px; }
+    .ac-owned { font-size: 11px; color: var(--draw); font-weight: 600; }
+    .card-owned-tag { display: inline-block; margin-top: 8px; font-size: 11px; color: var(--draw); font-weight: 600; }
+    .btn-full { width: 100%; text-align: center; }
+    .list-item { display: flex; justify-content: space-between; font-size: 12.5px; padding: 4px 0; }
+
+    .type-dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #0B0D12; flex-shrink: 0; }
+    .type-dot.sm { width: 18px; height: 18px; font-size: 9px; }
+
+    .detail-panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; max-width: 420px; }
+    .detail-panel h3 { font-family: var(--display); font-size: 18px; margin: 0 0 10px; }
+    .cd-header { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .cd-type-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; }
+    .cd-subtype { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-dim); color: var(--accent); }
+    .cd-stat { display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+    .cd-label { color: var(--text-dim); }
+    .cd-section { margin-top: 14px; }
+    .cd-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-faint); font-weight: 700; margin-bottom: 6px; }
+    .cd-ability { background: var(--surface-3); border-radius: var(--radius); padding: 10px; }
+    .cd-ability-name { font-weight: 600; font-size: 13px; display: block; margin-bottom: 3px; }
+    .cd-ability-text { font-size: 12px; color: var(--text-dim); }
+    .cd-attack { background: var(--surface-3); border-radius: var(--radius); padding: 10px; margin-bottom: 8px; }
+    .cd-attack-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .cd-attack-name { font-weight: 600; font-size: 13px; }
+    .cd-attack-cost { display: flex; gap: 3px; flex-shrink: 0; }
+    .cd-attack-damage { font-family: var(--display); font-size: 18px; font-weight: 700; margin-top: 2px; }
+    .cd-attack-text { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; }
+
+    .saved-card-row { display: flex; align-items: center; justify-content: space-between; }
+    .saved-card-header { display: flex; align-items: center; gap: 10px; }
+    .saved-card-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--surface-3); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .saved-card-date { font-size: 11px; color: var(--text-faint); }
+
+    .saved-collections { margin-bottom: 12px; }
+    .saved-collections-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; font-weight: 600; font-family: var(--mono); }
+    .collection-controls { margin-bottom: 14px; }
+
+    details.sidebar-box { padding: 14px 18px; }
+    details.sidebar-box summary.accordion-header { font-family: var(--display); font-size: 17px; font-weight: 700; cursor: pointer; user-select: none; outline: none; transition: color .15s ease; }
+    details.sidebar-box summary.accordion-header:hover { color: var(--accent); }
+    details.sidebar-box[open] summary.accordion-header { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px dashed var(--border); }
+
+    .dl-progress-bar { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+    .dl-progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s ease; }
+
+    .autocomplete-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; z-index: 50; max-height: 240px; overflow-y: auto; display: none; }
+    .autocomplete-list.show { display: block; }
+    .autocomplete-item { padding: 10px 14px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .autocomplete-item:hover { background: var(--surface-3); color: var(--text); }
+    .autocomplete-item .ac-owned { font-size: 10px; font-weight: 700; color: var(--draw); background: var(--draw-dim); padding: 1px 6px; border-radius: 4px; font-family: var(--mono); white-space: nowrap; }
+
+    .hidden { display: none !important; }
+    .mb-12 { margin-bottom: 12px; }
+    label.btn-label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+    label.btn-label input.hidden { display: none; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(11, 13, 18, .75); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-content { background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: 14px; padding: 24px; max-width: 500px; width: 100%; position: relative; }
+    .modal-close { position: absolute; top: 14px; right: 14px; background: transparent; border: none; color: var(--text-dim); font-size: 24px; cursor: pointer; }
+
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+    .db-sidebar { margin-top: 24px; }
+
+    .wizard-arche { text-align: left; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px; color: var(--text); }
+    .wizard-arche.active { border-color: var(--accent); background: var(--accent-dim); }
+    .card-add-owned-row { display: flex; gap: 4px; margin-top: 8px; }
+    .card-add-owned-row .card-owned-tag { flex: 1; text-align: center; padding: 6px; background: var(--draw); color: #fff; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .card-add-owned-row .add-btn { flex: 1; font-size: 12px; }
+    .suggest-section { margin-bottom: 12px; }
+    .suggest-section .suggest-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .deck-score { margin: 8px 0; }
+    .score-total { font-size: 14px; font-weight: 700; color: var(--accent); margin-top: 4px; }
+    .deck-section { margin-top: 10px; }
+    .deck-section h3 { font-family: var(--display); font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .deck-section .mini-card { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .deck-section .mini-card:last-child { border-bottom: none; }
+
+    @media (max-width: 768px) { .set-status-list { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .set-status-list { grid-template-columns: 1fr; } }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="ledger-head">
+      <h1><span class="thraex-title name-sub">PKM</span> Trainer's Ledger</h1>
+      <div class="tag">buscá &middot; cataloga &middot; armá tu mazo</div>
+    </div>
+
+    <nav class="tabs">
+      <button data-tab="scan" class="active">Buscar</button>
+      <button data-tab="build">Armar mazo</button>
+      <button data-tab="collection">Colección</button>
+      <button data-tab="saved">Guardado</button>
+    </nav>
+
+    <!-- SEARCH / SCAN -->
+    <section class="panel active" id="panel-scan">
+      <div class="card-box">
+        <h2>Buscar carta</h2>
+        <p class="hint">Escribí el nombre, número o ID de la carta. Funciona con: "Charizard", "Charizard 110",
+          "sv3pt5-110"</p>
+        <div class="search-wrap">
+          <input type="text" id="searchInput" placeholder="ej: Charizard ex 110" autocomplete="off" />
+          <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+        <div class="row">
+          <button class="action" id="searchBtn">Buscar</button>
+          <button class="ghost" id="clearSearchBtn">Limpiar</button>
+        </div>
+        <div class="status" id="searchStatus"></div>
+        <div class="search-filters" id="searchFilters">
+          <button class="filter-chip active" data-filter="all">Todos</button>
+          <button class="filter-chip" data-filter="Pokémon">Pokémon</button>
+          <button class="filter-chip" data-filter="Trainer">Trainer</button>
+          <button class="filter-chip" data-filter="Energy">Energy</button>
+        </div>
+        <div class="grid" id="searchResults"></div>
+        <div class="search-history" id="searchHistory">
+          <div class="deck-sub-h">Búsquedas recientes</div>
+          <div class="search-filters history-chips" id="historyChips"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLLECTION -->
+    <section class="panel" id="panel-collection">
+      <div class="card-box">
+        <h2>Mi colección</h2>
+        <div class="collection-stats" id="collectionStats"></div>
+        <div class="saved-collections" id="savedCollections"></div>
+        <div class="collection-controls">
+          <div class="filter-row">
+            <select id="collectionFilterType">
+              <option value="all">Todos los tipos</option>
+              <option value="Pokémon">Pokémon</option>
+              <option value="Trainer">Trainer</option>
+              <option value="Energy">Energy</option>
+            </select>
+            <select id="collectionFilterElement">
+              <option value="all">Todos los elementos</option>
+              <option value="Fire">Fire</option>
+              <option value="Water">Water</option>
+              <option value="Grass">Grass</option>
+              <option value="Lightning">Lightning</option>
+              <option value="Psychic">Psychic</option>
+              <option value="Fighting">Fighting</option>
+              <option value="Darkness">Darkness</option>
+              <option value="Metal">Metal</option>
+              <option value="Colorless">Colorless</option>
+            </select>
+            <select id="collectionSort">
+              <option value="name">Nombre</option>
+              <option value="copies-desc">Más copias</option>
+              <option value="copies-asc">Menos copias</option>
+              <option value="date">Fecha agregada</option>
+            </select>
+          </div>
+          <div class="row">
+            <input type="text" id="collectionSearch" placeholder="Filtrar por nombre..." />
+          </div>
+          <div class="row">
+            <input type="text" id="collectionNameInput" placeholder="Nombre de la colección" />
+            <button class="action" id="saveCollectionBtn">Guardar colección</button>
+            <button class="ghost" id="enrichAllBtn"
+              title="Actualizar datos de todas las colecciones guardadas desde la API">Actualizar datos</button>
+            <button class="ghost" id="exportCollectionBtn">Exportar JSON</button>
+            <label class="ghost btn-label">
+              Importar JSON
+              <input type="file" accept=".json" id="importCollectionInput" class="hidden" />
+            </label>
+          </div>
+        </div>
+        <div class="grid" id="collectionGrid"></div>
+        <div class="empty" id="collectionEmpty">Todavía no agregaste cartas. Andá a "Buscar".</div>
+      </div>
+    </section>
+
+    <!-- ARMAR MAZO: guía paso a paso como núcleo -->
+    <section class="panel" id="panel-build">
+
+      <div class="card-box">
+        <h2>Armar mazo — paso a paso</h2>
+        <p class="hint">Un método de 8 pasos para armar un mazo consistente a partir de tu colección: plan, Pokémon,
+          energía, robo, apoyo, consistencia simulada y cobertura de amenazas. En cada paso vas a ver sugerencias según
+          lo que ya tenés.</p>
+        <div class="row">
+          <button class="action" id="wizImportBtn">Importar desde mi colección</button>
+          <button class="ghost" id="wizClearBtn" title="Vaciar todas las cartas del mazo actual">Limpiar mazo</button>
+        </div>
+        <div class="status" id="wizImportStatus"></div>
+      </div>
+
+      <!-- Navegación de pasos + contenido del paso actual -->
+      <div class="card-box">
+        <div class="search-filters" id="wizardStepChips"></div>
+        <div id="wizardTotalBar" style="margin-top:12px;"></div>
+      </div>
+      <div class="card-box" id="wizardStepBody"></div>
+
+      <!-- Lo que más importa: tenés vs falta comprar, siempre a la vista -->
+      <details class="sidebar-box card-box" id="tenesComprarDetails">
+        <summary class="accordion-header">Tenés / falta comprar</summary>
+        <div class="next-steps-grid" style="margin-top:12px;">
+          <div>
+            <h3>Ya tenés</h3>
+            <div id="removeList"></div>
+          </div>
+          <div>
+            <h3>Falta comprar</h3>
+            <div id="buyList"></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Resultado final una vez completado el paso a paso -->
+      <div id="deckResults" class="hidden">
+
+        <div class="card-box">
+          <h2>Puntaje del mazo</h2>
+          <div class="deck-score" id="deckScore"></div>
+          <div class="score-total" id="scoreTotal"></div>
+        </div>
+
+        <div class="card-box">
+          <h2>Mazo completo — <span id="deckCardCount">60</span> cartas</h2>
+          <div class="deck-section" id="deckPokemonSection"></div>
+          <div class="deck-section" id="deckTrainerSection"></div>
+          <div class="deck-section" id="deckEnergySection"></div>
+        </div>
+
+        <div class="card-box">
+          <div class="row">
+            <input type="text" id="deckNameInput" placeholder="Nombre del mazo" />
+            <button class="action" id="saveDeckBtn">Guardar mazo</button>
+            <button class="ghost" id="exportDeckBtn">Exportar TXT</button>
+          </div>
+          <div class="saved-decks" id="savedDecks"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- GUARDADO -->
+    <section class="panel" id="panel-saved">
+      <div class="card-box">
+        <h2>Mis mazos</h2>
+        <p class="hint">Mazos guardados. Cargalos para verlos o modificá la variante.</p>
+        <div id="savedDecksFull"></div>
+        <div class="empty" id="savedDecksEmpty">No tenés mazos guardados. Andá a "Armar mazo" y generá uno para
+          guardarlo.</div>
+      </div>
+      <div class="card-box">
+        <h2>Mis colecciones</h2>
+        <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminalas.</p>
+        <div class="mb-12">
+          <div class="search-wrap">
+            <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..."
+              autocomplete="off" />
+            <div class="autocomplete-list" id="savedSearchAutocomplete"></div>
+          </div>
+        </div>
+        <div class="row mb-12">
+          <button class="ghost" id="exportAllCollectionsTxt">Exportar colecciones TXT</button>
+        </div>
+        <div id="savedCollectionsFull"></div>
+        <div class="empty" id="savedCollectionsEmpty">No tenés colecciones guardadas. Andá a "Colección" y guardá una.
+        </div>
+      </div>
+    </section>
+
+    <!-- DB Sidebar Accordion Section -->
+    <section class="db-sidebar" id="dbSidebar">
+      <details class="sidebar-box card-box">
+        <summary class="accordion-header">Base de datos y Sets Locales</summary>
+        <div class="db-status" id="dbStatus" style="margin-top:12px;"></div>
+      </details>
+    </section>
+
+  </div>
+
+  <!-- Card Explanation Modal -->
+  <div class="modal-overlay hidden" id="cardModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/core.js"></script>
+  <script src="js/views.js"></script>
+</body>
+
+</html>

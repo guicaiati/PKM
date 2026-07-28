@@ -211,6 +211,23 @@ button, label {
     flex-shrink: 0;
   }
 
+  .chip-card-thumb {
+    width: 24px;
+    height: 33px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: scale(2.8) translateY(-2px);
+      z-index: 999;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
+    }
+  }
+
   .chip-type-circle {
     width: 24px;
     height: 24px;
@@ -1047,33 +1064,96 @@ details.sidebar-box {
   .saved-card-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .saved-card-name {
-    font-family: var(--display);
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    gap: 10px;
+    margin-bottom: 12px;
+    .saved-card-icon {
+      font-size: 22px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .saved-card-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .saved-card-name {
+      font-family: var(--display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .saved-card-date {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
   }
 
   .saved-card-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
     font-family: var(--mono);
-    font-size: 12px;
-    color: var(--holo-a);
-    background: rgba(56, 224, 123, 0.12);
-    padding: 4px 10px;
-    border-radius: 6px;
-    display: inline-block;
-    width: fit-content;
-    margin-bottom: 8px;
-    font-weight: 600;
-    border: 1px solid rgba(56, 224, 123, 0.25);
+    font-size: 11.5px;
+    .sc-stat {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--text-dim);
+      .sc-stat-val {
+        font-weight: 700;
+        color: var(--text);
+      }
+      &.sc-pokemon { color: var(--grass); border-color: rgba(74, 222, 128, 0.3); }
+      &.sc-trainer { color: var(--holo-c); border-color: rgba(253, 186, 116, 0.3); }
+      &.sc-energy { color: var(--water); border-color: rgba(56, 189, 248, 0.3); }
+    }
+  }
+
+  .collection-bar {
+    display: flex;
+    height: 6px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+    gap: 2px;
+    margin-bottom: 6px;
+    .collection-bar-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+      &.poke-bar { background: var(--grass); }
+      &.train-bar { background: var(--holo-c); }
+      &.energy-bar { background: var(--water); }
+    }
+  }
+
+  .collection-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    .cbl-item {
+      &.poke-label { color: var(--grass); }
+      &.train-label { color: var(--holo-c); }
+      &.energy-label { color: var(--water); }
+    }
   }
 
   .saved-card-actions {
