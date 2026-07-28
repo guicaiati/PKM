@@ -343,19 +343,17 @@
      background: var(--fighting);
  }
 
- .type-dot.darkness {
-     background: var(--darkness);
-     color: #fff;
- }
+.type-dot.darkness {
+  background: var(--darkness);
+}
 
- .type-dot.metal {
-     background: var(--metal);
- }
+.type-dot.metal {
+  background: var(--metal);
+}
 
- .type-dot.dragon {
-     background: var(--dragon);
-     color: #fff;
- }
+.type-dot.dragon {
+  background: var(--dragon);
+}
 
  .type-dot.colorless {
      background: var(--colorless);
