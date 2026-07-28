@@ -1376,7 +1376,7 @@ const Wizard = (() => {
     const hasPreEvoInDeck = (name) => deckAll.some(x => {
       const xName = (x.name || '').toLowerCase();
       if (!name || !xName || xName === currentName) return false;
-      return xName.includes(name.toLowerCase()) || name.toLowerCase().includes(xName);
+      return xName === name.toLowerCase();
     });
 
     if (stageCat === 'stage1') {
@@ -1385,8 +1385,7 @@ const Wizard = (() => {
         if (pStage !== 'basic') return false;
         const pName = (p.name || '').toLowerCase();
         if (pName === currentName) return false;
-        if (evolvesFrom && (pName.includes(evolvesFrom.toLowerCase()) || evolvesFrom.toLowerCase().includes(pName))) return true;
-        return shareFamily(card.name, p.name);
+        return evolvesFrom && pName === evolvesFrom.toLowerCase();
       }) || (evolvesFrom && hasPreEvoInDeck(evolvesFrom));
       if (!hasBasic) {
         return {

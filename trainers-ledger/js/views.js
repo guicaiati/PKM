@@ -1338,8 +1338,7 @@ const Wizard = (() => {
         if (pStage !== 'basic') return false;
         const pName = (p.name || '').toLowerCase();
         if (pName === currentName) return false;
-        if (evolvesFrom && (pName.includes(evolvesFrom.toLowerCase()) || evolvesFrom.toLowerCase().includes(pName))) return true;
-        return shareFamily(card.name, p.name);
+        return evolvesFrom && pName === evolvesFrom.toLowerCase();
       });
       if (!hasBasic) {
         return {
