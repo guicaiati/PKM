@@ -1227,7 +1227,7 @@ const Wizard = (() => {
         </div>
 
         <div class="suggest-section">
-          <div class="suggest-title">💎 Mejoras</div>
+          <div id="missingTitle" class="suggest-title">💎 Mejoras</div>
           <div id="missingSuggestions" class="chip-container">${missingHtml}</div>
         </div>
       </div>

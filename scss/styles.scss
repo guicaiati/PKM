@@ -258,6 +258,11 @@ button, label {
   }
 }
 
+#missingTitle + #missingSuggestions .pick-chip {
+  border-style: dashed;
+  opacity: .8;
+}
+
 .type-dot {
   display: inline-flex;
   align-items: center;
