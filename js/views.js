@@ -1681,7 +1681,6 @@ const Wizard = (() => {
       const energyPct = hypergeo(total, energies, 7);
       return `<div class="status" style="margin-bottom:12px;">Total mazo: <strong>${total}</strong> / 60 cartas &nbsp; <span style="color:var(--text-faint);font-size:11px;">${basics} básicos · ${energies} energías · ${total - basics - energies} entrenadores</span></div>
         <p class="hint">Simulá manos iniciales y las primeras rondas con las cartas que llevás hasta ahora.</p>
-        <button type="button" class="action" id="wizSimBtn">▶ Simular 1000 manos</button>
         <div class="sim-grid">
           <div class="sim-stat"><div class="num">${basicPct}%</div><div class="label">básico en mano inicial</div></div>
           <div class="sim-stat"><div class="num">${mainAttacker}%</div><div class="label">atacante activo turno 2</div></div>
@@ -1889,9 +1888,6 @@ const Wizard = (() => {
         const name = document.getElementById('wizOtSearch')?.value?.trim();
         if (name) addCardByName(name, 'trainer', 'wizOtCount');
       });
-    }
-    if (state.step === 7) {
-      document.getElementById('wizSimBtn')?.addEventListener('click', () => render());
     }
     if (state.step === 8) {
       document.getElementById('wizAddThreat')?.addEventListener('click', () => { state.threats.push({ threat: '', answer: '' }); render(); });
