@@ -684,7 +684,6 @@ const Wizard = (() => {
     archetype: null,
     hasAcceleration: false,
     cards: [],
-    threats: [{ threat: '', answer: '' }],
   };
   let nextId = 1;
 
@@ -1618,11 +1617,6 @@ const Wizard = (() => {
     if (n === 6) {
       return `<div class="status">Total mazo: <strong>${totalDeckCount()}</strong> / 60 cartas.</div>`;
     }
-    if (n === 7) {
-      return `<p class="hint">Amenazas y respuestas:</p>
-        ${state.threats.map((t, i) => `<div class="row"><input type="text" class="wizThreatInput" value="${escapeHtml(t.threat)}" placeholder="Amenaza"/><input type="text" class="wizAnswerInput" value="${escapeHtml(t.answer)}" placeholder="Tech"/><button type="button" class="ghost" data-remove-threat="${i}">✕</button></div>`).join('')}
-        <button type="button" class="ghost" id="wizAddThreat">+ Amenaza</button>`;
-    }
     if (n === 8) {
       return `<div class="status">Mazo completo — <strong>${totalDeckCount()} cartas</strong>.</div>
         <div style="display:flex;gap:8px;margin-top:12px;">
@@ -1779,12 +1773,6 @@ const Wizard = (() => {
         const name = document.getElementById('wizTrSearch')?.value?.trim();
         const isDraw = document.getElementById('wizTrDraw')?.checked || false;
         if (name) addCardByName(name, 'trainer', 'wizTrCount', { isDraw });
-      });
-    }
-    if (state.step === 7) {
-      document.getElementById('wizAddThreat')?.addEventListener('click', () => { state.threats.push({ threat: '', answer: '' }); render(); });
-      body.querySelectorAll('[data-remove-threat]').forEach(btn => {
-        btn.addEventListener('click', () => { state.threats.splice(Number(btn.dataset.removeThreat), 1); render(); });
       });
     }
     if (state.step === 8) {

@@ -685,7 +685,6 @@ const Wizard = (() => {
     archetype: null,
     hasAcceleration: false,
     cards: [],
-    threats: [{ threat: '', answer: '' }],
     roleFilter: null,
   };
   let nextId = 1;
@@ -1703,10 +1702,7 @@ const Wizard = (() => {
       });
       return `<p class="hint">Análisis de debilidades de tus Pokémon:</p>
         ${threatRows.map(r => `<div class="threat-row ${r.verdict}"><span>${r.type} → débil a ${r.weakTo}</span><span class="verdict">${r.verdictText}</span></div>`).join('')}
-        ${threatRows.length === 0 ? '<div class="empty">No hay Pokémon en el mazo para analizar.</div>' : ''}
-        <p class="hint-small" style="margin-top:14px;">Amenazas personalizadas:</p>
-        ${state.threats.map((t, i) => `<div class="row"><input type="text" class="wizThreatInput" value="${escapeHtml(t.threat)}" placeholder="Amenaza"/><input type="text" class="wizAnswerInput" value="${escapeHtml(t.answer)}" placeholder="Tech"/><button type="button" class="ghost" data-remove-threat="${i}">✕</button></div>`).join('')}
-        <button type="button" class="ghost" id="wizAddThreat">+ Amenaza</button>`;
+        ${threatRows.length === 0 ? '<div class="empty">No hay Pokémon en el mazo para analizar.</div>' : ''}`;
     }
     if (n === 9) {
       return `<div class="status">Mazo completo — <strong>${totalDeckCount()} cartas</strong>.</div>
@@ -1890,10 +1886,6 @@ const Wizard = (() => {
       });
     }
     if (state.step === 8) {
-      document.getElementById('wizAddThreat')?.addEventListener('click', () => { state.threats.push({ threat: '', answer: '' }); render(); });
-      body.querySelectorAll('[data-remove-threat]').forEach(btn => {
-        btn.addEventListener('click', () => { state.threats.splice(Number(btn.dataset.removeThreat), 1); render(); });
-      });
     }
     if (state.step === 9) {
       document.getElementById('wizExport')?.addEventListener('click', exportDeckAsText);
