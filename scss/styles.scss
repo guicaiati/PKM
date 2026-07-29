@@ -1186,3 +1186,93 @@ details.sidebar-box {
     }
   }
 }
+
+/* Amenazas & Consistencia */
+#amenazas.card-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+
+.sg-section-title {
+  font-family: var(--display);
+  font-size: 17px;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.sg-badge-new {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  background: var(--draw-dim);
+  color: var(--draw);
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.sg-subtitle {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--accent);
+  margin: 20px 0 10px;
+}
+
+.threat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  padding: 9px 13px;
+  margin-bottom: 8px;
+  font-size: 13px;
+
+  &.ok {
+    background: var(--draw-dim);
+  }
+  &.bad {
+    background: var(--support-dim);
+  }
+}
+
+.verdict {
+  font-size: 11.5px;
+  font-weight: 700;
+
+  .threat-row.ok & {
+    color: var(--draw);
+  }
+  .threat-row.bad & {
+    color: var(--support);
+  }
+}
+
+.sim-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.sim-stat {
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+
+  .num {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .label {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+}
