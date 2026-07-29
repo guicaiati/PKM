@@ -1665,4 +1665,121 @@ details.sidebar-box[open] summary.accordion-header {
   margin-top: 2px;
 }
 
+/* Tarjetas guardadas */
+#guardado.card-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+
+.sg-section-desc {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin: 0 0 16px;
+}
+
+.saved-card {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.saved-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.saved-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.saved-card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.saved-card-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.saved-card-date {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.saved-card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.total-bar-wrap {
+  margin-top: 12px;
+}
+
+.total-bar-track {
+  height: 8px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+
+.total-bar-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot.pokemon {
+  background: var(--accent);
+}
+
+.dot.energy {
+  background: var(--energy);
+}
+
+.dot.item {
+  background: var(--draw);
+}
+
+.dot.supporter {
+  background: var(--support);
+}
+
+.dot.other {
+  background: #949494;
+}
+
 /*# sourceMappingURL=styles.css.map */
