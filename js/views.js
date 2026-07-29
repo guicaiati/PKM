@@ -654,7 +654,7 @@ const Wizard = (() => {
     { n: 5, key: 'supporter', label: 'Apoyo' },
     { n: 6, key: 'other', label: 'Estadio+Tool' },
     { n: 7, key: 'consistency', label: 'Consistencia' },
-    { n: 8, key: 'tech', label: 'Amenazas' },
+    { n: 8, key: 'analisis', label: 'Análisis' },
     { n: 9, key: 'final', label: 'Acta Final' },
   ];
 
@@ -1687,7 +1687,13 @@ const Wizard = (() => {
         </div>`;
     }
     if (n === 8) {
+      const total = totalDeckCount();
       const pokeCards = state.cards.filter(c => c.category === 'pokemon');
+      const basicCards = pokeCards.filter(c => c.subtypes && c.subtypes.includes('Basic'));
+      const basicCount = sumCount(basicCards);
+      const energyCount = sumCount(state.cards.filter(c => c.category === 'energy'));
+      const trainerCount = total - basicCount - energyCount;
+
       const typeSet = new Set();
       pokeCards.forEach(c => { if (c.types) c.types.forEach(t => typeSet.add(t)); });
       const weaknessMap = { Grass: 'Fire', Fire: 'Water', Water: 'Lightning', Lightning: 'Fighting', Psychic: 'Darkness', Fighting: 'Psychic', Darkness: 'Grass', Metal: 'Fire', Colorless: 'Fighting', Dragon: 'Fairyg' };
@@ -1697,12 +1703,39 @@ const Wizard = (() => {
         if (!weakTo) return;
         const hasAnswer = state.cards.some(c => c.types && c.types.includes(weakTo));
         const verdict = hasAnswer ? 'ok' : 'bad';
-        const verdictText = hasAnswer ? 'Cubierto' : 'Débil — sin respuesta';
+        const verdictText = hasAnswer ? 'Cubierto' : 'Débil — sin plan B';
         threatRows.push({ type: t, weakTo, verdict, verdictText });
       });
-      return `<p class="hint">Análisis de debilidades de tus Pokémon:</p>
-        ${threatRows.map(r => `<div class="threat-row ${r.verdict}"><span>${r.type} → débil a ${r.weakTo}</span><span class="verdict">${r.verdictText}</span></div>`).join('')}
-        ${threatRows.length === 0 ? '<div class="empty">No hay Pokémon en el mazo para analizar.</div>' : ''}`;
+
+      const goods = [];
+      const bads = [];
+
+      if (basicCount >= 4) goods.push(`${basicCount} básicos — buena base para arrancar`);
+      else if (basicCount < 3) bads.push(`Solo ${basicCount} básicos — muy pocos, riesgo de mano muerta`);
+      else bads.push(`${basicCount} básicos — podrían ser más para consistencia`);
+
+      if (energyCount >= 8 && energyCount <= 15) goods.push(`${energyCount} energías — cantidad equilibrada`);
+      else if (energyCount < 8) bads.push(`Solo ${energyCount} energías — muy pocas, riesgo de quedarse sin`);
+      else bads.push(`${energyCount} energías — muchas, podés recortar algunas`);
+
+      const coveredCount = threatRows.filter(r => r.verdict === 'ok').length;
+      const uncoveredCount = threatRows.filter(r => r.verdict === 'bad').length;
+      if (coveredCount > uncoveredCount) goods.push(`${coveredCount} de ${threatRows.length} debilidades cubiertas`);
+      else if (uncoveredCount > 0) bads.push(`${uncoveredCount} debilidades sin cubrir — revisá tu plan B`);
+
+      const hasDraw = state.cards.some(c => (c.category || '').toLowerCase() === 'trainer' && (c.name || '').toLowerCase().includes('profesor') || (c.name || '').toLowerCase().includes('investigación'));
+      if (hasDraw) goods.push('Tenés robo (Profesor/Investigación)');
+      else bads.push('No hay cartas de robo potente — agregá Profesor/investigación');
+
+      return `<p class="hint">Cobertura contra los tipos más comunes del meta actual.</p>
+        ${threatRows.map(r => `<div class="threat-row ${r.verdict}"><span>vs. ${r.weakTo}</span><span class="verdict">${r.verdictText}</span></div>`).join('')}
+        ${threatRows.length === 0 ? '<div class="empty">No hay Pokémon en el mazo para analizar.</div>' : ''}
+        <p class="sg-subtitle" style="margin-top:20px;">Lo bueno</p>
+        ${goods.map(g => `<div class="threat-row ok"><span>${g}</span><span class="verdict">✓</span></div>`).join('')}
+        ${goods.length === 0 ? '<div class="empty">(nada destacable)</div>' : ''}
+        <p class="sg-subtitle" style="margin-top:16px;">A mejorar</p>
+        ${bads.map(b => `<div class="threat-row bad"><span>${b}</span><span class="verdict">!</span></div>`).join('')}
+        ${bads.length === 0 ? '<div class="empty">Todo bien — mazo sólido</div>' : ''}`;
     }
     if (n === 9) {
       return `<div class="status">Mazo completo — <strong>${totalDeckCount()} cartas</strong>.</div>

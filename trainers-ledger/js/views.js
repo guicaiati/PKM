@@ -653,7 +653,7 @@ const Wizard = (() => {
     { n: 4, key: 'draw', label: 'Robo' },
     { n: 5, key: 'supporters', label: 'Apoyo' },
     { n: 6, key: 'consistency', label: 'Consistencia' },
-    { n: 7, key: 'tech', label: 'Amenazas' },
+    { n: 7, key: 'analisis', label: 'Análisis' },
     { n: 8, key: 'final', label: 'Acta Final' },
   ];
 
@@ -1616,6 +1616,54 @@ const Wizard = (() => {
     }
     if (n === 6) {
       return `<div class="status">Total mazo: <strong>${totalDeckCount()}</strong> / 60 cartas.</div>`;
+    }
+    if (n === 7) {
+      const total = totalDeckCount();
+      const pokeCards = state.cards.filter(c => c.category === 'pokemon');
+      const basicCards = pokeCards.filter(c => c.subtypes && c.subtypes.includes('Basic'));
+      const basicCount = sumCount(basicCards);
+      const energyCount = sumCount(state.cards.filter(c => c.category === 'energy'));
+
+      const typeSet = new Set();
+      pokeCards.forEach(c => { if (c.types) c.types.forEach(t => typeSet.add(t)); });
+      const weaknessMap = { Grass: 'Fire', Fire: 'Water', Water: 'Lightning', Lightning: 'Fighting', Psychic: 'Darkness', Fighting: 'Psychic', Darkness: 'Grass', Metal: 'Fire', Colorless: 'Fighting', Dragon: 'Fairyg' };
+      const threatRows = [];
+      typeSet.forEach(t => {
+        const weakTo = weaknessMap[t];
+        if (!weakTo) return;
+        const hasAnswer = state.cards.some(c => c.types && c.types.includes(weakTo));
+        threatRows.push({ weakTo, verdict: hasAnswer ? 'ok' : 'bad', verdictText: hasAnswer ? 'Cubierto' : 'Débil — sin plan B' });
+      });
+
+      const goods = [];
+      const bads = [];
+
+      if (basicCount >= 4) goods.push(`${basicCount} básicos — buena base`);
+      else if (basicCount < 3) bads.push(`Solo ${basicCount} básicos — riesgo de mano muerta`);
+      else bads.push(`${basicCount} básicos — podrían ser más`);
+
+      if (energyCount >= 8 && energyCount <= 15) goods.push(`${energyCount} energías — cantidad equilibrada`);
+      else if (energyCount < 8) bads.push(`Solo ${energyCount} energías — muy pocas`);
+      else bads.push(`${energyCount} energías — muchas, recortá`);
+
+      const covered = threatRows.filter(r => r.verdict === 'ok').length;
+      const uncovered = threatRows.filter(r => r.verdict === 'bad').length;
+      if (covered > uncovered) goods.push(`${covered} de ${threatRows.length} debilidades cubiertas`);
+      else if (uncovered > 0) bads.push(`${uncovered} debilidades sin cubrir`);
+
+      const hasDraw = state.cards.some(c => (c.name || '').toLowerCase().includes('profesor') || (c.name || '').toLowerCase().includes('investigación'));
+      if (hasDraw) goods.push('Tenés robo potente');
+      else bads.push('Falta robo (Profesor/Investigación)');
+
+      return `<p class="hint">Cobertura contra los tipos más comunes del meta actual.</p>
+        ${threatRows.map(r => `<div class="threat-row ${r.verdict}"><span>vs. ${r.weakTo}</span><span class="verdict">${r.verdictText}</span></div>`).join('')}
+        ${threatRows.length === 0 ? '<div class="empty">No hay Pokémon en el mazo para analizar.</div>' : ''}
+        <p class="sg-subtitle" style="margin-top:20px;">Lo bueno</p>
+        ${goods.map(g => `<div class="threat-row ok"><span>${g}</span><span class="verdict">✓</span></div>`).join('')}
+        ${goods.length === 0 ? '<div class="empty">(nada destacable)</div>' : ''}
+        <p class="sg-subtitle" style="margin-top:16px;">A mejorar</p>
+        ${bads.map(b => `<div class="threat-row bad"><span>${b}</span><span class="verdict">!</span></div>`).join('')}
+        ${bads.length === 0 ? '<div class="empty">Todo bien — mazo sólido</div>' : ''}`;
     }
     if (n === 8) {
       return `<div class="status">Mazo completo — <strong>${totalDeckCount()} cartas</strong>.</div>
