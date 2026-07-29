@@ -2289,14 +2289,58 @@ const Saved = (() => {
     }
     if (empty) empty.style.display = 'none';
 
-    container.innerHTML = saved.map(d => `
-      <div class="saved-card" data-id="${d.id}">
-        <div class="saved-card-header"><div class="saved-card-name">${escapeHtml(d.name)}</div></div>
-        <div class="saved-card-actions">
-          <button class="action saved-card-load">Cargar mazo</button>
-          <button class="ghost saved-card-delete">Eliminar</button>
+    container.innerHTML = saved.map(d => {
+      const cards = d.data?.cards || [];
+      const total = cards.reduce((s, c) => s + (c.count || 0), 0);
+      const pokemonCount = cards.filter(c => c.category === 'pokemon').reduce((s, c) => s + (c.count || 0), 0);
+      const energyCount = cards.filter(c => c.category === 'energy').reduce((s, c) => s + (c.count || 0), 0);
+      const trainerCount = total - pokemonCount - energyCount;
+      const itemCount = cards.filter(c => c.category === 'trainer' && (c.subtypes || '').toLowerCase().includes('item')).reduce((s, c) => s + (c.count || 0), 0);
+      const supporterCount = cards.filter(c => c.category === 'trainer' && (c.subtypes || '').toLowerCase().includes('supporter')).reduce((s, c) => s + (c.count || 0), 0);
+      const otherCount = trainerCount - itemCount - supporterCount;
+
+      const pokePct = total > 0 ? Math.round((pokemonCount / total) * 100) : 0;
+      const energyPct = total > 0 ? Math.round((energyCount / total) * 100) : 0;
+      const itemPct = total > 0 ? Math.round((itemCount / total) * 100) : 0;
+      const supporterPct = total > 0 ? Math.round((supporterCount / total) * 100) : 0;
+      const otherPct = total > 0 ? Math.max(0, 100 - pokePct - energyPct - itemPct - supporterPct) : 0;
+
+      const dateStr = d.savedAt ? new Date(d.savedAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : '';
+      const timeAgo = d.savedAt ? Math.round((Date.now() - d.savedAt) / 86400000) : 0;
+      const timeStr = timeAgo < 1 ? 'hoy' : timeAgo === 1 ? 'ayer' : `hace ${timeAgo} días`;
+
+      return `<div class="saved-card" data-id="${d.id}">
+        <div class="saved-card-row">
+          <div class="saved-card-header">
+            <div class="saved-card-icon">📂</div>
+            <div>
+              <div class="saved-card-name">${escapeHtml(d.name)}</div>
+              <div class="saved-card-date">${timeStr} · ${total} cartas</div>
+            </div>
+          </div>
+          <div class="saved-card-actions">
+            <button class="action saved-card-load">Cargar</button>
+            <button class="ghost saved-card-delete">Eliminar</button>
+          </div>
         </div>
-      </div>`).join('');
+        <div class="total-bar-wrap">
+          <div class="total-bar-track">
+            <div class="total-bar-segment" style="width:${pokePct}%;background:var(--accent);"></div>
+            <div class="total-bar-segment" style="width:${energyPct}%;background:var(--energy);"></div>
+            <div class="total-bar-segment" style="width:${itemPct}%;background:var(--draw);"></div>
+            <div class="total-bar-segment" style="width:${supporterPct}%;background:var(--support);"></div>
+            <div class="total-bar-segment" style="width:${otherPct}%;background:#949494;"></div>
+          </div>
+          <div class="legend">
+            <span><span class="dot pokemon"></span>Pokémon ${pokemonCount}</span>
+            <span><span class="dot energy"></span>Energía ${energyCount}</span>
+            <span><span class="dot item"></span>Objetos ${itemCount}</span>
+            <span><span class="dot supporter"></span>Apoyo ${supporterCount}</span>
+            ${otherCount > 0 ? `<span><span class="dot other"></span>Otros ${otherCount}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
 
     container.querySelectorAll('.saved-card-load').forEach(btn => {
       btn.addEventListener('click', async () => {

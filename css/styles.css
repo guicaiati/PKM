@@ -1680,7 +1680,7 @@ details.sidebar-box[open] summary.accordion-header {
   margin: 0 0 16px;
 }
 
-.saved-card {
+#guardado .saved-card {
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 10px;
