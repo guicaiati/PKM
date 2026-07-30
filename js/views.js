@@ -1847,12 +1847,24 @@ const Wizard = (() => {
       return;
     }
     const count = countInputId ? (Number(document.getElementById(countInputId)?.value) || 1) : 1;
-    const details = getCardDetails(name);
+    let details = getCardDetails(name);
+    let image = null;
+    if (!details) {
+      try {
+        const results = await API.searchCards(name, 3);
+        const match = results.find(r => (r.name || '').toLowerCase() === name.toLowerCase());
+        if (match) {
+          details = match;
+          image = match.images?.small || null;
+        }
+      } catch {}
+    }
     state.cards.push({
       id: nextId++,
       category,
       name,
       count,
+      image,
       isDraw: category === 'trainer' ? getTrainerRole(name) === 'Item' : false,
       types: details?.types || [],
       subtypes: details?.subtypes || [],
@@ -1973,7 +1985,8 @@ const Wizard = (() => {
         if (!img) return;
         const cardName = img.getAttribute('data-card-name');
         if (!cardName) return;
-        const card = getCardDetails(cardName);
+        let card = getCardDetails(cardName);
+        if (!card) card = state.cards.find(c => c.name.toLowerCase() === cardName.toLowerCase());
         if (!card) return;
         e.stopPropagation();
         UI.showLoading(cardName);
