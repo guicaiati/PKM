@@ -1344,6 +1344,24 @@ const Wizard = (() => {
     const supertype = (c.supertype || c.category || '').toLowerCase();
     const isEnergy = supertype.includes('energ');
 
+    function typeFromName(n) {
+      if (!n) return null;
+      const name = n.toLowerCase();
+      if (name.includes('fire') || name.includes('fuego')) return 'Fire';
+      if (name.includes('water') || name.includes('agua')) return 'Water';
+      if (name.includes('grass') || name.includes('planta')) return 'Grass';
+      if (name.includes('light') || name.includes('electr') || name.includes('rayo') || name.includes('relámpago') || name.includes('relampago')) return 'Lightning';
+      if (name.includes('psych') || name.includes('psí') || name.includes('psi')) return 'Psychic';
+      if (name.includes('fight') || name.includes('lucha')) return 'Fighting';
+      if (name.includes('dark') || name.includes('oscu')) return 'Darkness';
+      if (name.includes('metal')) return 'Metal';
+      if (name.includes('dragon') || name.includes('dragón')) return 'Dragon';
+      return null;
+    }
+
+    const nameType = typeFromName(c.name);
+    if (nameType) return nameType;
+
     const card = getCardDetails(c.name) || c;
     if (card.types && card.types.length > 0) {
       const t = card.types[0];
@@ -1368,18 +1386,8 @@ const Wizard = (() => {
       if (e.includes('drag')) return 'Dragon';
     }
 
-    const names = [c.name, card.name].filter(Boolean).map(n => n.toLowerCase());
-    for (const name of names) {
-      if (name.includes('fire') || name.includes('fuego')) return 'Fire';
-      if (name.includes('water') || name.includes('agua')) return 'Water';
-      if (name.includes('grass') || name.includes('planta')) return 'Grass';
-      if (name.includes('light') || name.includes('electr') || name.includes('rayo') || name.includes('relámpago') || name.includes('relampago')) return 'Lightning';
-      if (name.includes('psych') || name.includes('psí') || name.includes('psi')) return 'Psychic';
-      if (name.includes('fight') || name.includes('lucha')) return 'Fighting';
-      if (name.includes('dark') || name.includes('oscu')) return 'Darkness';
-      if (name.includes('metal')) return 'Metal';
-      if (name.includes('dragon') || name.includes('dragón')) return 'Dragon';
-    }
+    const cardNameType = typeFromName(card.name);
+    if (cardNameType) return cardNameType;
 
     return 'Colorless';
   }

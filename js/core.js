@@ -1150,7 +1150,20 @@ const UI = (() => {
         }
       }
       const typeColor = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
-      const tcVar = typeColor[card.types && card.types[0]] || 'colorless';
+      const rawT = card.types && card.types[0];
+      const tcVar = typeColor[rawT] || (() => {
+        const n = (card.name || '').toLowerCase();
+        if (n.includes('fire') || n.includes('fuego')) return 'fire';
+        if (n.includes('water') || n.includes('agua')) return 'water';
+        if (n.includes('grass') || n.includes('planta')) return 'grass';
+        if (n.includes('light') || n.includes('electr') || n.includes('rayo') || n.includes('relámpago')) return 'electric';
+        if (n.includes('psych') || n.includes('psí') || n.includes('psi')) return 'psychic';
+        if (n.includes('fight') || n.includes('lucha')) return 'fighting';
+        if (n.includes('dark') || n.includes('oscu')) return 'darkness';
+        if (n.includes('metal')) return 'metal';
+        if (n.includes('dragon') || n.includes('dragón')) return 'dragon';
+        return 'colorless';
+      })();
       const initial = (card.name || '?')[0].toUpperCase();
       const placeholder = `<div class="card-placeholder cd-badge-${tcVar}">${initial}</div>`;
       div.innerHTML = `
@@ -1328,8 +1341,23 @@ const UI = (() => {
       const attacks = card.attacks || [];
       const cardText = card.text && card.text.length > 0 ? card.text : (card.rules || []);
       const hp = card.hp || 0;
-      const type = (card.types && card.types[0]) || 'Colorless';
       const subs = card.subtypes || [];
+
+      let type = (card.types && card.types[0]) || '';
+      if (!type) {
+        const n = (card.name || '').toLowerCase();
+        if (n.includes('fire') || n.includes('fuego')) type = 'Fire';
+        else if (n.includes('water') || n.includes('agua')) type = 'Water';
+        else if (n.includes('grass') || n.includes('planta')) type = 'Grass';
+        else if (n.includes('light') || n.includes('electr') || n.includes('rayo') || n.includes('relámpago')) type = 'Lightning';
+        else if (n.includes('psych') || n.includes('psí') || n.includes('psi')) type = 'Psychic';
+        else if (n.includes('fight') || n.includes('lucha')) type = 'Fighting';
+        else if (n.includes('dark') || n.includes('oscu')) type = 'Darkness';
+        else if (n.includes('metal')) type = 'Metal';
+        else if (n.includes('dragon') || n.includes('dragón')) type = 'Dragon';
+        else type = 'Colorless';
+      }
+      const evoFrom = card.evolvesFrom || '';
       const evoFrom = card.evolvesFrom || '';
       const hasRealData = attacks.length > 0 || abilities.length > 0 || cardText.length > 0;
 
