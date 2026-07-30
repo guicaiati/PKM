@@ -1476,7 +1476,7 @@ const Wizard = (() => {
     const rowClass = evoCheck.valid ? '' : 'row-evo-warning';
     const warningBtn = evoCheck.valid ? '' : `<button type="button" class="ghost info-warn-btn" title="${escapeHtml(evoCheck.warning)}" onclick="UI.toast('${escapeHtml(evoCheck.warning)}', 'error')"><span class="warn-icon">⚠️</span></button>`;
 
-    const thumbHtml = imgUrl ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(c.name)}" class="card-mini-thumb" loading="lazy" />` : `<span class="card-mini-placeholder">🃏</span>`;
+    const thumbHtml = imgUrl ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(c.name)}" class="card-mini-thumb" data-card-name="${escapeHtml(c.name)}" loading="lazy" />` : `<span class="card-mini-placeholder">🃏</span>`;
 
     return `
     <tr data-id="${c.id}" class="${rowClass}">
@@ -1964,6 +1964,22 @@ const Wizard = (() => {
       });
     }
     if (state.step === 8) {
+    }
+    const stepEl = document.getElementById('wizardStepBody');
+    if (stepEl && !stepEl.dataset.wizInfo) {
+      stepEl.dataset.wizInfo = '1';
+      stepEl.addEventListener('click', async (e) => {
+        const img = e.target.closest('.card-mini-thumb');
+        if (!img) return;
+        const cardName = img.getAttribute('data-card-name');
+        if (!cardName) return;
+        const card = getCardDetails(cardName);
+        if (!card) return;
+        e.stopPropagation();
+        UI.showLoading(cardName);
+        const explanation = await UI.getCardExplanationAsync(card);
+        if (explanation) UI.showModal(cardName, explanation);
+      });
     }
     if (state.step === 9) {
       document.getElementById('wizExport')?.addEventListener('click', exportDeckAsText);
