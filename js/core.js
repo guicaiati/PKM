@@ -1165,18 +1165,23 @@ const UI = (() => {
             </div>
             <button class="ghost remove-btn">Quitar</button>
             <button class="ghost photo-btn" title="Agregar foto">📷</button>
+            <button class="ghost card-info-btn" title="Qué hace esta carta"><span class="tcg-sym">?</span></button>
           </div>`;
       }
+      let ownedTagHtml = '';
       if (opts.showAdd) {
         const owned = opts.owned || 0;
         if (owned > 0) {
-          qtyHTML = `<div class="card-add-owned-row">
-            <span class="card-owned-tag">✔ Tengo ${owned}</span>
-            <button class="ghost add-btn">+ Agregar</button>
-          </div>`;
-        } else {
-          qtyHTML = `<button class="ghost add-btn btn-full">+ Agregar</button>`;
+          ownedTagHtml = `<div class="card-owned-tag">✔ Tengo ${owned}</div>`;
         }
+        qtyHTML = `<div class="card-add-owned-row">
+          <button class="ghost add-btn">+ Agregar</button>
+          <button class="ghost card-info-btn" title="Qué hace esta carta"><span class="tcg-sym">?</span></button>
+        </div>`;
+      } else if (!opts.showQty) {
+        qtyHTML = `<div class="card-add-row">
+          <button class="ghost card-info-btn btn-full" title="Qué hace esta carta">Qué hace esta carta <span class="tcg-sym">?</span></button>
+        </div>`;
       }
       const typeColor = { Fire: 'fire', Water: 'water', Grass: 'grass', Lightning: 'electric', Psychic: 'psychic', Fighting: 'fighting', Darkness: 'darkness', Metal: 'metal', Colorless: 'colorless', Dragon: 'dragon', Fairy: 'dragon' };
       const tcVar = typeColor[card.types && card.types[0]] || 'colorless';
@@ -1185,22 +1190,35 @@ const UI = (() => {
       div.innerHTML = `
         ${card.image ? `<img src="" alt="${card.name}" loading="lazy"/>` : placeholder}
         <div class="meta">
-          <div class="name-row"><span class="name">${cardNameDisplay(card.name)}</span><button class="ghost card-info-btn" title="Qué hace esta carta"><span class="tcg-sym">?</span></button></div>
-          <div class="set">${card.set || ''}</div>
-          ${card.number ? `<div class="card-info">#${card.number}</div>` : ''}
+          <div class="name-row"><span class="name">${cardNameDisplay(card.name)}</span></div>
+          <div class="set">${card.set || ''} ${card.number ? `#${card.number}` : ''}</div>
+          ${ownedTagHtml}
           ${qtyHTML}
         </div>`;
       if (card.image) {
         const imgEl = div.querySelector('img');
         loadCachedImage(imgEl, card.id || card.name, card.image);
+        if (imgEl) {
+          imgEl.style.cursor = 'pointer';
+          imgEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            UI.openCardModal(card);
+          });
+        }
+      }
+      const phEl = div.querySelector('.card-placeholder');
+      if (phEl) {
+        phEl.style.cursor = 'pointer';
+        phEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          UI.openCardModal(card);
+        });
       }
       const infoBtn = div.querySelector('.card-info-btn');
       if (infoBtn) {
-        infoBtn.addEventListener('click', async (e) => {
+        infoBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          UI.showLoading(cardNamePlain(card.name));
-          const explanation = await UI.getCardExplanationAsync(card);
-          if (explanation) UI.showModal(cardNamePlain(card.name), explanation);
+          UI.openCardModal(card);
         });
       }
       return div;
@@ -1512,7 +1530,7 @@ const UI = (() => {
           const wType = w.type || 'Colorless';
           const wChar = typeIcons[wType] || 'c';
           const wLabel = TYPE_ES[wType] || wType;
-          html += '<div class="cd-weakness cd-badge-' + (typeVar[wType] || 'colorless') + '"><span class="tcg-sym">' + wChar + '</span> ' + wLabel + ' ' + (w.value || '') + '</div>';
+          html += '<div class="cd-wr-row"><span class="cd-wr-circle cd-bg-' + (typeVar[wType] || 'colorless') + '"><span class="tcg-sym">' + wChar + '</span></span><span class="cd-wr-label">' + wLabel + ' ' + (w.value || '') + '</span></div>';
         }
         html += '</div>';
       }
@@ -1523,7 +1541,7 @@ const UI = (() => {
           const rType = r.type || 'Colorless';
           const rChar = typeIcons[rType] || 'c';
           const rLabel = TYPE_ES[rType] || rType;
-          html += '<div class="cd-resistance cd-badge-' + (typeVar[rType] || 'colorless') + '"><span class="tcg-sym">' + rChar + '</span> ' + rLabel + ' ' + (r.value || '') + '</div>';
+          html += '<div class="cd-wr-row"><span class="cd-wr-circle cd-bg-' + (typeVar[rType] || 'colorless') + '"><span class="tcg-sym">' + rChar + '</span></span><span class="cd-wr-label">' + rLabel + ' ' + (r.value || '') + '</span></div>';
         }
         html += '</div>';
       }
@@ -1562,7 +1580,12 @@ const UI = (() => {
     showLoading(title) {
       const modal = document.getElementById('cardModal');
       const body = document.getElementById('modalBody');
-      body.innerHTML = `<h3>${title}</h3><div class="card-detail"><div class="cd-section cd-loading-text">Cargando info de la carta...</div></div>`;
+      body.innerHTML = `
+        <div class="cd-loading-box">
+          <img src="Running-Pikachu-GIF.webp" alt="Cargando..." class="modal-loading-gif" />
+          <h3 style="margin-bottom:6px;">${title}</h3>
+          <div class="cd-loading-text" style="color:var(--text-dim);font-size:13px;">Cargando info de la carta...</div>
+        </div>`;
       if (modal) {
         modal.style.display = 'flex';
         modal.classList.remove('hidden');
@@ -1587,6 +1610,59 @@ const UI = (() => {
         modal.classList.add('hidden');
       }
     },
+
+    async openCardModal(cardOrName) {
+      let card = cardOrName;
+      if (typeof cardOrName === 'string') {
+        const name = cardOrName.trim();
+        this.showLoading(name);
+        try {
+          const results = await API.searchCards(name, 5);
+          if (results.length > 0) {
+            const exact = results.find(r => (r.name || '').toLowerCase() === name.toLowerCase()) || results[0];
+            card = {
+              name: exact.name || name,
+              id: exact.id || '',
+              set: exact.set ? exact.set.name : '',
+              setId: exact.set ? exact.set.id : '',
+              number: exact.number || '',
+              image: exact.images ? (exact.images.small || exact.images.large) : '',
+              supertype: exact.supertype || '',
+              types: exact.types || [],
+              subtypes: exact.subtypes || [],
+              hp: exact.hp || '',
+              evolvesFrom: exact.evolvesFrom || '',
+              rarity: exact.rarity || '',
+              attacks: exact.attacks || [],
+              abilities: exact.abilities || [],
+              weaknesses: exact.weaknesses || [],
+              resistances: exact.resistances || [],
+              retreatCost: exact.retreatCost || [],
+              convertedRetreatCost: exact.convertedRetreatCost || 0,
+              text: exact.text || exact.rules || []
+            };
+          } else {
+            card = { name: name, supertype: '', types: [], attacks: [], abilities: [], text: [] };
+          }
+        } catch (e) {
+          console.warn('openCardModal search failed:', e);
+          card = { name: name, supertype: '', types: [], attacks: [], abilities: [], text: [] };
+        }
+      }
+
+      const title = card.name || 'Carta';
+      this.showLoading(title);
+      try {
+        const html = await this.getCardExplanationAsync(card);
+        const imgTag = card.image ? `<div style="text-align:center;margin-bottom:12px;"><img src="${card.image}" alt="${card.name}" style="max-width:200px;border-radius:12px;" /></div>` : '';
+        const setInfo = card.set ? `<div style="color:var(--text-dim);font-size:12px;margin-bottom:8px;">${card.set}${card.number ? ' #' + card.number : ''}</div>` : '';
+        this.showModal(cardNameDisplay(title), imgTag + setInfo + (html || '<p style="color:var(--text-dim);">Sin información detallada disponible.</p>'));
+      } catch (e) {
+        console.warn('openCardModal detail failed:', e);
+        this.showModal(title, '<p>No se pudo cargar la información de la carta.</p>');
+      }
+    },
+
 
     toast(msg, type = 'info') {
       const container = document.getElementById('toastContainer');

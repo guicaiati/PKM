@@ -33,11 +33,11 @@
         <h2>Buscar carta</h2>
         <p class="hint">Escribí el nombre, número o ID de la carta. Funciona con: "Charizard", "Charizard 110",
           "sv3pt5-110"</p>
-        <div class="search-wrap">
-          <input type="text" id="searchInput" placeholder="ej: Charizard ex 110" autocomplete="off" />
-          <div class="autocomplete-list" id="autocompleteList"></div>
-        </div>
         <div class="row">
+          <div class="search-wrap" style="flex:1;min-width:220px;">
+            <input type="text" id="searchInput" placeholder="ej: Charizard ex 110" autocomplete="off" style="width:100%;" />
+            <div class="autocomplete-list" id="autocompleteList"></div>
+          </div>
           <button class="action" id="searchBtn">Buscar</button>
           <button class="ghost" id="clearSearchBtn">Limpiar</button>
         </div>
@@ -49,8 +49,8 @@
           <button class="filter-chip" data-filter="Energy">Energy</button>
         </div>
         <div class="grid" id="searchResults"></div>
-        <div class="search-history" id="searchHistory">
-          <div class="deck-sub-h">Búsquedas recientes</div>
+        <div class="card-box search-history" id="searchHistory" style="margin-top:14px;background:var(--surface-2);">
+          <h3>Búsquedas recientes</h3>
           <div class="search-filters history-chips" id="historyChips"></div>
         </div>
       </div>
@@ -132,7 +132,7 @@
       <div class="card-box" id="wizardStepBody"></div>
 
       <!-- Lo que más importa: tenés vs falta comprar, siempre a la vista -->
-      <details class="sidebar-box card-box" id="tenesComprarDetails">
+      <details class="sidebar-box card-box" id="tenesComprarDetails" style="display:none;">
         <summary class="accordion-header">Tenés / falta comprar</summary>
         <div class="next-steps-grid" style="margin-top:12px;">
           <div>

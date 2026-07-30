@@ -18,9 +18,23 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-/* ==========================================
-   SCANNER MODULE (BUSCAR)
-   ========================================== */
+function getCollectionCardsData(data) {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (typeof data === 'object') {
+    if (data.cards && (Array.isArray(data.cards) || typeof data.cards === 'object')) return getCollectionCardsData(data.cards);
+    if (data.data && (Array.isArray(data.data) || typeof data.data === 'object')) return getCollectionCardsData(data.data);
+    if (data.items && (Array.isArray(data.items) || typeof data.items === 'object')) return getCollectionCardsData(data.items);
+    return Object.values(data).filter(x => x && typeof x === 'object' && x.name);
+  }
+  return [];
+}
+
+function formatCollectionName(name) {
+  if (!name) return 'Colección';
+  if (/^col_\d+$/i.test(name.trim())) return 'Colección guardada';
+  return name;
+}
 const Scanner = (() => {
   const MAX_HISTORY = 10;
   let autocompleteTimer = null;
@@ -61,9 +75,26 @@ const Scanner = (() => {
         try {
           const suggestions = await API.autocomplete(val);
           if (!suggestions.length) { list.classList.remove('show'); return; }
+
+          const saved = await Storage.loadNamedCollections();
+          const allColsMap = [];
+
+          saved.forEach(col => {
+            if (!col) return;
+            const colName = formatCollectionName(col.name);
+            getCollectionCardsData(col).forEach(c => {
+              if (c && c.name) allColsMap.push({ name: c.name, count: c.count || 1, colName: colName });
+            });
+          });
+
           list.innerHTML = suggestions.map(s => {
-            const owned = Collection.countByName(s);
-            const badge = owned > 0 ? `<span class="ac-owned">Tenés ${owned}</span>` : '';
+            const sLower = s.toLowerCase().trim();
+            const matchingInCols = allColsMap.filter(x => (x.name || '').toLowerCase().trim() === sLower);
+            const ownedTotal = matchingInCols.reduce((sum, x) => sum + (x.count || 1), 0);
+            const colNamesList = Array.from(new Set(matchingInCols.map(x => formatCollectionName(x.colName))));
+            const colNamesStr = colNamesList.slice(0, 2).join(', ');
+
+            const badge = ownedTotal > 0 ? `<span class="ac-owned">Tenés ${ownedTotal} ${colNamesStr ? `(${colNamesStr})` : ''}</span>` : '';
             return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
           }).join('');
           list.classList.add('show');
@@ -94,38 +125,101 @@ const Scanner = (() => {
     });
   }
 
-  function renderResults(cards) {
+  async function renderResults(cards) {
     const grid = document.getElementById('searchResults');
     if (!grid) return;
     grid.innerHTML = '';
-    const collection = Collection.getData();
+
+    const saved = await Storage.loadNamedCollections();
+    const allCollectionCards = [];
+
+    console.log('🔍 [BUSCAR] Colecciones guardadas en DB:', saved.length, saved);
+
+    // Add all saved collections cards from database
+    saved.forEach(col => {
+      if (!col) return;
+      const colName = formatCollectionName(col.name);
+      const cardsInCol = getCollectionCardsData(col);
+      console.log(`📦 [BUSCAR] Colección "${colName}": ${cardsInCol.length} cartas extraídas`);
+      cardsInCol.forEach(c => {
+        if (c && c.name) allCollectionCards.push({ ...c, colName: colName });
+      });
+    });
+
+    console.log('🃏 [BUSCAR] Total cartas recolectadas entre todas las colecciones:', allCollectionCards.length);
+
     cards.forEach(c => {
-      const key = Storage.generateId(c.name, c.set?.id || '', c.number);
-      const owned = collection[key]?.count || 0;
+      const cIdLower = (c.id || '').toLowerCase().trim();
+      const cNumberStr = String(c.number || '').toLowerCase().trim();
+      const cSetIdLower = (c.set?.id || '').toLowerCase().trim();
+      const cSetNameLower = (c.set?.name || c.set || '').toLowerCase().trim();
+      const cNameLower = (c.name || '').toLowerCase().trim().replace(/\s+/g, ' ');
+
+      const matchingInCols = allCollectionCards.filter(x => {
+        if (!x || !x.name) return false;
+        const xIdLower = (x.id || '').toLowerCase().trim();
+        const xNumberStr = String(x.number || '').toLowerCase().trim();
+        const xSetIdLower = (x.setId || '').toLowerCase().trim();
+        const xSetNameLower = (x.setName || x.set || '').toLowerCase().trim();
+        const xNameLower = (x.name || '').toLowerCase().trim().replace(/\s+/g, ' ');
+
+        // 1. Exact ID match (e.g. "sv3pt5-25")
+        if (xIdLower && cIdLower && xIdLower === cIdLower) return true;
+
+        // 2. Set & Number match (e.g. number "25" and set "151" or "sv3pt5")
+        const hasXSet = Boolean(xSetIdLower || xSetNameLower);
+        const hasCSet = Boolean(cSetIdLower || cSetNameLower);
+        const hasXNum = Boolean(xNumberStr);
+        const hasCNum = Boolean(cNumberStr);
+
+        if (hasXNum && hasCNum && xNumberStr === cNumberStr) {
+          if (hasXSet && hasCSet) {
+            if (xSetIdLower === cSetIdLower || xSetNameLower === cSetNameLower) return true;
+            return false;
+          }
+          if (xNameLower === cNameLower) return true;
+        }
+
+        // 3. If x has specific set/number info that differs from c -> do NOT match different prints
+        if (hasXSet || hasXNum) {
+          return false;
+        }
+
+        // 4. Fallback for generic/legacy card entries without set/number info
+        return xNameLower === cNameLower;
+      });
+
+      const owned = matchingInCols.reduce((sum, x) => sum + (x.count || 1), 0);
+      const colNamesList = Array.from(new Set(matchingInCols.map(x => formatCollectionName(x.colName))));
+      const colNames = colNamesList.slice(0, 2).join(', ');
+
+      if (owned > 0) {
+        console.log(`✅ [BUSCAR] Coincidencia exacta para "${c.name}" (#${c.number || ''} ${c.set?.name || ''}):`, owned, 'en colecciones:', colNamesList);
+      }
+
       const el = UI.renderCard({
         id: c.id, name: c.name, image: c.images?.small || '', set: c.set?.name || '',
         number: c.number, types: c.types, supertype: c.supertype, hp: c.hp,
         subtypes: c.subtypes, attacks: c.attacks, abilities: c.abilities,
         ability: c.ability, evolvesFrom: c.evolvesFrom, evolvesTo: c.evolvesTo
       }, { showAdd: true, owned });
-      el.querySelector('.add-btn').addEventListener('click', () => Collection.addFromAPI(c));
-      el.querySelector('.name-row .card-info-btn')?.remove();
-      const infoBtn = document.createElement('button');
-      infoBtn.className = 'ghost card-info-btn';
-      infoBtn.title = 'Qué hace esta carta';
-      infoBtn.textContent = '';
-      const infoIcon = document.createElement('span');
-      infoIcon.className = 'tcg-sym';
-      infoIcon.style.cssText = 'font-size:14px;';
-      infoIcon.textContent = '?';
-      infoBtn.appendChild(infoIcon);
-      infoBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        UI.showLoading(UI.cardNamePlain(c.name));
-        const explanation = await UI.getCardExplanationAsync(c);
-        if (explanation) UI.showModal(UI.cardNamePlain(c.name), explanation);
-      });
-      el.querySelector('.meta')?.appendChild(infoBtn);
+
+      if (owned > 0 && colNames) {
+        let ownedTag = el.querySelector('.card-owned-tag');
+        if (!ownedTag) {
+          ownedTag = document.createElement('div');
+          ownedTag.className = 'card-owned-tag';
+          const metaEl = el.querySelector('.meta');
+          const actionsRow = el.querySelector('.card-add-owned-row, .card-add-row');
+          if (metaEl && actionsRow) {
+            metaEl.insertBefore(ownedTag, actionsRow);
+          }
+        }
+        ownedTag.textContent = `✔ Tengo ${owned} (${colNames})`;
+        ownedTag.title = `Tengo ${owned} en: ${colNamesList.join(', ')}`;
+      }
+
+      el.querySelector('.add-btn')?.addEventListener('click', () => Collection.addFromAPI(c));
       grid.appendChild(el);
     });
   }
@@ -403,7 +497,7 @@ const Scanner = (() => {
       if (!query) return;
 
       gridEl.innerHTML = '';
-      UI.setStatus(statusEl, 'Buscando...');
+      if (statusEl) statusEl.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;"><img src="Running-Pikachu-GIF.webp" alt="Buscando..." style="width:48px;height:auto;" /><span style="font-size:12px;color:var(--text-dim);">Buscando...</span></div>';
 
       const t0 = Date.now();
       try {
@@ -634,6 +728,7 @@ const Collection = (() => {
 
     getCards() { return Object.values(data); },
     getMap() { return data; },
+    getData() { return data; },
     render,
     getCurrentName() { return currentCollectionName; },
     setCurrentName(name) { currentCollectionName = name || ''; renderSavedCollections(); }
@@ -692,42 +787,23 @@ const Wizard = (() => {
   function getAllCollectionCards() {
     const map = new Map();
     try {
-      const activeData = Collection.getData ? Collection.getData() : {};
-      Object.values(activeData).forEach(c => {
-        if (!c || !c.name) return;
-        const key = (c.name).toLowerCase().trim();
-        const existing = map.get(key);
-        if (existing) {
-          existing.count = (existing.count || 1) + (c.count || 1);
-        } else {
-          map.set(key, { ...c, count: c.count || 1 });
-        }
-      });
-    } catch (e) {}
-
-    try {
-      const saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
-      const activeName = (Collection.getCurrentName ? Collection.getCurrentName() : '').toLowerCase().trim();
-      
+      const raw = localStorage.getItem('savedCollections') || '[]';
+      const saved = JSON.parse(raw);
       saved.forEach(col => {
-        if (activeName && col.name && col.name.toLowerCase().trim() === activeName) {
-          return;
-        }
-        if (Array.isArray(col.data)) {
-          col.data.forEach(c => {
-            if (!c || !c.name) return;
-            const key = (c.name).toLowerCase().trim();
-            const existing = map.get(key);
-            if (existing) {
-              existing.count = (existing.count || 1) + (c.count || 1);
-            } else {
-              map.set(key, { ...c, count: c.count || 1 });
-            }
-          });
-        }
+        if (!col) return;
+        const cardsInCol = getCollectionCardsData(col);
+        cardsInCol.forEach(c => {
+          if (!c || !c.name) return;
+          const key = c.name.toLowerCase().trim();
+          const existing = map.get(key);
+          if (existing) {
+            existing.count = (existing.count || 1) + (c.count || 1);
+          } else {
+            map.set(key, { ...c, count: c.count || 1 });
+          }
+        });
       });
     } catch (e) {}
-
     return Array.from(map.values());
   }
 
@@ -773,29 +849,25 @@ const Wizard = (() => {
     }
     let added = 0;
     const existingNames = new Set(state.cards.map(c => c.name.toLowerCase()));
-    colCards.forEach(raw => {
-      const name = raw.name;
-      if (!name || existingNames.has(name.toLowerCase())) return;
-      const cardDetails = getCardDetails(name) || raw;
-      const supertype = (cardDetails.supertype || raw.supertype || raw.category || '').toLowerCase();
-      const count = Number(raw.count || 1);
-
-      if (supertype.includes('energ') || (raw.category === 'energy')) {
-        state.cards.push({ id: nextId++, category: 'energy', name, energyType: (raw.types && raw.types[0]) || name, count });
-        added++;
-      } else if (supertype.includes('train') || (raw.category === 'trainer')) {
-        const role = (raw.subtypes || cardDetails.subtypes || []).some(s => /supporter/i.test(s)) ? 'Supporter' : 'Item';
-        state.cards.push({ id: nextId++, category: 'trainer', name, trainerRole: role, isDraw: false, count });
-        added++;
-      } else {
-        const stageName = (cardDetails.subtypes || raw.subtypes || []).find(s => String(s).toLowerCase().includes('stage')) || 'Básico';
-        state.cards.push({ id: nextId++, category: 'pokemon', name, stage: stageName, count });
+    colCards.forEach(c => {
+      const count = Number(c.count || 1);
+      for (let i = 0; i < count; i++) {
+        state.cards.push({
+          id: nextId++,
+          name: c.name,
+          count: 1,
+          types: c.types || [],
+          supertype: c.supertype || 'Pokémon',
+          subtypes: c.subtypes || [],
+          image: c.image || c.imageUrl || (c.images && (c.images.small || c.images.large)) || '',
+          set: c.set || '',
+          number: c.number || ''
+        });
         added++;
       }
-      existingNames.add(name.toLowerCase());
     });
     save();
-    return { ok: true, msg: `Importadas ${added} cartas de tu colección.` };
+    return { ok: true, msg: `Se importaron ${added} cartas de tus colecciones guardadas.` };
   }
 
   function cardsBy(cat) { return state.cards.filter(c => c.category === cat); }
@@ -835,31 +907,46 @@ const Wizard = (() => {
 
   function getCardDetails(name) {
     if (!name) return null;
+    const nameLower = name.toLowerCase().trim();
+
+    // 1. Check saved collections first
+    const allSaved = getAllCollectionCards();
+    const fromCol = allSaved.find(x => (x.name || '').toLowerCase().trim() === nameLower);
+    if (fromCol) return fromCol;
+
+    // 2. Check local database
     let fromDb = (typeof API !== 'undefined' && API.findCardInDb) ? API.findCardInDb(name) : null;
     if (!fromDb && typeof API !== 'undefined' && API.translateToEnglish && API.findCardInDb) {
       fromDb = API.findCardInDb(API.translateToEnglish(name));
     }
     if (fromDb) return fromDb;
 
-    let fromCol = Collection.findByName(name);
-    if (!fromCol && typeof API !== 'undefined' && API.translateToEnglish) {
-      fromCol = Collection.findByName(API.translateToEnglish(name));
-    }
-    if (fromCol) return fromCol;
-
     return null;
   }
 
   function getCardImageUrl(c) {
     if (!c) return '';
-    const name = typeof c === 'string' ? c : (c.name || '');
-    const card = (getCardDetails(name) || (typeof c === 'object' ? c : {})) || {};
 
-    let url = (typeof c === 'object' && (c.image || c.imageUrl || (c.images && (c.images.small || c.images.large)))) ||
-              card.imageUrl ||
-              (card.images && (card.images.small || card.images.large)) ||
-              card.image ||
-              '';
+    // 1. Check direct object property first
+    if (typeof c === 'object') {
+      const directUrl = c.image || c.imageUrl || (c.images && (c.images.small || c.images.large));
+      if (directUrl) return directUrl;
+    }
+
+    const name = typeof c === 'string' ? c : (c.name || '');
+    if (!name) return '';
+
+    // 2. Check saved collection match
+    const allSaved = getAllCollectionCards();
+    const matchInCol = allSaved.find(x => (x.name || '').toLowerCase().trim() === name.toLowerCase().trim());
+    if (matchInCol) {
+      const colUrl = matchInCol.image || matchInCol.imageUrl || (matchInCol.images && (matchInCol.images.small || matchInCol.images.large));
+      if (colUrl) return colUrl;
+    }
+
+    // 3. Fallback to API db
+    const card = (getCardDetails(name) || (typeof c === 'object' ? c : {})) || {};
+    let url = card.imageUrl || (card.images && (card.images.small || card.images.large)) || card.image || '';
 
     if (!url && name && typeof API !== 'undefined' && API.fetchThumb) {
       url = API.fetchThumb(name) || (API.translateToEnglish ? API.fetchThumb(API.translateToEnglish(name)) : '') || '';
@@ -1143,14 +1230,26 @@ const Wizard = (() => {
       return { ...c, score: compat.score, reason: compat.reason };
     }).sort((a, b) => b.score - a.score);
 
-    const topOwned = ownedScored.slice(0, 50);
+    const ownedDeduped = [];
+    const ownedSeen = new Set();
+    for (const c of ownedScored) {
+      const key = c.name.toLowerCase();
+      if (!ownedSeen.has(key)) { ownedSeen.add(key); ownedDeduped.push(c); }
+    }
+    const topOwned = ownedDeduped.slice(0, 50);
 
     const missingScored = missingCandidates.map(c => {
       const compat = calculateCompatibility(c, currentDeck);
       return { ...c, score: compat.score, reason: c.reason || compat.reason };
     }).sort((a, b) => b.score - a.score);
 
-    const topMissing = missingScored.slice(0, 6);
+    const missingDeduped = [];
+    const missingSeen = new Set();
+    for (const c of missingScored) {
+      const key = c.name.toLowerCase();
+      if (!missingSeen.has(key)) { missingSeen.add(key); missingDeduped.push(c); }
+    }
+    const topMissing = missingDeduped.slice(0, 6);
 
     const renderChip = (c) => {
       const typeRaw = detectCardType(c);
@@ -1277,7 +1376,29 @@ const Wizard = (() => {
   function renderChips() {
     const rail = document.getElementById('wizardStepChips');
     if (!rail) return;
-    rail.innerHTML = STEP_META.map(s => `<button type="button" class="filter-chip ${state.step === s.n ? 'active' : ''}" data-wizard-step="${s.n}">${s.n}. ${s.label}</button>`).join('');
+    rail.className = 'step-nav';
+    rail.innerHTML = STEP_META.map(s => {
+      let badgeHtml = '';
+      if (s.key === 'plan') {
+        if (state.archetype) badgeHtml = `<span class="step-check">✓</span>`;
+      } else if (s.key === 'pokemon') {
+        const c = sumCount(cardsBy('pokemon'));
+        if (c > 0) badgeHtml = `<span class="step-badge">${c}</span>`;
+      } else if (s.key === 'energy') {
+        const c = sumCount(cardsBy('energy'));
+        if (c > 0) badgeHtml = `<span class="step-badge">${c}</span>`;
+      } else if (s.key === 'item') {
+        const c = sumCount(cardsBy('trainer').filter(x => getTrainerRole(x) === 'Item'));
+        if (c > 0) badgeHtml = `<span class="step-badge">${c}</span>`;
+      } else if (s.key === 'supporter') {
+        const c = sumCount(cardsBy('trainer').filter(x => getTrainerRole(x) === 'Supporter'));
+        if (c > 0) badgeHtml = `<span class="step-badge">${c}</span>`;
+      } else if (s.key === 'other') {
+        const c = sumCount(cardsBy('trainer').filter(x => { const r = getTrainerRole(x); return r === 'Stadium' || r === 'Tool'; }));
+        if (c > 0) badgeHtml = `<span class="step-badge">${c}</span>`;
+      }
+      return `<button type="button" class="step-btn ${state.step === s.n ? 'active' : ''}" data-wizard-step="${s.n}">${s.n}. ${s.label} ${badgeHtml}</button>`;
+    }).join('');
   }
 
   function getStageBadge(c) {
@@ -1576,9 +1697,6 @@ const Wizard = (() => {
       </details>`;
   }
 
-  // Barra total del mazo (60 cartas), segmentada por categoría con el mismo color
-  // que las barras de rango de cada paso. Vive junto a la navegación de pasos,
-  // así queda visible sin importar en qué paso estés parado.
   function renderTotalBar() {
     const pk = sumCount(cardsBy('pokemon'));
     const en = sumCount(cardsBy('energy'));
@@ -1589,12 +1707,21 @@ const Wizard = (() => {
     const total = pk + en + item + supporter + other;
     const seg = (n, color) => `<div style="height:100%;width:${Math.min(100, Math.round(n / 60 * 100))}%;background:${color};"></div>`;
     return `
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
-        <span style="color:var(--text-dim);">Mazo total</span>
-        <span style="font-weight:700;">${total} / 60</span>
-      </div>
-      <div style="height:8px;background:var(--line);border-radius:4px;overflow:hidden;display:flex;">
-        ${seg(pk, CAT_COLORS.pokemon)}${seg(en, CAT_COLORS.energy)}${seg(item, CAT_COLORS.item)}${seg(supporter, CAT_COLORS.supporter)}${seg(other, CAT_COLORS.other)}
+      <div class="total-bar-wrap">
+        <div class="total-bar-labels">
+          <span>Mazo total</span>
+          <strong style="color:var(--text);">${total} / 60</strong>
+        </div>
+        <div class="total-bar-track">
+          ${seg(pk, 'var(--accent)')}${seg(en, 'var(--energy)')}${seg(item, 'var(--draw)')}${seg(supporter, 'var(--support)')}${seg(other, '#949494')}
+        </div>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--accent);"></span>Pokémon (${pk})</span>
+          <span><span class="dot" style="background:var(--energy);"></span>Energía (${en})</span>
+          <span><span class="dot" style="background:var(--draw);"></span>Objetos (${item})</span>
+          <span><span class="dot" style="background:var(--support);"></span>Apoyo (${supporter})</span>
+          ${other > 0 ? `<span><span class="dot" style="background:#949494;"></span>Estadio+Tool (${other})</span>` : ''}
+        </div>
       </div>`;
   }
 
@@ -1610,7 +1737,7 @@ const Wizard = (() => {
       return `<p class="hint">Buscá Pokémon para agregar:</p>
         ${renderTargetBar('pokemon', 'Pokémon', sumCount(pkCards))}
         ${buildSuggestionsHtml('pokemon')}
-        <div class="row" style="gap:8px;align-items:center;">
+        <div class="row" style="margin-top:6px;">
           ${buildSearchInputHtml('wizPkSearch', 'wizPkAutocomplete', 'Buscar Pokémon...')}
           <input type="number" id="wizPkCount" min="1" max="4" value="1" style="width:70px;">
           <button class="action" id="wizAddPk">Agregar</button>
@@ -1623,7 +1750,7 @@ const Wizard = (() => {
       return `<p class="hint">Buscá Energías:</p>
         ${renderTargetBar('energy', 'Energía', sumCount(enCards))}
         ${buildSuggestionsHtml('energy')}
-        <div class="row" style="gap:8px;align-items:center;">
+        <div class="row" style="margin-top:6px;">
           ${buildSearchInputHtml('wizEnSearch', 'wizEnAutocomplete', 'Buscar Energía...')}
           <input type="number" id="wizEnCount" min="1" max="20" value="1" style="width:70px;">
           <button class="action" id="wizAddEn">Agregar</button>
@@ -1636,7 +1763,7 @@ const Wizard = (() => {
       return `<p class="hint">Objetos (Item) — cartas de búsqueda, recuperación y utilidad:</p>
         ${renderTargetBar('item', 'Objetos', sumCount(itemCards))}
         ${buildSuggestionsHtml('trainer')}
-        <div class="row" style="gap:8px;align-items:center;">
+        <div class="row" style="margin-top:6px;">
           ${buildSearchInputHtml('wizItSearch', 'wizItAutocomplete', 'Buscar Objeto...')}
           <input type="number" id="wizItCount" min="1" max="4" value="1" style="width:70px;">
           <button class="action" id="wizAddIt">Agregar</button>
@@ -1649,7 +1776,7 @@ const Wizard = (() => {
       return `<p class="hint">Apoyo (Supporter) — una por turno:</p>
         ${renderTargetBar('supporter', 'Apoyo', sumCount(supporterCards))}
         ${buildSuggestionsHtml('trainer')}
-        <div class="row" style="gap:8px;align-items:center;">
+        <div class="row" style="margin-top:6px;">
           ${buildSearchInputHtml('wizSuSearch', 'wizSuAutocomplete', 'Buscar Apoyo...')}
           <input type="number" id="wizSuCount" min="1" max="4" value="1" style="width:70px;">
           <button class="action" id="wizAddSu">Agregar</button>
@@ -1662,7 +1789,7 @@ const Wizard = (() => {
       return `<p class="hint">Estadios y Herramientas (Tool) — afectan el campo de juego:</p>
         ${renderTargetBar('other', 'Estadio+Tool', sumCount(otherCards))}
         ${buildSuggestionsHtml('trainer')}
-        <div class="row" style="gap:8px;align-items:center;">
+        <div class="row" style="margin-top:6px;">
           ${buildSearchInputHtml('wizOtSearch', 'wizOtAutocomplete', 'Buscar Estadio o Tool...')}
           <input type="number" id="wizOtCount" min="1" max="4" value="1" style="width:70px;">
           <button class="action" id="wizAddOt">Agregar</button>
@@ -2019,14 +2146,17 @@ const Saved = (() => {
         const apiSuggestions = await API.autocomplete(val);
 
         const saved = await Storage.loadNamedCollections();
-        const liveData = Collection.getMap();
-        const liveName = Collection.getCurrentName();
-        const localCards = [];
+        const allColsMap = [];
 
-        if (liveName) Object.values(liveData).forEach(c => localCards.push(c.name));
-        saved.forEach(col => (col.data || []).forEach(c => localCards.push(c.name)));
+        saved.forEach(col => {
+          if (!col) return;
+          const colName = formatCollectionName(col.name);
+          getCollectionCardsData(col).forEach(c => {
+            if (c && c.name) allColsMap.push({ name: c.name, count: c.count || 1, colName: colName });
+          });
+        });
 
-        const matchingLocal = [...new Set(localCards)].filter(n => (n || '').toLowerCase().includes(val));
+        const matchingLocal = [...new Set(allColsMap.map(c => c.name))].filter(n => (n || '').toLowerCase().includes(val));
         const combined = [...new Set([...matchingLocal, ...apiSuggestions])].slice(0, 10);
 
         if (!combined.length) {
@@ -2035,8 +2165,10 @@ const Saved = (() => {
         }
 
         list.innerHTML = combined.map(s => {
-          const owned = Collection.countByName(s);
-          const badge = owned > 0 ? `<span class="ac-owned">Tenés ${owned}</span>` : '';
+          const matchingInCols = allColsMap.filter(x => (x.name || '').toLowerCase() === s.toLowerCase());
+          const ownedTotal = matchingInCols.reduce((sum, x) => sum + (x.count || 1), 0);
+          const colNames = Array.from(new Set(matchingInCols.map(x => formatCollectionName(x.colName)))).slice(0, 2).join(', ');
+          const badge = ownedTotal > 0 ? `<span class="ac-owned">Tenés ${ownedTotal} ${colNames ? `(${colNames})` : ''}</span>` : '';
           return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
         }).join('');
 
@@ -2065,7 +2197,7 @@ const Saved = (() => {
       let text = '=== COLECCIONES GUARDADAS ===\n\n';
       saved.forEach(col => {
         text += `--- ${col.name} ---\n`;
-        (col.data || []).forEach(c => {
+        getCollectionCardsData(col.data).forEach(c => {
           text += `${c.count || 1}x ${c.name} (${c.set || ''} #${c.number || ''})\n`;
         });
         text += '\n';
@@ -2088,33 +2220,27 @@ const Saved = (() => {
     if (!container) return;
 
     const saved = await Storage.loadNamedCollections();
-    const liveData = Collection.getMap();
-    const liveName = Collection.getCurrentName();
+    const liveName = Collection.getCurrentName ? Collection.getCurrentName() : null;
 
-    const currentEntry = { id: 'current', name: liveName || 'Mi Colección', savedAt: Date.now(), data: Object.values(liveData) };
-    const others = liveName ? saved.filter(c => c.name !== liveName) : saved;
-    let all = [currentEntry, ...others];
+    let all = saved.map(c => {
+      const isThisCurrent = Boolean(liveName && (c.name === liveName || c.id === liveName));
+      return { ...c, isCurrent: isThisCurrent, data: getCollectionCardsData(c) };
+    });
 
     if (searchQuery) {
+      const q = searchQuery.trim().toLowerCase();
       all = all.map(col => {
-        const matchingCards = (col.data || []).filter(c => (c.name || '').toLowerCase().includes(searchQuery));
-        const matchesColName = (col.name || '').toLowerCase().includes(searchQuery);
+        const dataItems = getCollectionCardsData(col);
+        const matchingCards = dataItems.filter(c => (c.name || '').toLowerCase().includes(q));
+        const matchesColName = (col.name || '').toLowerCase().includes(q);
         if (matchesColName || matchingCards.length > 0) {
-          return { ...col, matchingCards };
+          return { ...col, data: dataItems, matchingCards };
         }
         return null;
       }).filter(Boolean);
     }
 
-    const trash = await Storage.getTrashBinCollections();
     let restoreBannerHtml = '';
-    if (trash.length > 0) {
-      const lastTrash = trash[trash.length - 1];
-      restoreBannerHtml = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(56,224,123,0.12);border:1px solid rgba(56,224,123,0.35);border-radius:8px;display:flex;align-items:center;justify-content:space-between;width:100%;">
-        <span style="font-size:13px;color:var(--text);">🗑️ Papelera: <strong>"${escapeHtml(lastTrash.name)}"</strong> fue eliminada.</span>
-        <button type="button" class="action" id="restoreCollectionBtn" style="padding:4px 12px;font-size:12px;">↩️ Restaurar</button>
-      </div>`;
-    }
 
     if (all.length === 0) {
       container.innerHTML = restoreBannerHtml;
@@ -2134,67 +2260,26 @@ const Saved = (() => {
     if (empty) empty.style.display = 'none';
 
     container.innerHTML = restoreBannerHtml + all.map(c => {
-      const dataItems = c.data || [];
+      const dataItems = getCollectionCardsData(c.data);
       const total = dataItems.reduce((s, x) => s + (x.count || 0), 0);
-      const uniqueCount = dataItems.length;
-
-      const pokemonCount = dataItems.filter(x => {
-        const sup = (x.supertype || '').toLowerCase();
-        return sup.includes('pok') || (!sup.includes('train') && !sup.includes('energ'));
-      }).reduce((s, x) => s + (x.count || 0), 0);
-
-      const trainerCount = dataItems.filter(x => (x.supertype || '').toLowerCase().includes('train')).reduce((s, x) => s + (x.count || 0), 0);
-      const energyCount = dataItems.filter(x => (x.supertype || '').toLowerCase().includes('energ')).reduce((s, x) => s + (x.count || 0), 0);
-
-      const pokePct = total > 0 ? Math.round((pokemonCount / total) * 100) : 0;
-      const trainPct = total > 0 ? Math.round((trainerCount / total) * 100) : 0;
-      const energyPct = total > 0 ? Math.round((energyCount / total) * 100) : 0;
-
-      const dateStr = new Date(c.savedAt || Date.now()).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: '2-digit' });
-      const isCurrent = c.id === 'current';
+      const isCurrent = Boolean(c.isCurrent || c.id === 'current');
 
       let matchesHtml = '';
       if (c.matchingCards && c.matchingCards.length > 0) {
-        matchesHtml = `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;">
-          <div style="color:var(--holo-a);font-weight:600;margin-bottom:4px;">Cartas encontradas (${c.matchingCards.length}):</div>
-          ${c.matchingCards.slice(0, 5).map(m => `<div style="color:var(--text);">${escapeHtml(m.name)} (x${m.count || 1})</div>`).join('')}
-        </div>`;
+        matchesHtml = `<div style="margin-top:4px;font-size:11px;color:var(--accent);">Coincidencias: ${c.matchingCards.map(m => `${escapeHtml(m.name)} (x${m.count || 1})`).join(', ')}</div>`;
       }
 
       return `
         <div class="saved-card" data-id="${c.id}">
           <div>
-            <div class="saved-card-header">
-              <div class="saved-card-icon">📦</div>
-              <div class="saved-card-info">
-                <div class="saved-card-name">${escapeHtml(c.name)} ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Actual)</span>' : ''}</div>
-                <div class="saved-card-date">${dateStr}</div>
-              </div>
-            </div>
-            <div class="saved-card-stats">
-              <span class="sc-stat"><span class="sc-stat-val">${total}</span> cartas</span>
-              <span class="sc-stat"><span class="sc-stat-val">${uniqueCount}</span> únicas</span>
-              <span class="sc-stat sc-pokemon">⚡ ${pokemonCount}</span>
-              <span class="sc-stat sc-trainer">🎴 ${trainerCount}</span>
-              <span class="sc-stat sc-energy">💎 ${energyCount}</span>
-            </div>
-            <div class="collection-bar">
-              <div class="collection-bar-fill poke-bar" style="width:${pokePct}%"></div>
-              <div class="collection-bar-fill train-bar" style="width:${trainPct}%"></div>
-              <div class="collection-bar-fill energy-bar" style="width:${energyPct}%"></div>
-            </div>
-            <div class="collection-bar-labels">
-              <span class="cbl-item poke-label">${pokePct}% Pokémon</span>
-              <span class="cbl-item train-label">${trainPct}% Trainer</span>
-              <span class="cbl-item energy-label">${energyPct}% Energía</span>
-            </div>
+            <div class="saved-card-name">📦 ${escapeHtml(c.name)} <span class="saved-type-tag type-collection">Colección</span> ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Colección actual)</span>' : ''}</div>
+            <div class="saved-card-stats">✨ ${total} cartas</div>
             ${matchesHtml}
           </div>
           <div class="saved-card-actions">
             <button class="action saved-card-load">${isCurrent ? 'Actualizar' : 'Cargar'}</button>
             <button class="ghost saved-card-rename">Renombrar</button>
             ${!isCurrent ? '<button class="ghost saved-card-delete">Eliminar</button>' : ''}
-            <button class="ghost saved-card-new" title="Nueva colección">➕</button>
           </div>
         </div>`;
     }).join('');
@@ -2214,13 +2299,16 @@ const Saved = (() => {
           UI.toast('La colección ya está activa', 'info');
           return;
         }
+        const savedCols = await Storage.loadNamedCollections();
+        const colObj = savedCols.find(x => x.id === id);
         const loaded = await Storage.loadCollectionAsNamed(id);
         if (loaded) {
           await Storage.saveCollection(loaded);
-          Collection.setCurrentName(id);
+          const colName = (colObj && colObj.name) ? colObj.name : (loaded.name || 'Colección');
+          Collection.setCurrentName(colName);
           Collection.init();
           renderCollections(searchQuery);
-          UI.toast('Colección cargada', 'success');
+          UI.toast(`Colección "${colName}" cargada`, 'success');
         }
       });
     });
@@ -2292,52 +2380,17 @@ const Saved = (() => {
     container.innerHTML = saved.map(d => {
       const cards = d.data?.cards || [];
       const total = cards.reduce((s, c) => s + (c.count || 0), 0);
-      const pokemonCount = cards.filter(c => c.category === 'pokemon').reduce((s, c) => s + (c.count || 0), 0);
-      const energyCount = cards.filter(c => c.category === 'energy').reduce((s, c) => s + (c.count || 0), 0);
-      const trainerCount = total - pokemonCount - energyCount;
-      const itemCount = cards.filter(c => c.category === 'trainer' && (c.subtypes || '').toLowerCase().includes('item')).reduce((s, c) => s + (c.count || 0), 0);
-      const supporterCount = cards.filter(c => c.category === 'trainer' && (c.subtypes || '').toLowerCase().includes('supporter')).reduce((s, c) => s + (c.count || 0), 0);
-      const otherCount = trainerCount - itemCount - supporterCount;
-
-      const pokePct = total > 0 ? Math.round((pokemonCount / total) * 100) : 0;
-      const energyPct = total > 0 ? Math.round((energyCount / total) * 100) : 0;
-      const itemPct = total > 0 ? Math.round((itemCount / total) * 100) : 0;
-      const supporterPct = total > 0 ? Math.round((supporterCount / total) * 100) : 0;
-      const otherPct = total > 0 ? Math.max(0, 100 - pokePct - energyPct - itemPct - supporterPct) : 0;
-
-      const dateStr = d.savedAt ? new Date(d.savedAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : '';
-      const timeAgo = d.savedAt ? Math.round((Date.now() - d.savedAt) / 86400000) : 0;
-      const timeStr = timeAgo < 1 ? 'hoy' : timeAgo === 1 ? 'ayer' : `hace ${timeAgo} días`;
+      const archetypeMap = { rush: 'Ofensivo rápido', control: 'Control', combo: 'Combo', mill: 'Decking-out' };
+      const archetype = archetypeMap[d.data?.archetype] || d.data?.archetype || 'Ofensivo';
 
       return `<div class="saved-card" data-id="${d.id}">
-        <div class="saved-card-row">
-          <div class="saved-card-header">
-            <div class="saved-card-icon">📂</div>
-            <div>
-              <div class="saved-card-name">${escapeHtml(d.name)}</div>
-              <div class="saved-card-date">${timeStr} · ${total} cartas</div>
-            </div>
-          </div>
-          <div class="saved-card-actions">
-            <button class="action saved-card-load">Cargar</button>
-            <button class="ghost saved-card-delete">Eliminar</button>
-          </div>
+        <div>
+          <div class="saved-card-name">📜 ${escapeHtml(d.name)} <span class="saved-type-tag type-deck">Mazo</span></div>
+          <div class="saved-card-stats">${total} cartas · arquetipo ${escapeHtml(archetype)}</div>
         </div>
-        <div class="total-bar-wrap">
-          <div class="total-bar-track">
-            <div class="total-bar-segment" style="width:${pokePct}%;background:var(--accent);"></div>
-            <div class="total-bar-segment" style="width:${energyPct}%;background:var(--energy);"></div>
-            <div class="total-bar-segment" style="width:${itemPct}%;background:var(--draw);"></div>
-            <div class="total-bar-segment" style="width:${supporterPct}%;background:var(--support);"></div>
-            <div class="total-bar-segment" style="width:${otherPct}%;background:#949494;"></div>
-          </div>
-          <div class="legend">
-            <span><span class="dot pokemon"></span>Pokémon ${pokemonCount}</span>
-            <span><span class="dot energy"></span>Energía ${energyCount}</span>
-            <span><span class="dot item"></span>Objetos ${itemCount}</span>
-            <span><span class="dot supporter"></span>Apoyo ${supporterCount}</span>
-            ${otherCount > 0 ? `<span><span class="dot other"></span>Otros ${otherCount}</span>` : ''}
-          </div>
+        <div class="saved-card-actions">
+          <button class="action saved-card-load">Cargar</button>
+          <button class="ghost saved-card-delete">Eliminar</button>
         </div>
       </div>`;
     }).join('');
@@ -2421,5 +2474,16 @@ const App = (() => {
     }
   };
 })();
+
+document.addEventListener('click', (e) => {
+  const thumb = e.target.closest('.card-mini-thumb, .card-mini-thumb-small, .list-item img, .deck-card-thumb, .card-thumb-ph');
+  if (thumb) {
+    const cardEl = thumb.closest('[data-card-name], .list-item, .pkcard, .saved-card, .deck-card, tr');
+    const cardName = cardEl?.dataset?.cardName || thumb.alt || thumb.title || cardEl?.querySelector('.li-name, .name, .saved-card-name, td:nth-child(2)')?.textContent;
+    if (cardName && !e.target.closest('.add-btn, .ghost, button, input')) {
+      UI.openCardModal(cardName.trim());
+    }
+  }
+});
 
 document.addEventListener('DOMContentLoaded', () => App.init());
