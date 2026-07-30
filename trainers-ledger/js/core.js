@@ -267,7 +267,8 @@ const Storage = (() => {
         id: 'col_' + Date.now(),
         name: name,
         savedAt: Date.now(),
-        data: items
+        data: items,
+        _type: 'collection'
       };
       saved.push(entry);
       localStorage.setItem('savedCollections', JSON.stringify(saved));
@@ -292,48 +293,16 @@ const Storage = (() => {
 
     async deleteNamedCollection(id) {
       let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
-      const itemToDelete = saved.find(c => c.id === id);
-      if (itemToDelete) {
-        let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
-        trash.push({ ...itemToDelete, deletedAt: Date.now() });
-        localStorage.setItem('savedCollections_trashBin', JSON.stringify(trash));
-      }
       saved = saved.filter(c => c.id !== id);
       localStorage.setItem('savedCollections', JSON.stringify(saved));
-    },
-
-    async restoreLastDeletedCollection() {
-      let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
-      if (trash.length === 0) return null;
-      const restoredItem = trash.pop();
-      localStorage.setItem('savedCollections_trashBin', JSON.stringify(trash));
-
-      let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
-      saved.push({ id: restoredItem.id, name: restoredItem.name, savedAt: Date.now(), data: restoredItem.data });
-      localStorage.setItem('savedCollections', JSON.stringify(saved));
-      return restoredItem;
-    },
-
-    async getTrashBinCollections() {
-      return JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
     },
 
     async recoverByName(searchName = '21 7 26') {
       const q = String(searchName).toLowerCase().replace(/[^a-z0-9]/g, '');
       let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
-      let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
 
       const existing = saved.find(c => (c.name || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(q));
       if (existing) return existing;
-
-      const foundInTrash = trash.find(c => (c.name || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(q));
-      if (foundInTrash) {
-        saved.push(foundInTrash);
-        localStorage.setItem('savedCollections', JSON.stringify(saved));
-        const newTrash = trash.filter(c => c.id !== foundInTrash.id);
-        localStorage.setItem('savedCollections_trashBin', JSON.stringify(newTrash));
-        return foundInTrash;
-      }
 
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -389,7 +358,8 @@ const Storage = (() => {
         id: 'deck_' + Date.now(),
         name: name,
         savedAt: Date.now(),
-        data: deckData
+        data: deckData,
+        _type: 'deck'
       };
       saved.push(entry);
       localStorage.setItem('savedDecks', JSON.stringify(saved));

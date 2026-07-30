@@ -5,19 +5,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trainer's Ledger v2.0</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
-    rel="stylesheet">
+
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
   <div id="app">
     <div class="ledger-head">
-      <h1><span class="thraex-title name-sub">PKM</span> Trainer's Ledger</h1>
-      <div class="tag">buscá &middot; cataloga &middot; armá tu mazo</div>
+      <h1><span class="name-sub">PKM</span> Trainer's Ledger</h1>
+      <div class="tag">v2.0 &middot; buscá &middot; cataloga &middot; armá tu mazo</div>
     </div>
 
     <nav class="tabs">
@@ -33,25 +29,25 @@
         <h2>Buscar carta</h2>
         <p class="hint">Escribí el nombre, número o ID de la carta. Funciona con: "Charizard", "Charizard 110",
           "sv3pt5-110"</p>
-        <div class="search-wrap">
-          <input type="text" id="searchInput" placeholder="ej: Charizard ex 110" autocomplete="off" />
-          <div class="autocomplete-list" id="autocompleteList"></div>
-        </div>
-        <div class="row">
+        <div class="row" style="flex-wrap: nowrap;">
+          <div class="search-wrap" style="flex:1;">
+            <input type="text" id="searchInput" placeholder="ej: Charizard ex 110" autocomplete="off" style="width:100%;" />
+            <div class="autocomplete-list" id="autocompleteList"></div>
+          </div>
           <button class="action" id="searchBtn">Buscar</button>
           <button class="ghost" id="clearSearchBtn">Limpiar</button>
         </div>
-        <div class="status" id="searchStatus"></div>
         <div class="search-filters" id="searchFilters">
           <button class="filter-chip active" data-filter="all">Todos</button>
           <button class="filter-chip" data-filter="Pokémon">Pokémon</button>
           <button class="filter-chip" data-filter="Trainer">Trainer</button>
           <button class="filter-chip" data-filter="Energy">Energy</button>
         </div>
+        <div class="status" id="searchStatus"></div>
         <div class="grid" id="searchResults"></div>
-        <div class="search-history" id="searchHistory">
-          <div class="deck-sub-h">Búsquedas recientes</div>
-          <div class="search-filters history-chips" id="historyChips"></div>
+        <div class="card-box search-history-box" id="searchHistory">
+          <h3>Búsquedas recientes</h3>
+          <div class="search-filters" id="historyChips"></div>
         </div>
       </div>
     </section>
@@ -131,21 +127,6 @@
       </div>
       <div class="card-box" id="wizardStepBody"></div>
 
-      <!-- Lo que más importa: tenés vs falta comprar, siempre a la vista -->
-      <details class="sidebar-box card-box" id="tenesComprarDetails">
-        <summary class="accordion-header">Tenés / falta comprar</summary>
-        <div class="next-steps-grid" style="margin-top:12px;">
-          <div>
-            <h3>Ya tenés</h3>
-            <div id="removeList"></div>
-          </div>
-          <div>
-            <h3>Falta comprar</h3>
-            <div id="buyList"></div>
-          </div>
-        </div>
-      </details>
-
       <!-- Resultado final una vez completado el paso a paso -->
       <div id="deckResults" class="hidden">
 
@@ -177,6 +158,14 @@
     <!-- GUARDADO -->
     <section class="panel" id="panel-saved">
       <div class="card-box">
+        <h2>Buscar en guardados</h2>
+        <p class="hint">Buscá mazos o colecciones guardadas por nombre o carta.</p>
+        <div class="search-wrap">
+          <input type="text" id="savedSearch" placeholder="Buscar mazos o colecciones..." autocomplete="off" />
+          <div class="autocomplete-list" id="savedSearchAutocomplete"></div>
+        </div>
+      </div>
+      <div class="card-box">
         <h2>Mis mazos</h2>
         <p class="hint">Mazos guardados. Cargalos para verlos o modificá la variante.</p>
         <div id="savedDecksFull"></div>
@@ -186,13 +175,6 @@
       <div class="card-box">
         <h2>Mis colecciones</h2>
         <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminalas.</p>
-        <div class="mb-12">
-          <div class="search-wrap">
-            <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..."
-              autocomplete="off" />
-            <div class="autocomplete-list" id="savedSearchAutocomplete"></div>
-          </div>
-        </div>
         <div class="row mb-12">
           <button class="ghost" id="exportAllCollectionsTxt">Exportar colecciones TXT</button>
         </div>

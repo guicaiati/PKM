@@ -50,9 +50,9 @@
   --trainer: #4FB6C9;
   --radius: 10px;
   --radius-lg: 16px;
-  --display: 'Space Grotesk', sans-serif;
-  --body: 'Inter', sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Segoe UI', system-ui, sans-serif;
+  --body: 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
   --tcg: 'EssentiarumTCG', sans-serif;
   --poke: 'ThraexMagnus', sans-serif;
 }
@@ -76,23 +76,43 @@ body {
 
 /* Header & Tabs */
 .ledger-head {
+  box-sizing: border-box;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 22px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
   border-bottom: 1px solid var(--line);
-  padding-bottom: 16px;
+  padding-bottom: 18px;
 }
 .ledger-head h1 {
+  box-sizing: border-box;
   font-family: var(--display);
+  font-weight: 700;
   font-size: 26px;
   margin: 0;
+  letter-spacing: -0.02em;
+}
+.ledger-head h1 .name-sub {
+  box-sizing: border-box;
+  background: linear-gradient(135deg, var(--accent), var(--support));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 .ledger-head .tag {
+  box-sizing: border-box;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 12px;
+  color: #5B5E6B;
+}
+
+.hint {
+  font-size: 12.5px;
   color: var(--text-dim);
+  margin: 0 0 12px;
+  line-height: 1.5;
 }
 
 nav.tabs {
@@ -116,10 +136,9 @@ nav.tabs button:hover {
   border-color: var(--holo-b);
 }
 nav.tabs button.active {
-  color: var(--bg);
-  font-weight: 600;
-  border-color: transparent;
-  background: linear-gradient(100deg, var(--holo-a), var(--holo-b) 55%, var(--holo-c));
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .panel {
@@ -127,6 +146,14 @@ nav.tabs button.active {
 }
 .panel.active {
   display: block;
+}
+
+button {
+  font-family: var(--body);
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: 0.15s ease;
 }
 
 /* Cards & Layout */
@@ -143,9 +170,32 @@ nav.tabs button.active {
   margin: 0 0 12px;
 }
 .card-box h3 {
-  font-family: var(--display);
-  font-size: 14px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
   margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.search-history-box {
+  margin-top: 14px;
+  background: var(--surface-2);
+}
+
+.status {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 4px 0 8px;
+}
+
+button.action {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  padding: 9px 16px;
+  font-weight: 600;
 }
 
 .row {
@@ -395,6 +445,57 @@ button.ghost:hover, label.ghost:hover {
   font-size: 12px;
 }
 
+.smart-suggestions-block {
+  margin-bottom: 12px;
+}
+
+.stage-filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  background: var(--surface-2);
+  margin-bottom: 16px;
+}
+
+.element-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 6px 0 10px;
+}
+.element-filter-row .todos-chip {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+.element-filter-row .todos-chip.active {
+  background: var(--holo-b);
+  color: var(--bg);
+  border-color: var(--holo-b);
+  font-weight: 600;
+}
+
+.filter-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.tcg-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .filter-chip {
   font-family: var(--mono);
   font-size: 13px;
@@ -411,10 +512,9 @@ button.ghost:hover, label.ghost:hover {
   color: var(--text);
 }
 .filter-chip.active {
-  background: var(--holo-b);
-  color: var(--bg);
-  border-color: var(--holo-b);
-  font-weight: 600;
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .element-filter-row .filter-chip {
@@ -1246,6 +1346,13 @@ tr.row-evo-warning td {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  margin-top: 12px;
+}
+.next-steps-grid h3.have {
+  color: var(--draw);
+}
+.next-steps-grid h3.need {
+  color: var(--support);
 }
 
 .list-item {
@@ -1320,6 +1427,13 @@ tr.row-evo-warning td {
 
 .db-sidebar {
   margin-top: 24px;
+}
+
+summary.accordion-header {
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
 }
 
 details.sidebar-box summary.accordion-header {
@@ -1428,9 +1542,6 @@ details.sidebar-box[open] summary.accordion-header {
 
 /* Premium Saved Collections Grid */
 #savedCollectionsFull, #savedCollections {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
   margin-top: 14px;
   width: 100%;
 }
@@ -1459,15 +1570,14 @@ details.sidebar-box[open] summary.accordion-header {
   margin-bottom: 12px;
 }
 .saved-card .saved-card-header .saved-card-icon {
-  font-size: 22px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
-  width: 38px;
-  height: 38px;
+  background: var(--surface-3);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 16px;
   flex-shrink: 0;
 }
 .saved-card .saved-card-header .saved-card-info {
@@ -1475,21 +1585,15 @@ details.sidebar-box[open] summary.accordion-header {
   overflow: hidden;
 }
 .saved-card .saved-card-header .saved-card-name {
-  font-family: var(--display);
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .saved-card .saved-card-header .saved-card-date {
-  font-family: var(--mono);
   font-size: 11px;
-  color: var(--text-dim);
+  color: #5B5E6B;
   margin-top: 2px;
 }
 .saved-card .saved-card-stats {
@@ -1565,18 +1669,36 @@ details.sidebar-box[open] summary.accordion-header {
 .saved-card .saved-card-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 6px;
 }
-.saved-card .saved-card-actions .action, .saved-card .saved-card-actions .ghost {
+.saved-card .saved-card-actions .action {
+  font-family: var(--body);
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: 0.15s ease;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  padding: 9px 16px;
   flex: 1;
-  padding: 7px 12px;
-  font-size: 12px;
   justify-content: center;
   text-align: center;
-  border-radius: 6px;
+}
+.saved-card .saved-card-actions .ghost {
+  font-family: var(--body);
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: 0.15s ease;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--line);
+  padding: 9px 14px;
+  flex: 1;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Amenazas & Consistencia */
@@ -1676,7 +1798,7 @@ details.sidebar-box[open] summary.accordion-header {
 .sg-section-desc {
   font-family: var(--mono);
   font-size: 11.5px;
-  color: var(--text-faint);
+  color: #5B5E6B;
   margin: 0 0 16px;
 }
 
@@ -1686,6 +1808,49 @@ details.sidebar-box[open] summary.accordion-header {
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 10px;
+}
+
+#guardado .saved-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#guardado .saved-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#guardado .saved-card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+#guardado .saved-card-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+#guardado .saved-card-date {
+  font-size: 11px;
+  color: #5B5E6B;
+}
+
+#guardado .saved-card .total-bar-wrap {
+  margin-top: 12px;
+}
+
+.total-bar-track > div {
+  height: 100%;
+  transition: width 0.3s ease;
 }
 
 .saved-card-row {
@@ -1719,12 +1884,30 @@ details.sidebar-box[open] summary.accordion-header {
 
 .saved-card-date {
   font-size: 11px;
-  color: var(--text-faint);
+  color: #5B5E6B;
+}
+
+.saved-card-stats {
+  font-size: 11.5px;
+  color: #5B5E6B;
+  margin-top: 3px;
+  font-family: var(--mono);
 }
 
 .saved-card-actions {
   display: flex;
   gap: 6px;
+}
+
+.total-bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.total-bar-count {
+  font-weight: 700;
 }
 
 .total-bar-wrap {
@@ -1753,13 +1936,16 @@ details.sidebar-box[open] summary.accordion-header {
   color: var(--text-dim);
 }
 
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
 }
 
 .dot.pokemon {
@@ -1778,7 +1964,7 @@ details.sidebar-box[open] summary.accordion-header {
   background: var(--support);
 }
 
-.dot.other {
+.dot.stadium {
   background: #949494;
 }
 

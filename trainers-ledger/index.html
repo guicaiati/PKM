@@ -5,11 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trainer's Ledger v2.0</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
-    rel="stylesheet">
+
   <style>
     :root {
       --bg: #0B0D12;
@@ -21,9 +17,9 @@
       --text: #EDEDF2;
       --text-dim: #8A8D9A;
       --text-faint: #5B5E6B;
-      --mono: 'IBM Plex Mono', monospace;
-      --display: 'Space Grotesk', sans-serif;
-      --body: 'Inter', sans-serif;
+      --mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+      --display: 'Segoe UI', system-ui, sans-serif;
+      --body: 'Segoe UI', system-ui, sans-serif;
       --accent: #8B7FE8;
       --accent-dim: rgba(139, 127, 232, .14);
       --energy: #EF9F27;
@@ -1071,17 +1067,17 @@
           <button class="action" id="searchBtn">Buscar</button>
           <button class="ghost" id="clearSearchBtn">Limpiar</button>
         </div>
-        <div class="status" id="searchStatus"></div>
         <div class="search-filters" id="searchFilters">
           <button class="filter-chip active" data-filter="all">Todos</button>
           <button class="filter-chip" data-filter="Pokémon">Pokémon</button>
           <button class="filter-chip" data-filter="Trainer">Trainer</button>
           <button class="filter-chip" data-filter="Energy">Energy</button>
         </div>
+        <div class="status" id="searchStatus"></div>
         <div class="grid" id="searchResults"></div>
-        <div class="search-history" id="searchHistory">
-          <div class="deck-sub-h">Búsquedas recientes</div>
-          <div class="search-filters history-chips" id="historyChips"></div>
+        <div class="card-box search-history-box" id="searchHistory">
+          <h3>Búsquedas recientes</h3>
+          <div class="search-filters" id="historyChips"></div>
         </div>
       </div>
     </section>
@@ -1160,21 +1156,6 @@
         <div id="wizardTotalBar" style="margin-top:12px;"></div>
       </div>
       <div class="card-box" id="wizardStepBody"></div>
-
-      <!-- Lo que más importa: tenés vs falta comprar, siempre a la vista -->
-      <details class="sidebar-box card-box" id="tenesComprarDetails">
-        <summary class="accordion-header">Tenés / falta comprar</summary>
-        <div class="next-steps-grid" style="margin-top:12px;">
-          <div>
-            <h3>Ya tenés</h3>
-            <div id="removeList"></div>
-          </div>
-          <div>
-            <h3>Falta comprar</h3>
-            <div id="buyList"></div>
-          </div>
-        </div>
-      </details>
 
       <!-- Resultado final una vez completado el paso a paso -->
       <div id="deckResults" class="hidden">

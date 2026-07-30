@@ -1527,11 +1527,11 @@ const Wizard = (() => {
         <summary class="accordion-header">Tenés / falta comprar</summary>
         <div class="next-steps-grid" style="margin-top:12px;">
           <div>
-            <h3>Ya tenés (${have.length})</h3>
+            <h3 class="have">Ya tenés (${have.length})</h3>
             <p class="hint" style="margin:0;">${have.length ? have.map(escapeHtml).join(', ') : '—'}</p>
           </div>
           <div>
-            <h3>Falta comprar</h3>
+            <h3 class="need">Falta comprar</h3>
             <p class="hint" style="margin:0;">${need.length ? need.map(escapeHtml).join(', ') : '¡Tenés todo lo que necesitás!'}</p>
           </div>
         </div>
@@ -2009,34 +2009,17 @@ const Saved = (() => {
       }).filter(Boolean);
     }
 
-    const trash = await Storage.getTrashBinCollections();
-    let restoreBannerHtml = '';
-    if (trash.length > 0) {
-      const lastTrash = trash[trash.length - 1];
-      restoreBannerHtml = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(56,224,123,0.12);border:1px solid rgba(56,224,123,0.35);border-radius:8px;display:flex;align-items:center;justify-content:space-between;width:100%;">
-        <span style="font-size:13px;color:var(--text);">🗑️ Papelera: <strong>"${escapeHtml(lastTrash.name)}"</strong> fue eliminada.</span>
-        <button type="button" class="action" id="restoreCollectionBtn" style="padding:4px 12px;font-size:12px;">↩️ Restaurar</button>
-      </div>`;
-    }
-
     if (all.length === 0) {
-      container.innerHTML = restoreBannerHtml;
+      container.innerHTML = '';
       if (empty) {
         empty.style.display = 'block';
         empty.textContent = searchQuery ? `No se encontraron colecciones con "${searchQuery}".` : 'No tenés colecciones guardadas. Andá a "Colección" y guardá una.';
       }
-      document.getElementById('restoreCollectionBtn')?.addEventListener('click', async () => {
-        const item = await Storage.restoreLastDeletedCollection();
-        if (item) {
-          renderCollections(searchQuery);
-          UI.toast(`Colección "${item.name}" restaurada con éxito`, 'success');
-        }
-      });
       return;
     }
     if (empty) empty.style.display = 'none';
 
-    container.innerHTML = restoreBannerHtml + all.map(c => {
+    container.innerHTML = all.map(c => {
       const dataItems = c.data || [];
       const total = dataItems.reduce((s, x) => s + (x.count || 0), 0);
       const uniqueCount = dataItems.length;
@@ -2101,14 +2084,6 @@ const Saved = (() => {
           </div>
         </div>`;
     }).join('');
-
-    document.getElementById('restoreCollectionBtn')?.addEventListener('click', async () => {
-      const item = await Storage.restoreLastDeletedCollection();
-      if (item) {
-        renderCollections(searchQuery);
-        UI.toast(`Colección "${item.name}" restaurada con éxito`, 'success');
-      }
-    });
 
     container.querySelectorAll('.saved-card-load').forEach(btn => {
       btn.addEventListener('click', async () => {

@@ -61,8 +61,24 @@ const Scanner = (() => {
         try {
           const suggestions = await API.autocomplete(val);
           if (!suggestions.length) { list.classList.remove('show'); return; }
+          const ownedMap = {};
+          try {
+            const saved = await Storage.loadNamedCollections();
+            for (const col of saved) {
+              if (col._type === 'deck') continue;
+              if (!Array.isArray(col.data)) continue;
+              for (const card of col.data) {
+                if (!card || !card.name) continue;
+                const k = Storage.generateId(card.name, card.setId || '', card.number || '');
+                if (ownedMap[k]) ownedMap[k].count = (ownedMap[k].count || 0) + (card.count || 0);
+                else ownedMap[k] = { ...card, count: card.count || 1 };
+              }
+            }
+          } catch (e) {}
+          const nameCounts = {};
+          Object.values(ownedMap).forEach(c => { const n = (c.name || '').toLowerCase(); nameCounts[n] = (nameCounts[n] || 0) + (c.count || 0); });
           list.innerHTML = suggestions.map(s => {
-            const owned = Collection.countByName(s);
+            const owned = nameCounts[s.toLowerCase()] || 0;
             const badge = owned > 0 ? `<span class="ac-owned">Tenés ${owned}</span>` : '';
             return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
           }).join('');
@@ -94,14 +110,26 @@ const Scanner = (() => {
     });
   }
 
-  function renderResults(cards) {
+  async function renderResults(cards) {
     const grid = document.getElementById('searchResults');
     if (!grid) return;
     grid.innerHTML = '';
-    const collection = Collection.getData();
+    const ownedMap = {};
+    try {
+      const saved = await Storage.loadNamedCollections();
+      for (const col of saved) {
+        if (col._type === 'deck') continue;
+        if (!Array.isArray(col.data)) continue;
+        for (const card of col.data) {
+          if (!card || !card.name) continue;
+          const k = Storage.generateId(card.name, card.setId || '', card.number || '');
+          if (ownedMap[k]) ownedMap[k].count = (ownedMap[k].count || 0) + (card.count || 0);
+          else ownedMap[k] = { ...card, count: card.count || 1 };
+        }
+      }
+    } catch (e) { console.warn('renderResults named collection error:', e); }
     cards.forEach(c => {
-      const key = Storage.generateId(c.name, c.set?.id || '', c.number);
-      const owned = collection[key]?.count || 0;
+      const owned = ownedMap[Storage.generateId(c.name, c.set?.id || '', c.number)]?.count || 0;
       const el = UI.renderCard({
         id: c.id, name: c.name, image: c.images?.small || '', set: c.set?.name || '',
         number: c.number, types: c.types, supertype: c.supertype, hp: c.hp,
@@ -417,7 +445,7 @@ const Scanner = (() => {
         UI.setStatus(statusEl, `${results.length} resultado(s).${note}`);
         document.querySelectorAll('#searchFilters .filter-chip').forEach(b => b.classList.remove('active'));
         document.querySelector('#searchFilters .filter-chip[data-filter="all"]')?.classList.add('active');
-        renderResults(results);
+        await renderResults(results);
       } catch (err) {
         UI.setStatus(statusEl, 'Error: ' + err.message, true);
       }
@@ -518,6 +546,7 @@ const Collection = (() => {
       const entry = saved.find(c => c.name === currentCollectionName);
       if (entry) {
         entry.data = Object.values(data).map(c => ({ ...c }));
+        entry._type = entry._type || 'collection';
         localStorage.setItem('savedCollections', JSON.stringify(saved));
       }
     }
@@ -546,6 +575,12 @@ const Collection = (() => {
 
     async init() {
       data = await Storage.loadCollection();
+      const lastActive = localStorage.getItem('lastActiveCollection') || '';
+      if (lastActive) {
+        const saved = await Storage.loadNamedCollections();
+        const found = saved.find(c => c.name === lastActive);
+        if (found) currentCollectionName = lastActive;
+      }
       render();
 
       document.getElementById('collectionFilterType')?.addEventListener('change', render);
@@ -636,7 +671,11 @@ const Collection = (() => {
     getMap() { return data; },
     render,
     getCurrentName() { return currentCollectionName; },
-    setCurrentName(name) { currentCollectionName = name || ''; renderSavedCollections(); }
+    setCurrentName(name) {
+      currentCollectionName = name || '';
+      localStorage.setItem('lastActiveCollection', currentCollectionName);
+      renderSavedCollections();
+    }
   };
 })();
 
@@ -678,7 +717,7 @@ const Wizard = (() => {
 
   // Un color fijo por categoría, reutilizado en la barra de rango de cada paso
   // y en la barra total segmentada, para que de un vistazo se identifique de qué está hecho el mazo.
-  const CAT_COLORS = { pokemon: '#7F77DD', energy: '#EF9F27', item: '#1D9E75', supporter: '#D4537E', other: '#949494' };
+  const CAT_COLORS = { pokemon: '#7F77DD', energy: '#EF9F27', item: '#1D9E75', supporter: '#D4537E', other: '#949494', stadium: '#949494' };
 
   let state = {
     step: 1,
@@ -692,28 +731,15 @@ const Wizard = (() => {
   function getAllCollectionCards() {
     const map = new Map();
     try {
-      const activeData = Collection.getData ? Collection.getData() : {};
-      Object.values(activeData).forEach(c => {
-        if (!c || !c.name) return;
-        const key = (c.name).toLowerCase().trim();
-        const existing = map.get(key);
-        if (existing) {
-          existing.count = (existing.count || 1) + (c.count || 1);
-        } else {
-          map.set(key, { ...c, count: c.count || 1 });
-        }
-      });
-    } catch (e) {}
-
-    try {
       const saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
       const activeName = (Collection.getCurrentName ? Collection.getCurrentName() : '').toLowerCase().trim();
       
       saved.forEach(col => {
+        if (col._type === 'deck') return;
+        if (!Array.isArray(col.data)) return;
         if (activeName && col.name && col.name.toLowerCase().trim() === activeName) {
           return;
         }
-        if (Array.isArray(col.data)) {
           col.data.forEach(c => {
             if (!c || !c.name) return;
             const key = (c.name).toLowerCase().trim();
@@ -724,7 +750,6 @@ const Wizard = (() => {
               map.set(key, { ...c, count: c.count || 1 });
             }
           });
-        }
       });
     } catch (e) {}
 
@@ -1184,39 +1209,38 @@ const Wizard = (() => {
       : '<div class="empty" style="font-size:11px;padding:6px;">No hay sugerencias para este filtro.</div>';
 
     const stageFiltersHtml = (filterSupertype === 'pokemon' || filterSupertype === 'energy') ? `
-      <div class="element-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px;">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Tipo:</span>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Fire') ? 'active' : ''}" data-elem="Fire"><span class="chip-type-circle cost-typed cost-fire"><span class="tcg-sym">r</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Water') ? 'active' : ''}" data-elem="Water"><span class="chip-type-circle cost-typed cost-water"><span class="tcg-sym">w</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Grass') ? 'active' : ''}" data-elem="Grass"><span class="chip-type-circle cost-typed cost-grass"><span class="tcg-sym">g</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Lightning') ? 'active' : ''}" data-elem="Lightning"><span class="chip-type-circle cost-typed cost-electric"><span class="tcg-sym">l</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Psychic') ? 'active' : ''}" data-elem="Psychic"><span class="chip-type-circle cost-typed cost-psychic"><span class="tcg-sym">p</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Fighting') ? 'active' : ''}" data-elem="Fighting"><span class="chip-type-circle cost-typed cost-fighting"><span class="tcg-sym">f</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Darkness') ? 'active' : ''}" data-elem="Darkness"><span class="chip-type-circle cost-typed cost-darkness"><span class="tcg-sym">d</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Metal') ? 'active' : ''}" data-elem="Metal"><span class="chip-type-circle cost-typed cost-metal"><span class="tcg-sym">m</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Dragon') ? 'active' : ''}" data-elem="Dragon"><span class="chip-type-circle cost-typed cost-dragon"><span class="tcg-sym">n</span></span></button>
-        <button type="button" class="filter-chip wiz-stage-btn ${(state.elementFilters||[]).includes('Colorless') ? 'active' : ''}" data-elem="Colorless"><span class="chip-type-circle cost-colorless"><span class="tcg-sym">c</span></span></button>
+      <div class="stage-filter-row">
+        <div class="element-filter-row">
+          <span class="filter-label">Tipo:</span>
+          <button type="button" class="filter-chip todos-chip wiz-stage-btn ${elemFilter.length === 0 ? 'active' : ''}" data-elem="all">Todos</button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Fire') ? 'active' : ''}" data-elem="Fire"><span class="chip-type-circle cost-typed cost-fire"><span class="tcg-sym">r</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Water') ? 'active' : ''}" data-elem="Water"><span class="chip-type-circle cost-typed cost-water"><span class="tcg-sym">w</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Grass') ? 'active' : ''}" data-elem="Grass"><span class="chip-type-circle cost-typed cost-grass"><span class="tcg-sym">g</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Lightning') ? 'active' : ''}" data-elem="Lightning"><span class="chip-type-circle cost-typed cost-electric"><span class="tcg-sym">l</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Psychic') ? 'active' : ''}" data-elem="Psychic"><span class="chip-type-circle cost-typed cost-psychic"><span class="tcg-sym">p</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Fighting') ? 'active' : ''}" data-elem="Fighting"><span class="chip-type-circle cost-typed cost-fighting"><span class="tcg-sym">f</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Darkness') ? 'active' : ''}" data-elem="Darkness"><span class="chip-type-circle cost-typed cost-darkness"><span class="tcg-sym">d</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Metal') ? 'active' : ''}" data-elem="Metal"><span class="chip-type-circle cost-typed cost-metal"><span class="tcg-sym">m</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Dragon') ? 'active' : ''}" data-elem="Dragon"><span class="chip-type-circle cost-typed cost-dragon"><span class="tcg-sym">n</span></span></button>
+          <button type="button" class="filter-chip wiz-stage-btn ${elemFilter.includes('Colorless') ? 'active' : ''}" data-elem="Colorless"><span class="chip-type-circle cost-colorless"><span class="tcg-sym">c</span></span></button>
+        </div>
+        ${filterSupertype === 'pokemon' ? `
+        <div class="tcg-filter-row">
+          <span class="filter-label">Filtro TCG:</span>
+          <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'all' ? 'active' : ''}" data-stage="all">Todos</button>
+          <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'main' ? 'active' : ''}" data-stage="main">⚔️ Atacante Principal</button>
+          <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'secondary' ? 'active' : ''}" data-stage="secondary">🛡️ Reserva / Secundario</button>
+          <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'support' ? 'active' : ''}" data-stage="support">⚙️ Motor / Banca</button>
+          <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'basic' ? 'active' : ''}" data-stage="basic">🌱 Básicos</button>
+          <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'stage1' ? 'active' : ''}" data-stage="stage1">⚡ Nivel 1</button>
+          <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'stage2' ? 'active' : ''}" data-stage="stage2">🔥 Nivel 2</button>
+        </div>
+        ` : ''}
       </div>
-      ${filterSupertype === 'pokemon' ? `
-      <div class="stage-filter-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 10px;">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);font-weight:600;margin-right:2px;">Filtro TCG:</span>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'all' ? 'active' : ''}" data-stage="all">Todos</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'main' ? 'active' : ''}" data-stage="main">⚔️ Atacante Principal</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'secondary' ? 'active' : ''}" data-stage="secondary">🛡️ Reserva / Secundario</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'support' ? 'active' : ''}" data-stage="support">⚙️ Motor / Banca</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'basic' ? 'active' : ''}" data-stage="basic">🌱 Básicos</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'stage1' ? 'active' : ''}" data-stage="stage1">⚡ Nivel 1</button>
-        <button type="button" class="filter-chip wiz-stage-btn ${state.stageFilter === 'stage2' ? 'active' : ''}" data-stage="stage2">🔥 Nivel 2</button>
-      </div>` : ''}
     ` : '';
 
     return `
-      <div class="smart-suggestions-block" style="margin-bottom:12px;">
-        <p class="hint" style="margin-bottom:2px;font-weight:700;">🧠 Recomendaciones inteligentes</p>
-        <div class="hint-small">
-          Mostramos primero las mejores cartas de tu colección y, si faltan, las mejoras recomendadas para este mazo.
-        </div>
-
+      <div class="smart-suggestions-block">
         ${stageFiltersHtml}
 
         <div class="suggest-section">
@@ -1565,11 +1589,11 @@ const Wizard = (() => {
         <summary class="accordion-header">Tenés / falta comprar</summary>
         <div class="next-steps-grid" style="margin-top:12px;">
           <div>
-            <h3>Ya tenés (${have.length})</h3>
+            <h3 class="have">Ya tenés (${have.length})</h3>
             <p class="hint" style="margin:0;">${have.length ? have.map(escapeHtml).join(', ') : '—'}</p>
           </div>
           <div>
-            <h3>Falta comprar</h3>
+            <h3 class="need">Falta comprar</h3>
             <p class="hint" style="margin:0;">${need.length ? need.map(escapeHtml).join(', ') : '¡Tenés todo lo que necesitás!'}</p>
           </div>
         </div>
@@ -1580,21 +1604,37 @@ const Wizard = (() => {
   // que las barras de rango de cada paso. Vive junto a la navegación de pasos,
   // así queda visible sin importar en qué paso estés parado.
   function renderTotalBar() {
-    const pk = sumCount(cardsBy('pokemon'));
-    const en = sumCount(cardsBy('energy'));
-    const trainerCards = cardsBy('trainer');
-    const item = sumCount(trainerCards.filter(c => getTrainerRole(c) === 'Item'));
-    const supporter = sumCount(trainerCards.filter(c => getTrainerRole(c) === 'Supporter'));
-    const other = sumCount(trainerCards.filter(c => { const r = getTrainerRole(c); return r === 'Stadium' || r === 'Tool'; }));
-    const total = pk + en + item + supporter + other;
-    const seg = (n, color) => `<div style="height:100%;width:${Math.min(100, Math.round(n / 60 * 100))}%;background:${color};"></div>`;
+    const cards = state.cards;
+    const pk = sumCount(cards.filter(c => c.category === 'pokemon'));
+    const en = sumCount(cards.filter(c => c.category === 'energy'));
+    const t = cards.filter(c => c.category === 'trainer');
+    const tier = c => {
+      const subs = (c.subtypes || []).map(s => s.toLowerCase());
+      if (subs.includes('supporter')) return 'supporter';
+      if (subs.includes('stadium') || subs.includes('tool') || subs.includes('pokemon tool')) return 'stadium';
+      return 'item';
+    };
+    const supporter = sumCount(t.filter(c => tier(c) === 'supporter'));
+    const stadium = sumCount(t.filter(c => tier(c) === 'stadium'));
+    const item = sumCount(t.filter(c => tier(c) === 'item'));
+    const total = pk + en + item + supporter + stadium;
+    const seg = (n, color) => `<div class="total-bar-segment" style="width:${Math.min(100, Math.round(n / 60 * 100))}%;background:${color};"></div>`;
     return `
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
-        <span style="color:var(--text-dim);">Mazo total</span>
-        <span style="font-weight:700;">${total} / 60</span>
-      </div>
-      <div style="height:8px;background:var(--line);border-radius:4px;overflow:hidden;display:flex;">
-        ${seg(pk, CAT_COLORS.pokemon)}${seg(en, CAT_COLORS.energy)}${seg(item, CAT_COLORS.item)}${seg(supporter, CAT_COLORS.supporter)}${seg(other, CAT_COLORS.other)}
+      <div class="total-bar-wrap">
+        <div class="total-bar-header">
+          <span>Mazo total</span>
+          <span class="total-bar-count">${total} / 60</span>
+        </div>
+        <div class="total-bar-track">
+          ${seg(pk, CAT_COLORS.pokemon)}${seg(en, CAT_COLORS.energy)}${seg(item, CAT_COLORS.item)}${seg(supporter, CAT_COLORS.supporter)}${seg(stadium, CAT_COLORS.stadium)}
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="dot pokemon"></span>Pokémon ${pk}</span>
+          <span class="legend-item"><span class="dot energy"></span>Energía ${en}</span>
+          <span class="legend-item"><span class="dot item"></span>Objetos ${item}</span>
+          <span class="legend-item"><span class="dot supporter"></span>Apoyo ${supporter}</span>
+          <span class="legend-item"><span class="dot stadium"></span>Estadio+Tool ${stadium}</span>
+        </div>
       </div>`;
   }
 
@@ -1859,7 +1899,12 @@ const Wizard = (() => {
       });
     });
 
+    body.querySelector('[data-elem="all"]')?.addEventListener('click', () => {
+      state.elementFilters = undefined;
+      render();
+    });
     body.querySelectorAll('[data-elem]').forEach(btn => {
+      if (btn.dataset.elem === 'all') return;
       btn.addEventListener('click', () => {
         const arr = state.elementFilters || [];
         const idx = arr.indexOf(btn.dataset.elem);
@@ -2000,7 +2045,7 @@ const Saved = (() => {
   let isInitialized = false;
 
   function setupSearch() {
-    const input = document.getElementById('savedCollectionSearch');
+    const input = document.getElementById('savedSearch');
     const list = document.getElementById('savedSearchAutocomplete');
     if (!input || !list) return;
 
@@ -2010,6 +2055,7 @@ const Saved = (() => {
 
       searchTimer = setTimeout(async () => {
         renderCollections(val);
+        renderDecks(val);
 
         if (val.length < 2) {
           list.classList.remove('show');
@@ -2047,13 +2093,14 @@ const Saved = (() => {
             input.value = cardName;
             list.classList.remove('show');
             renderCollections(cardName.toLowerCase());
+            renderDecks(cardName.toLowerCase());
           });
         });
       }, API.isDbReady ? 50 : 200);
     });
 
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('#savedCollectionSearch') && !e.target.closest('#savedSearchAutocomplete')) {
+      if (!e.target.closest('#savedSearch') && !e.target.closest('#savedSearchAutocomplete')) {
         list.classList.remove('show');
       }
     });
@@ -2088,12 +2135,8 @@ const Saved = (() => {
     if (!container) return;
 
     const saved = await Storage.loadNamedCollections();
-    const liveData = Collection.getMap();
     const liveName = Collection.getCurrentName();
-
-    const currentEntry = { id: 'current', name: liveName || 'Mi Colección', savedAt: Date.now(), data: Object.values(liveData) };
-    const others = liveName ? saved.filter(c => c.name !== liveName) : saved;
-    let all = [currentEntry, ...others];
+    let all = saved;
 
     if (searchQuery) {
       all = all.map(col => {
@@ -2106,34 +2149,17 @@ const Saved = (() => {
       }).filter(Boolean);
     }
 
-    const trash = await Storage.getTrashBinCollections();
-    let restoreBannerHtml = '';
-    if (trash.length > 0) {
-      const lastTrash = trash[trash.length - 1];
-      restoreBannerHtml = `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(56,224,123,0.12);border:1px solid rgba(56,224,123,0.35);border-radius:8px;display:flex;align-items:center;justify-content:space-between;width:100%;">
-        <span style="font-size:13px;color:var(--text);">🗑️ Papelera: <strong>"${escapeHtml(lastTrash.name)}"</strong> fue eliminada.</span>
-        <button type="button" class="action" id="restoreCollectionBtn" style="padding:4px 12px;font-size:12px;">↩️ Restaurar</button>
-      </div>`;
-    }
-
     if (all.length === 0) {
-      container.innerHTML = restoreBannerHtml;
+      container.innerHTML = '';
       if (empty) {
         empty.style.display = 'block';
         empty.textContent = searchQuery ? `No se encontraron colecciones con "${searchQuery}".` : 'No tenés colecciones guardadas. Andá a "Colección" y guardá una.';
       }
-      document.getElementById('restoreCollectionBtn')?.addEventListener('click', async () => {
-        const item = await Storage.restoreLastDeletedCollection();
-        if (item) {
-          renderCollections(searchQuery);
-          UI.toast(`Colección "${item.name}" restaurada con éxito`, 'success');
-        }
-      });
       return;
     }
     if (empty) empty.style.display = 'none';
 
-    container.innerHTML = restoreBannerHtml + all.map(c => {
+    container.innerHTML = all.map(c => {
       const dataItems = c.data || [];
       const total = dataItems.reduce((s, x) => s + (x.count || 0), 0);
       const uniqueCount = dataItems.length;
@@ -2151,7 +2177,7 @@ const Saved = (() => {
       const energyPct = total > 0 ? Math.round((energyCount / total) * 100) : 0;
 
       const dateStr = new Date(c.savedAt || Date.now()).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: '2-digit' });
-      const isCurrent = c.id === 'current';
+      const isCurrent = liveName ? c.name === liveName : false;
 
       let matchesHtml = '';
       if (c.matchingCards && c.matchingCards.length > 0) {
@@ -2163,64 +2189,58 @@ const Saved = (() => {
 
       return `
         <div class="saved-card" data-id="${c.id}">
-          <div>
+          <div class="saved-card-row">
             <div class="saved-card-header">
               <div class="saved-card-icon">📦</div>
-              <div class="saved-card-info">
+              <div>
                 <div class="saved-card-name">${escapeHtml(c.name)} ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Actual)</span>' : ''}</div>
-                <div class="saved-card-date">${dateStr}</div>
+                <div class="saved-card-date">${dateStr} · ${total} cartas</div>
               </div>
             </div>
-            <div class="saved-card-stats">
-              <span class="sc-stat"><span class="sc-stat-val">${total}</span> cartas</span>
-              <span class="sc-stat"><span class="sc-stat-val">${uniqueCount}</span> únicas</span>
-              <span class="sc-stat sc-pokemon">⚡ ${pokemonCount}</span>
-              <span class="sc-stat sc-trainer">🎴 ${trainerCount}</span>
-              <span class="sc-stat sc-energy">💎 ${energyCount}</span>
+            <div class="saved-card-actions">
+              <button class="action saved-card-load">${isCurrent ? 'Actualizar' : 'Cargar'}</button>
+              <button class="ghost saved-card-rename">Renombrar</button>
+              ${!isCurrent ? '<button class="ghost saved-card-delete">Eliminar</button>' : ''}
+              <button class="ghost saved-card-new" title="Nueva colección">➕</button>
             </div>
-            <div class="collection-bar">
-              <div class="collection-bar-fill poke-bar" style="width:${pokePct}%"></div>
-              <div class="collection-bar-fill train-bar" style="width:${trainPct}%"></div>
-              <div class="collection-bar-fill energy-bar" style="width:${energyPct}%"></div>
-            </div>
-            <div class="collection-bar-labels">
-              <span class="cbl-item poke-label">${pokePct}% Pokémon</span>
-              <span class="cbl-item train-label">${trainPct}% Trainer</span>
-              <span class="cbl-item energy-label">${energyPct}% Energía</span>
-            </div>
-            ${matchesHtml}
           </div>
-          <div class="saved-card-actions">
-            <button class="action saved-card-load">${isCurrent ? 'Actualizar' : 'Cargar'}</button>
-            <button class="ghost saved-card-rename">Renombrar</button>
-            ${!isCurrent ? '<button class="ghost saved-card-delete">Eliminar</button>' : ''}
-            <button class="ghost saved-card-new" title="Nueva colección">➕</button>
+          <div class="total-bar-wrap">
+            <div class="total-bar-track">
+              <div class="total-bar-segment" style="width:${pokePct}%;background:var(--accent);"></div>
+              <div class="total-bar-segment" style="width:${trainPct}%;background:var(--draw);"></div>
+              <div class="total-bar-segment" style="width:${energyPct}%;background:var(--energy);"></div>
+            </div>
+            <div class="legend">
+              <span><span class="dot pokemon"></span>Pokémon ${pokemonCount}</span>
+              <span><span class="dot item"></span>Entrenador ${trainerCount}</span>
+              <span><span class="dot energy"></span>Energía ${energyCount}</span>
+            </div>
           </div>
+          ${matchesHtml}
         </div>`;
     }).join('');
 
-    document.getElementById('restoreCollectionBtn')?.addEventListener('click', async () => {
-      const item = await Storage.restoreLastDeletedCollection();
-      if (item) {
-        renderCollections(searchQuery);
-        UI.toast(`Colección "${item.name}" restaurada con éxito`, 'success');
-      }
-    });
-
     container.querySelectorAll('.saved-card-load').forEach(btn => {
       btn.addEventListener('click', async () => {
-        const id = btn.closest('.saved-card').dataset.id;
-        if (id === 'current') {
-          UI.toast('La colección ya está activa', 'info');
-          return;
-        }
-        const loaded = await Storage.loadCollectionAsNamed(id);
-        if (loaded) {
-          await Storage.saveCollection(loaded);
-          Collection.setCurrentName(id);
-          Collection.init();
+        const cardEl = btn.closest('.saved-card');
+        const id = cardEl.dataset.id;
+        const saved = await Storage.loadNamedCollections();
+        const col = saved.find(x => x.id === id);
+        if (!col) return;
+        if (col.name === liveName) {
+          const liveData = Collection.getMap();
+          await Storage.updateNamedCollectionData(id, liveData);
+          UI.toast('Colección actualizada', 'success');
           renderCollections(searchQuery);
-          UI.toast('Colección cargada', 'success');
+        } else {
+          const loaded = await Storage.loadCollectionAsNamed(id);
+          if (loaded) {
+            await Storage.saveCollection(loaded);
+            Collection.setCurrentName(col.name);
+            Collection.init();
+            renderCollections(searchQuery);
+            UI.toast('Colección cargada', 'success');
+          }
         }
       });
     });
@@ -2229,8 +2249,10 @@ const Saved = (() => {
       btn.addEventListener('click', async () => {
         const cardEl = btn.closest('.saved-card');
         const id = cardEl.dataset.id;
-        if (id === 'current') {
-          const newName = prompt('Nuevo nombre para la colección actual:', Collection.getCurrentName() || 'Mi colección');
+        const saved = await Storage.loadNamedCollections();
+        const col = saved.find(x => x.id === id);
+        if (col && col.name === liveName) {
+          const newName = prompt('Nuevo nombre para la colección actual:', liveName || 'Mi colección');
           if (newName) {
             Collection.setCurrentName(newName);
             renderCollections(searchQuery);
@@ -2238,8 +2260,6 @@ const Saved = (() => {
           }
           return;
         }
-        const saved = await Storage.loadNamedCollections();
-        const col = saved.find(x => x.id === id);
         const newName = prompt('Renombrar colección:', col ? col.name : '');
         if (newName) {
           await Storage.renameNamedCollection(id, newName);
@@ -2254,7 +2274,7 @@ const Saved = (() => {
         const id = btn.closest('.saved-card').dataset.id;
         if (confirm('¿Eliminar colección? Se guardará en la papelera por si querés restaurarla.')) {
           await Storage.deleteNamedCollection(id);
-          const searchVal = document.getElementById('savedCollectionSearch')?.value?.trim().toLowerCase() || '';
+          const searchVal = document.getElementById('savedSearch')?.value?.trim().toLowerCase() || '';
           renderCollections(searchVal);
           UI.toast('Colección enviada a la papelera. Podés restaurarla.', 'info');
         }
@@ -2276,11 +2296,19 @@ const Saved = (() => {
     });
   }
 
-  async function renderDecks() {
+  async function renderDecks(searchQuery = '') {
     const container = document.getElementById('savedDecksFull');
     const empty = document.getElementById('savedDecksEmpty');
     if (!container) return;
-    const saved = await Storage.loadNamedDecks();
+    let saved = await Storage.loadNamedDecks();
+
+    if (searchQuery) {
+      saved = saved.filter(d => {
+        const nameMatch = (d.name || '').toLowerCase().includes(searchQuery);
+        const cardMatch = (d.data?.cards || []).some(c => (c.name || '').toLowerCase().includes(searchQuery));
+        return nameMatch || cardMatch;
+      });
+    }
 
     if (saved.length === 0) {
       container.innerHTML = '';
@@ -2295,8 +2323,9 @@ const Saved = (() => {
       const pokemonCount = cards.filter(c => c.category === 'pokemon').reduce((s, c) => s + (c.count || 0), 0);
       const energyCount = cards.filter(c => c.category === 'energy').reduce((s, c) => s + (c.count || 0), 0);
       const trainerCount = total - pokemonCount - energyCount;
-      const itemCount = cards.filter(c => c.category === 'trainer' && (c.subtypes || '').toLowerCase().includes('item')).reduce((s, c) => s + (c.count || 0), 0);
-      const supporterCount = cards.filter(c => c.category === 'trainer' && (c.subtypes || '').toLowerCase().includes('supporter')).reduce((s, c) => s + (c.count || 0), 0);
+      const subtypesStr = s => Array.isArray(s) ? s.join(' ') : (s || '');
+      const itemCount = cards.filter(c => c.category === 'trainer' && subtypesStr(c.subtypes).toLowerCase().includes('item')).reduce((s, c) => s + (c.count || 0), 0);
+      const supporterCount = cards.filter(c => c.category === 'trainer' && subtypesStr(c.subtypes).toLowerCase().includes('supporter')).reduce((s, c) => s + (c.count || 0), 0);
       const otherCount = trainerCount - itemCount - supporterCount;
 
       const pokePct = total > 0 ? Math.round((pokemonCount / total) * 100) : 0;
@@ -2334,7 +2363,7 @@ const Saved = (() => {
           <div class="legend">
             <span><span class="dot pokemon"></span>Pokémon ${pokemonCount}</span>
             <span><span class="dot energy"></span>Energía ${energyCount}</span>
-            <span><span class="dot item"></span>Objetos ${itemCount}</span>
+            <span><span class="dot item"></span>Robo ${itemCount}</span>
             <span><span class="dot supporter"></span>Apoyo ${supporterCount}</span>
             ${otherCount > 0 ? `<span><span class="dot other"></span>Otros ${otherCount}</span>` : ''}
           </div>
@@ -2358,7 +2387,8 @@ const Saved = (() => {
         const id = btn.closest('.saved-card').dataset.id;
         if (confirm('¿Eliminar mazo?')) {
           await Storage.deleteNamedDeck(id);
-          renderDecks();
+          const searchVal = document.getElementById('savedSearch')?.value?.trim().toLowerCase() || '';
+          renderDecks(searchVal);
           UI.toast('Eliminado', 'success');
         }
       });
@@ -2371,9 +2401,9 @@ const Saved = (() => {
         setupSearch();
         isInitialized = true;
       }
-      const searchVal = document.getElementById('savedCollectionSearch')?.value?.trim().toLowerCase() || '';
+      const searchVal = document.getElementById('savedSearch')?.value?.trim().toLowerCase() || '';
       await renderCollections(searchVal);
-      await renderDecks();
+      await renderDecks(searchVal);
     }
   };
 })();
