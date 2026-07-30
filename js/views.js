@@ -1476,7 +1476,9 @@ const Wizard = (() => {
     const rowClass = evoCheck.valid ? '' : 'row-evo-warning';
     const warningBtn = evoCheck.valid ? '' : `<button type="button" class="ghost info-warn-btn" title="${escapeHtml(evoCheck.warning)}" onclick="UI.toast('${escapeHtml(evoCheck.warning)}', 'error')"><span class="warn-icon">⚠️</span></button>`;
 
-    const thumbHtml = imgUrl ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(c.name)}" class="card-mini-thumb" data-card-name="${escapeHtml(c.name)}" loading="lazy" />` : `<span class="card-mini-placeholder">🃏</span>`;
+    const thumbHtml = imgUrl
+      ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(c.name)}" class="card-mini-thumb" data-card-name="${escapeHtml(c.name)}" loading="lazy" />`
+      : `<span class="card-mini-placeholder" data-card-name="${escapeHtml(c.name)}">🃏</span>`;
 
     return `
     <tr data-id="${c.id}" class="${rowClass}">
@@ -1495,6 +1497,22 @@ const Wizard = (() => {
       </td>
       <td class="col-owned ${missing > 0 ? 'owned-missing' : 'owned-complete'}" style="text-align:center;">${missing > 0 ? `Falta ${missing}` : `✔ ${owned}`}</td>
     </tr>`;
+  }
+
+  async function fetchMissingImages() {
+    const imgs = document.querySelectorAll('#wizardStepBody .card-mini-placeholder[data-card-name]');
+    if (!imgs.length) return;
+    for (const el of imgs) {
+      const name = el.getAttribute('data-card-name');
+      if (!name) continue;
+      try {
+        const results = await API.searchCards(name, 3);
+        const match = results.find(r => (r.name || '').toLowerCase() === name.toLowerCase());
+        if (match && match.images?.small) {
+          el.outerHTML = `<img src="${match.images.small}" alt="${name.replace(/"/g, '&quot;')}" class="card-mini-thumb" data-card-name="${name.replace(/"/g, '&quot;')}" loading="lazy" />`;
+        }
+      } catch {}
+    }
   }
 
   function renderCardTable(list, category) {
@@ -1795,6 +1813,7 @@ const Wizard = (() => {
     const body = document.getElementById('wizardStepBody');
     if (body) body.innerHTML = renderStepBody(state.step);
     attachStepListeners();
+    fetchMissingImages();
     updateHaveNeedPanel();
     
     const details = document.getElementById('tenesComprarDetails');
@@ -1981,9 +2000,9 @@ const Wizard = (() => {
     if (stepEl && !stepEl.dataset.wizInfo) {
       stepEl.dataset.wizInfo = '1';
       stepEl.addEventListener('click', async (e) => {
-        const img = e.target.closest('.card-mini-thumb');
-        if (!img) return;
-        const cardName = img.getAttribute('data-card-name');
+        const target = e.target.closest('[data-card-name]');
+        if (!target) return;
+        const cardName = target.getAttribute('data-card-name');
         if (!cardName) return;
         let card = getCardDetails(cardName);
         if (!card) card = state.cards.find(c => c.name.toLowerCase() === cardName.toLowerCase());
