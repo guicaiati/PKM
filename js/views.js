@@ -597,9 +597,10 @@ const Collection = (() => {
     items.forEach(c => {
       try {
         const el = UI.renderCard(c, { showQty: true });
-        el.querySelector('.inc').addEventListener('click', () => { c.count++; save(); render(); });
-        el.querySelector('.dec').addEventListener('click', () => { c.count = Math.max(0, c.count - 1); if (c.count === 0) delete data[Storage.generateId(c.name, c.setId, c.number)]; save(); render(); });
-        el.querySelector('.remove-btn').addEventListener('click', () => { delete data[Storage.generateId(c.name, c.setId, c.number)]; save(); render(); });
+        el.querySelector('.inc')?.addEventListener('click', () => { c.count++; save(); render(); });
+        el.querySelector('.dec')?.addEventListener('click', () => { c.count = Math.max(0, c.count - 1); if (c.count === 0) delete data[Storage.generateId(c.name, c.setId, c.number)]; save(); render(); });
+        el.querySelector('.remove-btn')?.addEventListener('click', () => { delete data[Storage.generateId(c.name, c.setId, c.number)]; save(); render(); });
+        el.querySelector('.photo-btn')?.addEventListener('click', () => { UI.promptCardPhoto(c, () => { save(); render(); }); });
         grid.appendChild(el);
       } catch (e) { console.warn('Error rendering card:', c.name, e); }
     });
@@ -784,7 +785,14 @@ const Wizard = (() => {
   };
   let nextId = 1;
 
+  let _cachedCollectionCards = null;
+  let _cachedCollectionTime = 0;
+
   function getAllCollectionCards() {
+    const now = Date.now();
+    if (_cachedCollectionCards && (now - _cachedCollectionTime) < 500) {
+      return _cachedCollectionCards;
+    }
     const map = new Map();
     try {
       const raw = localStorage.getItem('savedCollections') || '[]';
@@ -804,7 +812,9 @@ const Wizard = (() => {
         });
       });
     } catch (e) {}
-    return Array.from(map.values());
+    _cachedCollectionCards = Array.from(map.values());
+    _cachedCollectionTime = now;
+    return _cachedCollectionCards;
   }
 
   function getCollectionCards() {
@@ -819,11 +829,11 @@ const Wizard = (() => {
       const target = name.toLowerCase().trim();
       const allCards = getAllCollectionCards();
       let total = 0;
-      allCards.forEach(c => {
-        if (c && c.name && c.name.toLowerCase().trim() === target) {
-          total += Number(c.count || 1);
+      for (let i = 0; i < allCards.length; i++) {
+        if (allCards[i] && allCards[i].name && allCards[i].name.toLowerCase().trim() === target) {
+          total += Number(allCards[i].count || 1);
         }
-      });
+      }
       return total;
     } catch (e) { return 0; }
   }
@@ -1112,34 +1122,120 @@ const Wizard = (() => {
     return 'basic';
   }
 
+  const CURATED_META_POKEMON = [
+    // --- LIGHTNING (ELÉCTRICO) ---
+    { name: 'Iron Hands ex', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Basic', 'Future', 'ex'], hp: 230, reason: '⚔️ Atacante Principal: Amp You Very Much roba 1 premio extra.' },
+    { name: 'Miraidon ex', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Basic', 'ex'], hp: 220, reason: '⚔️ Atacante Principal & Motor: Tandem Unit busca Pokémon Eléctricos.' },
+    { name: 'Iron Thorns ex', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Basic', 'Future', 'ex'], hp: 230, reason: '⚔️ Atacante Principal & Control: Bloquea habilidades de Rule Box.' },
+    { name: 'Pikachu ex', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Basic', 'Tera', 'ex'], hp: 200, reason: '⚔️ Atacante Principal: Gran potencia de K.O. directo.' },
+    { name: 'Raikou V', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Basic', 'V'], hp: 200, reason: '⚔️ Atacante Principal: Ataque rápido según bancas y robo Fleet Footed.' },
+    { name: 'Regieleki VMAX', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Stage 1', 'VMAX'], hp: 310, reason: '⚔️ Atacante Principal & Booster: +30 daño a Básicos Eléctricos.' },
+    { name: 'Regieleki V', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Basic', 'V'], hp: 200, reason: '🛡️ Reserva / Atacante: Cambia y ataca por poca energía.' },
+    { name: 'Zapdos ex', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Basic', 'ex'], hp: 200, reason: '⚔️ Atacante Principal: Daño masivo a bancas y activos.' },
+    { name: 'Pawmot ex', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Stage 2', 'ex'], hp: 300, reason: '🔥 Atacante Fase 2: 230 de daño ignorando debilidades/efectos.' },
+    { name: 'Luxray ex', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Stage 2', 'ex'], hp: 310, reason: '🔥 Atacante Fase 2: Destruye cartas de la mano del rival.' },
+    { name: 'Ampharos ex', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Stage 2', 'ex'], hp: 330, reason: '🔥 Atacante Fase 2: Tanque masivo de 240 de daño.' },
+    { name: 'Flaaffy', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Stage 1'], hp: 90, abilities: [{ name: 'Dynamotor', text: 'attach energy' }], reason: '⚙️ Motor de Banca: Acelera energías eléctricas del descartador.' },
+    { name: 'Vikavolt V', types: ['Lightning'], supertype: 'Pokémon', subtypes: ['Basic', 'V'], hp: 200, reason: '⚔️ Atacante Principal: Paratingua e ítem lock.' },
+
+    // --- FIRE (FUEGO) ---
+    { name: 'Charizard ex', types: ['Darkness', 'Fire'], supertype: 'Pokémon', subtypes: ['Stage 2', 'Tera', 'ex'], hp: 330, reason: '⚔️ Atacante Principal: Infernal Reign carga energías y escala daño.' },
+    { name: 'Gouging Fire ex', types: ['Fire'], supertype: 'Pokémon', subtypes: ['Basic', 'Ancient', 'ex'], hp: 230, reason: '⚔️ Atacante Principal: 260 de daño directo.' },
+    { name: 'Chi-Yu ex', types: ['Fire'], supertype: 'Pokémon', subtypes: ['Basic', 'ex'], hp: 190, reason: '⚔️ Atacante Principal: Quema mazo rival y acelera fuego.' },
+    { name: 'Armarouge ex', types: ['Fire'], supertype: 'Pokémon', subtypes: ['Stage 1', 'ex'], hp: 260, reason: '⚔️ Atacante Principal: Daño escala por energías de fuego.' },
+
+    // --- WATER (AGUA) ---
+    { name: 'Chien-Pao ex', types: ['Water'], supertype: 'Pokémon', subtypes: ['Basic', 'ex'], hp: 220, reason: '⚔️ Atacante Principal: Shivery Chill busca energías y hace daño ilimitado.' },
+    { name: 'Wellspring Mask Ogerpon ex', types: ['Water'], supertype: 'Pokémon', subtypes: ['Basic', 'Tera', 'ex'], hp: 210, reason: '⚔️ Atacante Principal: Ataca a la banca y devuelve energías.' },
+    { name: 'Palkia VSTAR', types: ['Water'], supertype: 'Pokémon', subtypes: ['VSTAR'], hp: 280, reason: '⚔️ Atacante Principal & Acelerador: Star Portal carga 3 energías.' },
+    { name: 'Baxcalibur', types: ['Water'], supertype: 'Pokémon', subtypes: ['Stage 2'], hp: 160, abilities: [{ name: 'Supercold', text: 'attach water energy' }], reason: '⚙️ Motor de Banca: Carga energías de agua sin límite.' },
+
+    // --- GRASS (PLANTA) ---
+    { name: 'Teal Mask Ogerpon ex', types: ['Grass'], supertype: 'Pokémon', subtypes: ['Basic', 'Tera', 'ex'], hp: 210, abilities: [{ name: 'Teal Dance', text: 'attach grass and draw' }], reason: '⚔️ Atacante Principal & Motor: Teal Dance carga energía y roba cartas.' },
+    { name: 'Venusaur ex', types: ['Grass'], supertype: 'Pokémon', subtypes: ['Stage 2', 'ex'], hp: 340, reason: '🔥 Atacante Fase 2: Tanque de 340 HP y curación masiva.' },
+    { name: 'Meowscarada ex', types: ['Grass'], supertype: 'Pokémon', subtypes: ['Stage 2', 'ex'], hp: 310, reason: '🔥 Atacante Fase 2: Pone contadores y hace 220 de daño.' },
+
+    // --- PSYCHIC (PSIQUICO) ---
+    { name: 'Gardevoir ex', types: ['Psychic'], supertype: 'Pokémon', subtypes: ['Stage 2', 'ex'], hp: 310, abilities: [{ name: 'Psychic Embrace', text: 'attach energy' }], reason: '⚔️ Atacante Principal & Motor: Carga infinitas energías psíquicas.' },
+    { name: 'Iron Crown ex', types: ['Psychic'], supertype: 'Pokémon', subtypes: ['Basic', 'Future', 'ex'], hp: 220, reason: '⚔️ Atacante Principal & Booster: +20 daño a Pokémon Futuro.' },
+    { name: 'Scream Tail', types: ['Psychic'], supertype: 'Pokémon', subtypes: ['Basic', 'Ancient'], hp: 90, reason: '🛡️ Reserva / Francotirador: Daño a cualquier banca por contadores.' },
+
+    // --- FIGHTING (LUCHA) ---
+    { name: 'Cornerstone Mask Ogerpon ex', types: ['Fighting'], supertype: 'Pokémon', subtypes: ['Basic', 'Tera', 'ex'], hp: 210, reason: '⚔️ Atacante Principal: Inmune a Pokémon con habilidad.' },
+    { name: 'Ting-Lu ex', types: ['Fighting'], supertype: 'Pokémon', subtypes: ['Basic', 'ex'], hp: 240, reason: '⚔️ Atacante Principal: Anula habilidades rivales.' },
+    { name: 'Koraidon ex', types: ['Fighting'], supertype: 'Pokémon', subtypes: ['Basic', 'Ancient', 'ex'], hp: 230, reason: '⚔️ Atacante Principal: 280 de daño masivo.' },
+
+    // --- DARKNESS (OSCURIDAD) ---
+    { name: 'Roaring Moon ex', types: ['Darkness'], supertype: 'Pokémon', subtypes: ['Basic', 'Ancient', 'ex'], hp: 230, reason: '⚔️ Atacante Principal: Frenzy Gouging K.O. automático.' },
+    { name: 'Darkrai VSTAR', types: ['Darkness'], supertype: 'Pokémon', subtypes: ['VSTAR'], hp: 270, reason: '⚔️ Atacante Principal: Escalado masivo por energías oscuras.' },
+
+    // --- METAL (METAL) ---
+    { name: 'Gholdengo ex', types: ['Metal'], supertype: 'Pokémon', subtypes: ['Stage 1', 'ex'], hp: 260, reason: '⚔️ Atacante Principal & Robo: Make It Rain destruye cualquier HP.' },
+    { name: 'Dialga VSTAR', types: ['Metal'], supertype: 'Pokémon', subtypes: ['VSTAR'], hp: 280, reason: '⚔️ Atacante Principal: Star Chronos toma turno extra.' },
+    { name: 'Metagross ex', types: ['Metal'], supertype: 'Pokémon', subtypes: ['Stage 2', 'ex'], hp: 310, reason: '🔥 Atacante Fase 2: Ataques de costo cero y 250 de daño.' },
+
+    // --- DRAGON (DRAGÓN) ---
+    { name: 'Raging Bolt ex', types: ['Dragon'], supertype: 'Pokémon', subtypes: ['Basic', 'Ancient', 'ex'], hp: 240, reason: '⚔️ Atacante Principal Tier 0: Descarta energías para daño infinito.' },
+    { name: 'Regidrago VSTAR', types: ['Dragon'], supertype: 'Pokémon', subtypes: ['VSTAR'], hp: 280, reason: '⚔️ Atacante Principal: Copia cualquier ataque Dragón del descarte.' },
+    { name: 'Giratina VSTAR', types: ['Dragon'], supertype: 'Pokémon', subtypes: ['VSTAR'], hp: 280, reason: '⚔️ Atacante Principal: Star Requiem K.O. instantáneo.' },
+
+    // --- COLORLESS (INCOLORO) ---
+    { name: 'Terapagos ex', types: ['Colorless'], supertype: 'Pokémon', subtypes: ['Basic', 'Tera', 'ex'], hp: 230, reason: '⚔️ Atacante Principal: Daño por banca llena y escudo completo.' },
+    { name: 'Slaking ex', types: ['Colorless'], supertype: 'Pokémon', subtypes: ['Stage 2', 'ex'], hp: 340, reason: '🔥 Atacante Fase 2: 280 de daño con costo incoloro.' },
+  ];
+
   function getDeckRole(c) {
     const card = getCardDetails(c.name) || c;
     const hp = parseInt(card.hp || 0, 10);
-    const abilities = card.abilities || [];
-    const subtypes = (card.subtypes || []).map(s => s.toLowerCase());
+    const nameLower = (card.name || '').toLowerCase();
+    const rawSubtypes = card.subtypes || [];
+    const subtypes = (Array.isArray(rawSubtypes) ? rawSubtypes : [rawSubtypes]).map(s => String(s).toLowerCase());
 
-    // 1. Motor / Banca (Bench engine & Support)
+    const isHeavyAttacker = subtypes.includes('ex') || subtypes.includes('v') || subtypes.includes('vmax') || 
+                            subtypes.includes('vstar') || subtypes.includes('stage 2') || subtypes.includes('fase 2') ||
+                            nameLower.endsWith(' ex') || nameLower.endsWith(' v') || nameLower.endsWith(' vmax') || nameLower.endsWith(' vstar') ||
+                            hp >= 190;
+
+    // Dedicated pure support cards exception
+    const pureSupportNames = ['lumineon v', 'rotom v', 'squawkabilly ex', 'fezandipiti ex', 'bibarel', 'skwovet', 'manaphy', 'jirachi', 'radiant greninja', 'drakloak', 'flaaffy'];
+    if (pureSupportNames.includes(nameLower)) return 'support';
+
+    if (isHeavyAttacker) return 'main';
+
+    const abilities = card.abilities || [];
     const hasSupportAbility = abilities.some(a => {
       const text = ((a.name || '') + ' ' + (a.text || '')).toLowerCase();
       return text.includes('search') || text.includes('draw') || text.includes('attach') || text.includes('energy') || text.includes('cards') || text.includes('restart');
     });
     if (hasSupportAbility) return 'support';
 
-    // 2. Atacante Principal (Main Heavy Attacker)
-    if (hp >= 200 || subtypes.includes('stage 2') || subtypes.includes('vstar') || subtypes.includes('vmax') || subtypes.includes('ex') || subtypes.includes('v')) {
-      return 'main';
-    }
-
-    // 3. Atacante Secundario / Reserva (Backup / Tech Attacker)
     return 'secondary';
   }
 
   function matchesStageOrRoleFilter(c, filter) {
     if (!filter || filter === 'all') return true;
-    if (filter === 'main' || filter === 'secondary' || filter === 'support') {
-      return getDeckRole(c) === filter;
+    const cardDetails = getCardDetails(c.name) || c;
+    const role = getDeckRole(c);
+    const stage = getStageCategory(c);
+    const nameLower = (c.name || '').toLowerCase();
+    const rawSubtypes = cardDetails.subtypes || c.subtypes || [];
+    const subtypes = (Array.isArray(rawSubtypes) ? rawSubtypes : [rawSubtypes]).map(s => String(s).toLowerCase());
+    const hp = parseInt(cardDetails.hp || 0, 10);
+
+    if (filter === 'main') {
+      if (role === 'main') return true;
+      if (subtypes.includes('ex') || subtypes.includes('v') || subtypes.includes('vmax') || subtypes.includes('vstar') || subtypes.includes('stage 2') || nameLower.includes(' ex') || nameLower.includes(' v') || hp >= 190) {
+        return true;
+      }
+      return false;
     }
-    return getStageCategory(c) === filter;
+    if (filter === 'secondary') {
+      return role === 'secondary' || stage === 'stage1' || stage === 'basic';
+    }
+    if (filter === 'support') {
+      return role === 'support';
+    }
+    return stage === filter;
   }
 
   function buildSuggestionsHtml(filterSupertype) {
@@ -1166,16 +1262,17 @@ const Wizard = (() => {
       ownedCandidates = ownedCandidates.filter(isMatch);
     }
 
-    // Dynamic Missing candidates catalog from IndexedDB database and collections
+    // Dynamic Missing candidates catalog from IndexedDB database
     let fallbackMissingCatalog = [];
     const dbCatalog = API.getDbCards ? API.getDbCards() : [];
+
+    // Pre-build owned set for super fast lookup
+    const ownedNameSet = new Set(colCards.map(c => (c.name || '').toLowerCase().trim()));
 
     if (filterSupertype === 'pokemon') {
       const deckPokemon = currentDeck.filter(c => c.category === 'pokemon').map(c => getCardDetails(c.name) || c);
       const deckTypes = [...new Set(deckPokemon.flatMap(p => p.types || []))];
-
       const dbPokemon = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('pok'));
-      const matchingTypes = dbPokemon.filter(c => (c.types || []).some(t => deckTypes.includes(t)));
 
       const familyCandidates = [];
       deckPokemon.forEach(p => {
@@ -1185,14 +1282,53 @@ const Wizard = (() => {
         }
       });
 
-      fallbackMissingCatalog = [...familyCandidates, ...matchingTypes, ...dbPokemon].slice(0, 50);
+      const matchingTypes = (deckTypes.length > 0)
+        ? dbPokemon.filter(c => (c.types || []).some(t => deckTypes.includes(t)))
+        : [];
+
+      fallbackMissingCatalog = [...familyCandidates, ...matchingTypes, ...dbPokemon];
     } else if (filterSupertype === 'energy') {
-      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('energ')).slice(0, 20);
+      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('energ'));
+      if (fallbackMissingCatalog.length === 0) {
+        fallbackMissingCatalog = [
+          { name: 'Basic Lightning Energy', supertype: 'Energy', energyType: 'Lightning' },
+          { name: 'Basic Fire Energy', supertype: 'Energy', energyType: 'Fire' },
+          { name: 'Basic Water Energy', supertype: 'Energy', energyType: 'Water' },
+          { name: 'Basic Grass Energy', supertype: 'Energy', energyType: 'Grass' },
+          { name: 'Basic Psychic Energy', supertype: 'Energy', energyType: 'Psychic' },
+          { name: 'Basic Fighting Energy', supertype: 'Energy', energyType: 'Fighting' },
+          { name: 'Basic Darkness Energy', supertype: 'Energy', energyType: 'Darkness' },
+          { name: 'Basic Metal Energy', supertype: 'Energy', energyType: 'Metal' },
+          { name: 'Double Turbo Energy', supertype: 'Energy', energyType: 'Colorless' }
+        ];
+      }
     } else {
-      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('train')).slice(0, 30);
+      fallbackMissingCatalog = dbCatalog.filter(c => (c.supertype || '').toLowerCase().includes('train'));
+      if (fallbackMissingCatalog.length === 0) {
+        fallbackMissingCatalog = [
+          { name: "Professor's Research", supertype: 'Trainer', subtypes: ['Supporter'] },
+          { name: 'Iono', supertype: 'Trainer', subtypes: ['Supporter'] },
+          { name: 'Boss\'s Orders', supertype: 'Trainer', subtypes: ['Supporter'] },
+          { name: 'Ultra Ball', supertype: 'Trainer', subtypes: ['Item'] },
+          { name: 'Nest Ball', supertype: 'Trainer', subtypes: ['Item'] },
+          { name: 'Buddy-Buddy Poffin', supertype: 'Trainer', subtypes: ['Item'] },
+          { name: 'Super Rod', supertype: 'Trainer', subtypes: ['Item'] },
+          { name: 'Switch', supertype: 'Trainer', subtypes: ['Item'] }
+        ];
+      }
     }
 
-    let missingCandidates = fallbackMissingCatalog.filter(c => countOwned(c.name) === 0);
+    // Deduplicate and filter missing candidates fast
+    const seenNames = new Set();
+    let missingCandidates = [];
+    for (const c of fallbackMissingCatalog) {
+      if (!c || !c.name) continue;
+      const key = c.name.toLowerCase().trim();
+      if (!seenNames.has(key) && !ownedNameSet.has(key)) {
+        seenNames.add(key);
+        missingCandidates.push(c);
+      }
+    }
 
     if (state.roleFilter && filterSupertype === 'trainer') {
       const isMatch = state.roleFilter === 'Stadium+Tool'
@@ -1212,6 +1348,9 @@ const Wizard = (() => {
       ownedCandidates = ownedCandidates.filter(isElemMatch);
       missingCandidates = missingCandidates.filter(isElemMatch);
     }
+
+    // Slice to top candidates before scoring to ensure zero lag
+    missingCandidates = missingCandidates.slice(0, 80);
     if (filterSupertype === 'energy') {
       const deckPokeTypes = new Set();
       currentDeck.filter(c => c.category === 'pokemon').forEach(c => { const d = getCardDetails(c.name); if (d && d.types) d.types.forEach(t => deckPokeTypes.add(t)); });
@@ -1240,7 +1379,7 @@ const Wizard = (() => {
 
     const missingScored = missingCandidates.map(c => {
       const compat = calculateCompatibility(c, currentDeck);
-      return { ...c, score: compat.score, reason: c.reason || compat.reason };
+      return { ...c, score: compat.score, reason: compat.reason };
     }).sort((a, b) => b.score - a.score);
 
     const missingDeduped = [];
@@ -1265,11 +1404,18 @@ const Wizard = (() => {
 
       const extraClass = added ? 'active' : '';
       const ownedBadge = owned > 0 ? `<span class="chip-owned">${owned}</span>` : '';
+
+      // Format short explanation reason text (e.g. "Mayor potencia", "Habilidad útil")
+      let displayReason = c.reason || 'Buena cobertura';
+      if (displayReason.includes(':')) {
+        displayReason = displayReason.split(':')[0].trim();
+      }
+
       return `<button type="button" class="pick-chip ${extraClass}" data-suggest-name="${escapeHtml(c.name)}">
         <span class="type-dot ${dotClass} sm"><span class="tcg-sym">${typeChar}</span></span>
         <span class="chip-body">
           <span class="chip-top">${escapeHtml(c.name)} ${ownedBadge}</span>
-          <span class="chip-reason">${escapeHtml(c.reason)}</span>
+          <span class="chip-reason">${escapeHtml(displayReason)}</span>
         </span>
       </button>`;
     };

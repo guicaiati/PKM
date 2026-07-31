@@ -58,9 +58,9 @@
 
     <!-- COLLECTION -->
     <section class="panel" id="panel-collection">
-      <div class="card-box">
-        <h2>Mi colección</h2>
-        <div class="collection-stats" id="collectionStats"></div>
+      <div class="card-box collection-box">
+        <h2 class="collection-title">Mi colección</h2>
+        <div class="collection-stats-grid" id="collectionStats"></div>
         <div class="saved-collections" id="savedCollections"></div>
         <div class="collection-controls">
           <div class="filter-row">
@@ -89,10 +89,10 @@
               <option value="date">Fecha agregada</option>
             </select>
           </div>
-          <div class="row">
+          <div class="search-row">
             <input type="text" id="collectionSearch" placeholder="Filtrar por nombre..." />
           </div>
-          <div class="row">
+          <div class="collection-actions-bar">
             <input type="text" id="collectionNameInput" placeholder="Nombre de la colección" />
             <button class="action" id="saveCollectionBtn">Guardar colección</button>
             <button class="ghost" id="enrichAllBtn"
@@ -104,7 +104,7 @@
             </label>
           </div>
         </div>
-        <div class="grid" id="collectionGrid"></div>
+        <div class="grid collection-cards-grid" id="collectionGrid"></div>
         <div class="empty" id="collectionEmpty">Todavía no agregaste cartas. Andá a "Buscar".</div>
       </div>
     </section>

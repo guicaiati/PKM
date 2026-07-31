@@ -1159,12 +1159,12 @@ const UI = (() => {
         qtyHTML = `
           <div class="qty-row">
             <div class="qty-controls">
-              <button class="dec">&minus;</button>
+              <button class="dec" title="Disminuir cantidad">&minus;</button>
               <span>${card.count || 1}</span>
-              <button class="inc">+</button>
+              <button class="inc" title="Aumentar cantidad">+</button>
             </div>
-            <button class="ghost remove-btn">Quitar</button>
-            <button class="ghost photo-btn" title="Agregar foto">📷</button>
+            <button class="ghost remove-btn" title="Quitar de la colección">Quitar</button>
+            <button class="ghost photo-btn" title="Agregar / cambiar foto">📷</button>
             <button class="ghost card-info-btn" title="Qué hace esta carta"><span class="tcg-sym">?</span></button>
           </div>`;
       }
@@ -1222,6 +1222,82 @@ const UI = (() => {
         });
       }
       return div;
+    },
+
+    promptCardPhoto(card, callback) {
+      const modal = document.getElementById('cardModal');
+      const body = document.getElementById('modalBody');
+      if (!modal || !body) return;
+      
+      body.innerHTML = `
+        <h3 style="margin-top:0;font-family:var(--display);font-size:18px;">Agregar / Cambiar foto de ${card.name ? card.name.replace(/</g,'&lt;') : ''}</h3>
+        <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:14px;">Podés subir una imagen desde tu dispositivo o ingresar la URL de la imagen.</p>
+        
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="font-size:11px;font-family:var(--mono);color:var(--text-dim);text-transform:uppercase;display:block;margin-bottom:4px;">Subir archivo de imagen</label>
+            <input type="file" id="photoFileInput" accept="image/*" style="width:100%;font-size:13px;" />
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--text-dim);">&mdash; O &mdash;</div>
+          <div>
+            <label style="font-size:11px;font-family:var(--mono);color:var(--text-dim);text-transform:uppercase;display:block;margin-bottom:4px;">URL de la imagen</label>
+            <input type="text" id="photoUrlInput" placeholder="https://..." value="${card.image && !card.image.startsWith('data:') ? card.image.replace(/"/g,'&quot;') : ''}" style="width:100%;" />
+          </div>
+          ${card.image ? `
+          <div style="text-align:center;margin-top:8px;">
+            <img src="${card.image}" alt="Vista previa" style="max-height:140px;border-radius:8px;border:1px solid var(--border);" />
+          </div>` : ''}
+        </div>
+        
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          ${card.image ? `<button class="ghost" id="removePhotoBtn" style="color:var(--fire);border-color:rgba(229,83,61,0.3);">Eliminar foto</button>` : ''}
+          <button class="ghost" id="cancelPhotoBtn">Cancelar</button>
+          <button class="action" id="savePhotoBtn">Guardar foto</button>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+
+      const fileInput = document.getElementById('photoFileInput');
+      const urlInput = document.getElementById('photoUrlInput');
+      const saveBtn = document.getElementById('savePhotoBtn');
+      const cancelBtn = document.getElementById('cancelPhotoBtn');
+      const removeBtn = document.getElementById('removePhotoBtn');
+
+      const closeModal = () => {
+        modal.classList.add('hidden');
+        body.innerHTML = '';
+      };
+
+      cancelBtn?.addEventListener('click', closeModal);
+
+      removeBtn?.addEventListener('click', () => {
+        card.image = '';
+        closeModal();
+        if (callback) callback();
+        UI.toast('Foto eliminada', 'success');
+      });
+
+      saveBtn?.addEventListener('click', () => {
+        if (fileInput?.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            card.image = e.target.result;
+            closeModal();
+            if (callback) callback();
+            UI.toast('Foto actualizada', 'success');
+          };
+          reader.readAsDataURL(file);
+        } else if (urlInput?.value.trim()) {
+          card.image = urlInput.value.trim();
+          closeModal();
+          if (callback) callback();
+          UI.toast('Foto actualizada', 'success');
+        } else {
+          closeModal();
+        }
+      });
     },
 
     renderGrid(container, cards, opts = {}) {
