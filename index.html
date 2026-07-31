@@ -94,7 +94,8 @@
             <input type="text" id="collectionSearch" placeholder="Filtrar por nombre..." />
           </div>
           <div class="collection-actions-bar">
-            <input type="text" id="collectionNameInput" placeholder="Nombre de la colección" />
+            <button class="ghost" id="newCollectionBtn" title="Iniciar una nueva colección en blanco">➕ Nueva colección</button>
+            <input type="text" id="collectionNameInput" placeholder="Nombre de la colección (ej. Colección 1)" />
             <button class="action" id="saveCollectionBtn">Guardar colección</button>
             <button class="ghost" id="enrichAllBtn"
               title="Actualizar datos de todas las colecciones guardadas desde la API">Actualizar datos</button>
@@ -187,6 +188,7 @@
       <div class="card-box">
         <h2>Mis colecciones</h2>
         <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminalas.</p>
+        <div id="savedCollectionsStorageBar"></div>
         <div class="mb-12">
           <div class="search-wrap">
             <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..."

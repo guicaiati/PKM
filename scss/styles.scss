@@ -1404,6 +1404,56 @@ details.sidebar-box {
   width: 100%;
 }
 
+.storage-bar-wrap {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+
+  .storage-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    margin-bottom: 8px;
+
+    .storage-label {
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .storage-val {
+      font-weight: 700;
+      color: var(--text);
+    }
+  }
+
+  .storage-bar-track {
+    height: 8px;
+    background: var(--surface-3);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .storage-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease, background 0.3s ease;
+  }
+
+  &.warning {
+    border-color: rgba(239, 159, 39, 0.4);
+    .storage-val { color: var(--energy); }
+  }
+
+  &.danger {
+    border-color: rgba(229, 83, 61, 0.4);
+    .storage-val { color: var(--fire); }
+  }
+}
+
 .saved-card {
   display: flex;
   align-items: center;
@@ -1417,6 +1467,11 @@ details.sidebar-box {
 
   &:hover {
     border-color: var(--border-strong);
+  }
+
+  &.has-matches {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .saved-card-name {

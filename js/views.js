@@ -35,6 +35,38 @@ function formatCollectionName(name) {
   if (/^col_\d+$/i.test(name.trim())) return 'Colección guardada';
   return name;
 }
+
+async function getAllUserCollections() {
+  const saved = await Storage.loadNamedCollections();
+  const liveName = (typeof Collection !== 'undefined' && Collection.getCurrentName) ? Collection.getCurrentName() : null;
+  const liveData = (typeof Collection !== 'undefined' && Collection.getMap) ? Collection.getMap() : {};
+  const liveCards = Object.values(liveData).filter(x => x && (x.count > 0 || x.count === undefined));
+
+  const cleanLiveName = (liveName || '').trim().toLowerCase();
+
+  const liveCol = {
+    id: 'current',
+    name: liveName || 'Colección Actual',
+    isCurrent: true,
+    data: getCollectionCardsData(liveCards)
+  };
+
+  const otherCols = saved
+    .filter(c => {
+      if (!c || !c.name) return false;
+      if (cleanLiveName && c.name.trim().toLowerCase() === cleanLiveName) return false;
+      return true;
+    })
+    .map(c => ({
+      id: c.id,
+      name: c.name,
+      isCurrent: false,
+      data: getCollectionCardsData(c.data || c)
+    }));
+
+  return [liveCol, ...otherCols];
+}
+
 const Scanner = (() => {
   const MAX_HISTORY = 10;
   let autocompleteTimer = null;
@@ -76,14 +108,13 @@ const Scanner = (() => {
           const suggestions = await API.autocomplete(val);
           if (!suggestions.length) { list.classList.remove('show'); return; }
 
-          const saved = await Storage.loadNamedCollections();
+          const collections = await getAllUserCollections();
           const allColsMap = [];
 
-          saved.forEach(col => {
-            if (!col) return;
+          collections.forEach(col => {
             const colName = formatCollectionName(col.name);
-            getCollectionCardsData(col).forEach(c => {
-              if (c && c.name) allColsMap.push({ name: c.name, count: c.count || 1, colName: colName });
+            getCollectionCardsData(col.data).forEach(c => {
+              if (c && c.name) allColsMap.push({ ...c, name: c.name.trim(), count: c.count || 1, colName: colName });
             });
           });
 
@@ -92,9 +123,9 @@ const Scanner = (() => {
             const matchingInCols = allColsMap.filter(x => (x.name || '').toLowerCase().trim() === sLower);
             const ownedTotal = matchingInCols.reduce((sum, x) => sum + (x.count || 1), 0);
             const colNamesList = Array.from(new Set(matchingInCols.map(x => formatCollectionName(x.colName))));
-            const colNamesStr = colNamesList.slice(0, 2).join(', ');
+            const colNamesStr = colNamesList.join(', ');
 
-            const badge = ownedTotal > 0 ? `<span class="ac-owned">Tenés ${ownedTotal} ${colNamesStr ? `(${colNamesStr})` : ''}</span>` : '';
+            const badge = ownedTotal > 0 ? `<span class="ac-owned">Tenés ${ownedTotal} (${colNamesStr})</span>` : '';
             return `<div class="autocomplete-item" data-val="${escapeHtml(s)}"><span>${escapeHtml(s)}</span>${badge}</div>`;
           }).join('');
           list.classList.add('show');
@@ -130,23 +161,16 @@ const Scanner = (() => {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const saved = await Storage.loadNamedCollections();
+    const collections = await getAllUserCollections();
     const allCollectionCards = [];
 
-    console.log('🔍 [BUSCAR] Colecciones guardadas en DB:', saved.length, saved);
-
-    // Add all saved collections cards from database
-    saved.forEach(col => {
-      if (!col) return;
+    collections.forEach(col => {
       const colName = formatCollectionName(col.name);
-      const cardsInCol = getCollectionCardsData(col);
-      console.log(`📦 [BUSCAR] Colección "${colName}": ${cardsInCol.length} cartas extraídas`);
+      const cardsInCol = getCollectionCardsData(col.data);
       cardsInCol.forEach(c => {
         if (c && c.name) allCollectionCards.push({ ...c, colName: colName });
       });
     });
-
-    console.log('🃏 [BUSCAR] Total cartas recolectadas entre todas las colecciones:', allCollectionCards.length);
 
     cards.forEach(c => {
       const cIdLower = (c.id || '').toLowerCase().trim();
@@ -160,33 +184,20 @@ const Scanner = (() => {
         const xIdLower = (x.id || '').toLowerCase().trim();
         const xNumberStr = String(x.number || '').toLowerCase().trim();
         const xSetIdLower = (x.setId || '').toLowerCase().trim();
-        const xSetNameLower = (x.setName || x.set || '').toLowerCase().trim();
+        const xSetNameLower = (typeof x.set === 'string' ? x.set : (x.set?.name || x.setName || '')).toLowerCase().trim();
         const xNameLower = (x.name || '').toLowerCase().trim().replace(/\s+/g, ' ');
 
         // 1. Exact ID match (e.g. "sv3pt5-25")
         if (xIdLower && cIdLower && xIdLower === cIdLower) return true;
 
-        // 2. Set & Number match (e.g. number "25" and set "151" or "sv3pt5")
-        const hasXSet = Boolean(xSetIdLower || xSetNameLower);
-        const hasCSet = Boolean(cSetIdLower || cSetNameLower);
-        const hasXNum = Boolean(xNumberStr);
-        const hasCNum = Boolean(cNumberStr);
-
-        if (hasXNum && hasCNum && xNumberStr === cNumberStr) {
-          if (hasXSet && hasCSet) {
-            if (xSetIdLower === cSetIdLower || xSetNameLower === cSetNameLower) return true;
-            return false;
-          }
-          if (xNameLower === cNameLower) return true;
+        // 2. Exact Card Name + Set + Number match
+        if (xNameLower === cNameLower && xNumberStr === cNumberStr) {
+          if (xSetIdLower && cSetIdLower && xSetIdLower === cSetIdLower) return true;
+          if (xSetNameLower && cSetNameLower && (xSetNameLower === cSetNameLower || xSetNameLower.includes(cSetNameLower) || cSetNameLower.includes(xSetNameLower))) return true;
+          if (!xSetIdLower && !cSetIdLower && !xSetNameLower && !cSetNameLower) return true;
         }
 
-        // 3. If x has specific set/number info that differs from c -> do NOT match different prints
-        if (hasXSet || hasXNum) {
-          return false;
-        }
-
-        // 4. Fallback for generic/legacy card entries without set/number info
-        return xNameLower === cNameLower;
+        return false;
       });
 
       const owned = matchingInCols.reduce((sum, x) => sum + (x.count || 1), 0);
@@ -561,13 +572,20 @@ const Collection = (() => {
     const typeFilter = document.getElementById('collectionFilterType')?.value || 'all';
     const elemFilter = document.getElementById('collectionFilterElement')?.value || 'all';
     const sortBy = document.getElementById('collectionSort')?.value || 'name';
-    const nameSearch = document.getElementById('collectionSearch')?.value?.toLowerCase() || '';
+    const nameSearch = (document.getElementById('collectionSearch')?.value || '').trim().toLowerCase();
 
-    let items = Object.values(data);
+    let items = Object.values(data).filter(Boolean);
 
     if (typeFilter !== 'all') items = items.filter(c => c.supertype === typeFilter);
-    if (elemFilter !== 'all') items = items.filter(c => c.types && c.types.includes(elemFilter));
-    if (nameSearch) items = items.filter(c => c.name.toLowerCase().includes(nameSearch));
+    if (elemFilter !== 'all') items = items.filter(c => c.types && Array.isArray(c.types) && c.types.includes(elemFilter));
+    if (nameSearch) {
+      items = items.filter(c => {
+        const nameMatch = (c.name || '').toLowerCase().includes(nameSearch);
+        const setMatch = (typeof c.set === 'string' ? c.set : (c.set?.name || c.setId || '')).toLowerCase().includes(nameSearch);
+        const numMatch = String(c.number || '').toLowerCase().includes(nameSearch);
+        return nameMatch || setMatch || numMatch;
+      });
+    }
 
     switch (sortBy) {
       case 'type':
@@ -576,16 +594,30 @@ const Collection = (() => {
           const typeB = (b.supertype || '') + ' ' + ((b.types && b.types[0]) || '');
           const comp = typeA.localeCompare(typeB);
           if (comp !== 0) return comp;
-          return a.name.localeCompare(b.name);
+          return (a.name || '').localeCompare(b.name || '');
         });
         break;
       case 'copies-desc': items.sort((a, b) => (b.count || 0) - (a.count || 0)); break;
       case 'copies-asc': items.sort((a, b) => (a.count || 0) - (b.count || 0)); break;
       case 'date': items.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0)); break;
-      default: items.sort((a, b) => a.name.localeCompare(b.name));
+      default: items.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
 
     return items;
+  }
+
+  function deleteCard(c) {
+    const key1 = Storage.generateId(c.name, c.setId || c.set, c.number);
+    delete data[key1];
+    if (c.id) delete data[c.id];
+    Object.keys(data).forEach(k => {
+      const item = data[k];
+      if (item && (item.name || '').toLowerCase() === (c.name || '').toLowerCase() && String(item.number || '') === String(c.number || '')) {
+        delete data[k];
+      }
+    });
+    save();
+    render();
   }
 
   function render() {
@@ -607,8 +639,8 @@ const Collection = (() => {
       try {
         const el = UI.renderCard(c, { showQty: true });
         el.querySelector('.inc')?.addEventListener('click', () => { c.count++; save(); render(); });
-        el.querySelector('.dec')?.addEventListener('click', () => { c.count = Math.max(0, c.count - 1); if (c.count === 0) delete data[Storage.generateId(c.name, c.setId, c.number)]; save(); render(); });
-        el.querySelector('.remove-btn')?.addEventListener('click', () => { delete data[Storage.generateId(c.name, c.setId, c.number)]; save(); render(); });
+        el.querySelector('.dec')?.addEventListener('click', () => { c.count = Math.max(0, c.count - 1); if (c.count === 0) deleteCard(c); else { save(); render(); } });
+        el.querySelector('.remove-btn')?.addEventListener('click', () => { deleteCard(c); });
         el.querySelector('.photo-btn')?.addEventListener('click', () => { UI.promptCardPhoto(c, () => { save(); render(); }); });
         grid.appendChild(el);
       } catch (e) { console.warn('Error rendering card:', c.name, e); }
@@ -618,12 +650,7 @@ const Collection = (() => {
   async function save() {
     await Storage.saveCollection(data);
     if (currentCollectionName) {
-      const saved = await Storage.loadNamedCollections();
-      const entry = saved.find(c => c.name === currentCollectionName);
-      if (entry) {
-        entry.data = Object.values(data).map(c => ({ ...c }));
-        localStorage.setItem('savedCollections', JSON.stringify(saved));
-      }
+      await Storage.saveNamedCollection(currentCollectionName, data);
     }
   }
 
@@ -650,6 +677,14 @@ const Collection = (() => {
 
     async init() {
       data = await Storage.loadCollection();
+      if (!currentCollectionName) {
+        const storedName = localStorage.getItem('currentCollectionName');
+        if (storedName) currentCollectionName = storedName;
+        else {
+          const savedCols = await Storage.loadNamedCollections();
+          if (savedCols.length > 0) currentCollectionName = savedCols[0].name;
+        }
+      }
       render();
 
       document.getElementById('collectionFilterType')?.addEventListener('change', render);
@@ -657,15 +692,38 @@ const Collection = (() => {
       document.getElementById('collectionSort')?.addEventListener('change', render);
       document.getElementById('collectionSearch')?.addEventListener('input', render);
 
+      document.getElementById('newCollectionBtn')?.addEventListener('click', async () => {
+        data = {};
+        currentCollectionName = null;
+        await Storage.saveCollection({});
+        const nameInput = document.getElementById('collectionNameInput');
+        const savedCols = await Storage.loadNamedCollections();
+        const defaultName = `Colección ${savedCols.length + 1}`;
+        if (nameInput) {
+          nameInput.value = '';
+          nameInput.placeholder = `Nombre (ej. ${defaultName})`;
+          nameInput.focus();
+        }
+        render();
+        renderSavedCollections();
+        UI.toast(`Nueva colección vacía iniciada. Escribí un nombre o se guardará como "${defaultName}".`, 'info');
+      });
+
       document.getElementById('saveCollectionBtn')?.addEventListener('click', async () => {
         try {
           const nameInput = document.getElementById('collectionNameInput');
-          const name = nameInput?.value?.trim() || ('Colección ' + new Date().toLocaleDateString('es-AR'));
+          const savedCols = await Storage.loadNamedCollections();
+          const defaultName = `Colección ${savedCols.length + 1}`;
+          const name = nameInput?.value?.trim() || defaultName;
+          if (nameInput && !nameInput.value.trim()) {
+            nameInput.value = defaultName;
+          }
           UI.toast('Guardando "' + name + '"...', 'info');
           await Storage.saveNamedCollection(name, data);
           currentCollectionName = name;
           UI.toast('Colección "' + name + '" guardada', 'success');
           renderSavedCollections();
+          if (typeof Saved !== 'undefined' && Saved.render) Saved.render();
         } catch (err) {
           UI.toast('Error al guardar: ' + err.message, 'error');
         }
@@ -706,34 +764,59 @@ const Collection = (() => {
     },
 
     addFromAPI(apiCard) {
-      const setId = apiCard.set?.id || '';
-      const key = Storage.generateId(apiCard.name, setId, apiCard.number);
+      const setId = (typeof apiCard.set === 'object' ? apiCard.set?.id : apiCard.setId) || apiCard.setId || '';
+      const setName = (typeof apiCard.set === 'object' ? apiCard.set?.name : apiCard.set) || apiCard.set || '';
+      const key = Storage.generateId(apiCard.name, setId || setName, apiCard.number);
       const prevCount = data[key] ? data[key].count : 0;
       data[key] = {
-        id: apiCard.id || key, name: apiCard.name, image: apiCard.images?.small || '',
-        set: apiCard.set?.name || '', setId: setId, number: apiCard.number || '',
-        count: prevCount + 1, supertype: apiCard.supertype || '', types: apiCard.types || [],
-        subtypes: apiCard.subtypes || [], evolvesFrom: apiCard.evolvesFrom || null,
-        hp: apiCard.hp ? parseInt(apiCard.hp, 10) : null, rarity: apiCard.rarity || '',
-        attacks: apiCard.attacks || [], abilities: apiCard.abilities || [],
-        weaknesses: apiCard.weaknesses || [], resistances: apiCard.resistances || [],
-        retreatCost: apiCard.retreatCost || [], text: apiCard.text || [],
+        id: apiCard.id || key,
+        name: apiCard.name,
+        image: apiCard.images?.small || apiCard.image || '',
+        set: setName,
+        setId: setId,
+        number: apiCard.number || '',
+        count: prevCount + 1,
+        supertype: apiCard.supertype || '',
+        types: apiCard.types || [],
+        subtypes: apiCard.subtypes || [],
+        evolvesFrom: apiCard.evolvesFrom || null,
+        hp: apiCard.hp ? parseInt(apiCard.hp, 10) : null,
+        rarity: apiCard.rarity || '',
+        attacks: apiCard.attacks || [],
+        abilities: apiCard.abilities || [],
+        weaknesses: apiCard.weaknesses || [],
+        resistances: apiCard.resistances || [],
+        retreatCost: apiCard.retreatCost || [],
+        text: apiCard.text || [],
         addedAt: data[key]?.addedAt || Date.now()
       };
       save();
-      UI.toast('Agregada: ' + apiCard.name, 'success');
+      render();
+      UI.toast('Agregada a la colección: ' + apiCard.name, 'success');
     },
 
     countByName(name) {
-      const target = name.toLowerCase();
+      if (!name) return 0;
+      const target = String(name).trim().toLowerCase();
       let total = 0;
-      Object.values(data).forEach(c => { if (c.name.toLowerCase() === target) total += c.count; });
+      Object.values(data).forEach(c => {
+        if (!c || !c.name) return;
+        const cName = String(c.name).trim().toLowerCase();
+        if (cName === target || cName.includes(target) || target.includes(cName)) {
+          total += (c.count || 1);
+        }
+      });
       return total;
     },
 
     findByName(name) {
-      const target = name.toLowerCase();
-      return Object.values(data).find(c => c.name.toLowerCase() === target);
+      if (!name) return null;
+      const target = String(name).trim().toLowerCase();
+      return Object.values(data).find(c => {
+        if (!c || !c.name) return false;
+        const cName = String(c.name).trim().toLowerCase();
+        return cName === target || cName.includes(target) || target.includes(cName);
+      });
     },
 
     getCards() { return Object.values(data); },
@@ -741,7 +824,12 @@ const Collection = (() => {
     getData() { return data; },
     render,
     getCurrentName() { return currentCollectionName; },
-    setCurrentName(name) { currentCollectionName = name || ''; renderSavedCollections(); }
+    setCurrentName(name) {
+      currentCollectionName = name || '';
+      if (currentCollectionName) localStorage.setItem('currentCollectionName', currentCollectionName);
+      else localStorage.removeItem('currentCollectionName');
+      renderSavedCollections();
+    }
   };
 })();
 
@@ -2300,14 +2388,13 @@ const Saved = (() => {
 
         const apiSuggestions = await API.autocomplete(val);
 
-        const saved = await Storage.loadNamedCollections();
+        const collections = await getAllUserCollections();
         const allColsMap = [];
 
-        saved.forEach(col => {
-          if (!col) return;
+        collections.forEach(col => {
           const colName = formatCollectionName(col.name);
-          getCollectionCardsData(col).forEach(c => {
-            if (c && c.name) allColsMap.push({ name: c.name, count: c.count || 1, colName: colName });
+          getCollectionCardsData(col.data).forEach(c => {
+            if (c && c.name) allColsMap.push({ name: c.name.trim(), count: c.count || 1, colName: colName });
           });
         });
 
@@ -2369,25 +2456,68 @@ const Saved = (() => {
     });
   }
 
+  function renderStorageBar() {
+    const barContainer = document.getElementById('savedCollectionsStorageBar');
+    if (!barContainer) return;
+
+    localStorage.removeItem('savedCollections_trashBin');
+    const dataStr = localStorage.getItem('savedCollections') || '[]';
+    
+    const totalChars = dataStr.length;
+    const totalBytes = totalChars * 2;
+    const maxBytes = 5 * 1024 * 1024;
+    const pct = Math.min(100, (totalBytes / maxBytes) * 100);
+
+    let mbStr = (totalBytes / (1024 * 1024)).toFixed(2);
+    let sizeDisplay = mbStr + ' MB';
+    if (mbStr === '0.00' && totalBytes > 0) {
+      sizeDisplay = (totalBytes / 1024).toFixed(1) + ' KB';
+    }
+
+    let statusClass = '';
+    let fillColor = 'linear-gradient(100deg, var(--holo-a), var(--holo-b))';
+
+    if (pct > 90) {
+      statusClass = 'danger';
+      fillColor = 'var(--fire)';
+    } else if (pct > 70) {
+      statusClass = 'warning';
+      fillColor = 'var(--energy)';
+    }
+
+    barContainer.className = `storage-bar-wrap mb-12 ${statusClass}`;
+    barContainer.innerHTML = `
+      <div class="storage-bar-labels">
+        <span class="storage-label">💾 Almacenamiento ocupado (localStorage)</span>
+        <span class="storage-val">${sizeDisplay} / 5.00 MB (${pct.toFixed(1)}%)</span>
+      </div>
+      <div class="storage-bar-track">
+        <div class="storage-bar-fill" style="width: ${Math.max(0.5, pct)}%; background: ${fillColor};"></div>
+      </div>
+      ${pct > 80 ? `<div class="storage-hint" style="color:var(--fire);margin-top:6px;font-size:11px;">⚠️ Te estás acercando al límite de 5 MB. Se recomienda exportar tus colecciones en TXT o JSON.</div>` : ''}
+    `;
+  }
+
   async function renderCollections(searchQuery = '') {
+    renderStorageBar();
     const container = document.getElementById('savedCollectionsFull');
     const empty = document.getElementById('savedCollectionsEmpty');
     if (!container) return;
 
-    const saved = await Storage.loadNamedCollections();
-    const liveName = Collection.getCurrentName ? Collection.getCurrentName() : null;
-
-    let all = saved.map(c => {
-      const isThisCurrent = Boolean(liveName && (c.name === liveName || c.id === liveName));
-      return { ...c, isCurrent: isThisCurrent, data: getCollectionCardsData(c) };
-    });
+    let all = await getAllUserCollections();
 
     if (searchQuery) {
       const q = searchQuery.trim().toLowerCase();
       all = all.map(col => {
-        const dataItems = getCollectionCardsData(col);
-        const matchingCards = dataItems.filter(c => (c.name || '').toLowerCase().includes(q));
-        const matchesColName = (col.name || '').toLowerCase().includes(q);
+        const dataItems = getCollectionCardsData(col.data);
+        const matchingCards = dataItems.filter(c => {
+          if (!c || !c.name) return false;
+          const cName = String(c.name).trim().toLowerCase();
+          const cSet = String(typeof c.set === 'string' ? c.set : (c.set?.name || c.setId || '')).toLowerCase();
+          const cNum = String(c.number || '').toLowerCase();
+          return cName.includes(q) || cSet.includes(q) || cNum.includes(q);
+        });
+        const matchesColName = String(col.name || '').toLowerCase().includes(q);
         if (matchesColName || matchingCards.length > 0) {
           return { ...col, data: dataItems, matchingCards };
         }
@@ -2395,55 +2525,60 @@ const Saved = (() => {
       }).filter(Boolean);
     }
 
-    let restoreBannerHtml = '';
-
     if (all.length === 0) {
-      container.innerHTML = restoreBannerHtml;
+      container.innerHTML = '';
       if (empty) {
         empty.style.display = 'block';
         empty.textContent = searchQuery ? `No se encontraron colecciones con "${searchQuery}".` : 'No tenés colecciones guardadas. Andá a "Colección" y guardá una.';
       }
-      document.getElementById('restoreCollectionBtn')?.addEventListener('click', async () => {
-        const item = await Storage.restoreLastDeletedCollection();
-        if (item) {
-          renderCollections(searchQuery);
-          UI.toast(`Colección "${item.name}" restaurada con éxito`, 'success');
-        }
-      });
       return;
     }
     if (empty) empty.style.display = 'none';
 
-    container.innerHTML = restoreBannerHtml + all.map(c => {
+    container.innerHTML = all.map(c => {
       const dataItems = getCollectionCardsData(c.data);
       const total = dataItems.reduce((s, x) => s + (x.count || 0), 0);
       const isCurrent = Boolean(c.isCurrent || c.id === 'current');
-
-      let matchesHtml = '';
-      if (c.matchingCards && c.matchingCards.length > 0) {
-        matchesHtml = `<div style="margin-top:4px;font-size:11px;color:var(--accent);">Coincidencias: ${c.matchingCards.map(m => `${escapeHtml(m.name)} (x${m.count || 1})`).join(', ')}</div>`;
-      }
+      const hasMatches = Boolean(c.matchingCards && c.matchingCards.length > 0);
 
       return `
-        <div class="saved-card" data-id="${c.id}">
-          <div>
-            <div class="saved-card-name">📦 ${escapeHtml(c.name)} <span class="saved-type-tag type-collection">Colección</span> ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Colección actual)</span>' : ''}</div>
-            <div class="saved-card-stats">✨ ${total} cartas</div>
-            ${matchesHtml}
-          </div>
-          <div class="saved-card-actions">
-            <button class="action saved-card-load">${isCurrent ? 'Actualizar' : 'Cargar'}</button>
-            <button class="ghost saved-card-rename">Renombrar</button>
-            ${!isCurrent ? '<button class="ghost saved-card-delete">Eliminar</button>' : ''}
+        <div class="saved-card ${hasMatches ? 'has-matches' : ''}" data-id="${c.id}">
+          <div style="width:100%;">
+            <div class="saved-card-header-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+              <div>
+                <div class="saved-card-name">📦 ${escapeHtml(c.name)} <span class="saved-type-tag type-collection">Colección</span> ${isCurrent ? '<span style="font-size:11px;color:var(--grass);font-weight:700;">(Colección actual)</span>' : ''}</div>
+                <div class="saved-card-stats">✨ ${total} cartas</div>
+              </div>
+              <div class="saved-card-actions" style="margin-top:0;padding-top:0;border-top:none;">
+                <button class="action saved-card-load">${isCurrent ? 'Actualizar' : 'Cargar'}</button>
+                <button class="ghost saved-card-rename">Renombrar</button>
+                ${!isCurrent ? '<button class="ghost saved-card-delete">Eliminar</button>' : ''}
+              </div>
+            </div>
+            ${hasMatches ? `<div class="matching-cards-container" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
+              <div style="font-size:12px;font-weight:600;color:var(--holo-a);margin-bottom:10px;">Cartas encontradas (${c.matchingCards.length}):</div>
+              <div class="matching-cards-grid grid" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;"></div>
+            </div>` : ''}
           </div>
         </div>`;
     }).join('');
 
-    document.getElementById('restoreCollectionBtn')?.addEventListener('click', async () => {
-      const item = await Storage.restoreLastDeletedCollection();
-      if (item) {
-        renderCollections(searchQuery);
-        UI.toast(`Colección "${item.name}" restaurada con éxito`, 'success');
+    container.querySelectorAll('.saved-card').forEach(node => {
+      const id = node.dataset.id;
+      const colObj = all.find(x => String(x.id) === String(id));
+      if (colObj && colObj.matchingCards && colObj.matchingCards.length > 0) {
+        const gridEl = node.querySelector('.matching-cards-grid');
+        if (gridEl) {
+          gridEl.innerHTML = '';
+          colObj.matchingCards.forEach(m => {
+            try {
+              const cardDom = UI.renderCard(m, { readOnly: true, count: m.count || 1 });
+              gridEl.appendChild(cardDom);
+            } catch (err) {
+              console.warn('Error rendering matching card:', m, err);
+            }
+          });
+        }
       }
     });
 
@@ -2495,11 +2630,14 @@ const Saved = (() => {
     container.querySelectorAll('.saved-card-delete').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.closest('.saved-card').dataset.id;
-        if (confirm('¿Eliminar colección? Se guardará en la papelera por si querés restaurarla.')) {
+        const savedCols = await Storage.loadNamedCollections();
+        const colObj = savedCols.find(x => String(x.id) === String(id));
+        const colName = colObj ? colObj.name : 'esta colección';
+        if (confirm(`¿Eliminar la colección "${colName}"?`)) {
           await Storage.deleteNamedCollection(id);
           const searchVal = document.getElementById('savedCollectionSearch')?.value?.trim().toLowerCase() || '';
-          renderCollections(searchVal);
-          UI.toast('Colección enviada a la papelera. Podés restaurarla.', 'info');
+          await renderCollections(searchVal);
+          UI.toast(`Colección "${colName}" eliminada`, 'info');
         }
       });
     });

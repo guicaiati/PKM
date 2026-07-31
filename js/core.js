@@ -108,7 +108,15 @@ const Storage = (() => {
   }
 
   function generateId(name, setId, number) {
-    return (name || '').toLowerCase().replace(/[^a-z0-9]/g, '') + '|' + (setId || '') + '|' + (number || '');
+    const cleanName = (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    let sId = '';
+    if (typeof setId === 'string') {
+      sId = setId.toLowerCase();
+    } else if (typeof setId === 'object' && setId !== null) {
+      sId = (setId.id || setId.name || '').toLowerCase();
+    }
+    const cleanNum = String(number || '').trim().toLowerCase();
+    return cleanName + '|' + sId + '|' + cleanNum;
   }
 
   return {
@@ -263,20 +271,42 @@ const Storage = (() => {
     async saveNamedCollection(name, collectionMap) {
       const items = Object.values(collectionMap).map(c => ({ ...c }));
       const saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
-      const entry = {
-        id: 'col_' + Date.now(),
-        name: name,
-        savedAt: Date.now(),
-        data: items
-      };
-      saved.push(entry);
-      localStorage.setItem('savedCollections', JSON.stringify(saved));
-      console.log('Saved collection:', name, items.length, 'cards');
-      return entry.id;
+      const cleanName = (name || '').trim().toLowerCase();
+      const existing = saved.find(c => (c.name || '').trim().toLowerCase() === cleanName);
+      if (existing) {
+        existing.name = name;
+        existing.data = items;
+        existing.savedAt = Date.now();
+        localStorage.setItem('savedCollections', JSON.stringify(saved));
+        return existing.id;
+      } else {
+        const entry = {
+          id: 'col_' + Date.now(),
+          name: name,
+          savedAt: Date.now(),
+          data: items
+        };
+        saved.push(entry);
+        localStorage.setItem('savedCollections', JSON.stringify(saved));
+        return entry.id;
+      }
     },
 
     async loadNamedCollections() {
-      return JSON.parse(localStorage.getItem('savedCollections') || '[]');
+      const raw = JSON.parse(localStorage.getItem('savedCollections') || '[]');
+      const map = new Map();
+      raw.forEach(item => {
+        if (!item || !item.name) return;
+        const key = item.name.trim().toLowerCase();
+        if (!map.has(key) || (item.savedAt || 0) > (map.get(key).savedAt || 0)) {
+          map.set(key, item);
+        }
+      });
+      const deduplicated = Array.from(map.values());
+      if (deduplicated.length !== raw.length) {
+        localStorage.setItem('savedCollections', JSON.stringify(deduplicated));
+      }
+      return deduplicated;
     },
 
     async loadNamedCollection(id) {
@@ -292,48 +322,21 @@ const Storage = (() => {
 
     async deleteNamedCollection(id) {
       let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
-      const itemToDelete = saved.find(c => c.id === id);
-      if (itemToDelete) {
-        let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
-        trash.push({ ...itemToDelete, deletedAt: Date.now() });
-        localStorage.setItem('savedCollections_trashBin', JSON.stringify(trash));
+      const target = saved.find(c => String(c.id) === String(id));
+      saved = saved.filter(c => String(c.id) !== String(id));
+      if (target && target.name) {
+        saved = saved.filter(c => (c.name || '').trim().toLowerCase() !== target.name.trim().toLowerCase());
       }
-      saved = saved.filter(c => c.id !== id);
       localStorage.setItem('savedCollections', JSON.stringify(saved));
-    },
-
-    async restoreLastDeletedCollection() {
-      let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
-      if (trash.length === 0) return null;
-      const restoredItem = trash.pop();
-      localStorage.setItem('savedCollections_trashBin', JSON.stringify(trash));
-
-      let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
-      saved.push({ id: restoredItem.id, name: restoredItem.name, savedAt: Date.now(), data: restoredItem.data });
-      localStorage.setItem('savedCollections', JSON.stringify(saved));
-      return restoredItem;
-    },
-
-    async getTrashBinCollections() {
-      return JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
+      localStorage.removeItem('savedCollections_trashBin');
     },
 
     async recoverByName(searchName = '21 7 26') {
       const q = String(searchName).toLowerCase().replace(/[^a-z0-9]/g, '');
       let saved = JSON.parse(localStorage.getItem('savedCollections') || '[]');
-      let trash = JSON.parse(localStorage.getItem('savedCollections_trashBin') || '[]');
 
       const existing = saved.find(c => (c.name || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(q));
       if (existing) return existing;
-
-      const foundInTrash = trash.find(c => (c.name || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(q));
-      if (foundInTrash) {
-        saved.push(foundInTrash);
-        localStorage.setItem('savedCollections', JSON.stringify(saved));
-        const newTrash = trash.filter(c => c.id !== foundInTrash.id);
-        localStorage.setItem('savedCollections_trashBin', JSON.stringify(newTrash));
-        return foundInTrash;
-      }
 
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -1176,6 +1179,12 @@ const UI = (() => {
         }
         qtyHTML = `<div class="card-add-owned-row">
           <button class="ghost add-btn">+ Agregar</button>
+          <button class="ghost card-info-btn" title="Qué hace esta carta"><span class="tcg-sym">?</span></button>
+        </div>`;
+      } else if (opts.readOnly) {
+        const count = opts.count || card.count || 1;
+        qtyHTML = `<div class="card-add-owned-row">
+          <div class="card-owned-tag" style="flex:1;text-align:center;padding:6px;background:var(--surface-3);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:600;">x${count}</div>
           <button class="ghost card-info-btn" title="Qué hace esta carta"><span class="tcg-sym">?</span></button>
         </div>`;
       } else if (!opts.showQty) {
