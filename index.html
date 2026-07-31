@@ -189,15 +189,13 @@
         <h2>Mis colecciones</h2>
         <p class="hint">Colecciones guardadas. Cargalas, renombralas o eliminalas.</p>
         <div id="savedCollectionsStorageBar"></div>
-        <div class="mb-12">
-          <div class="search-wrap">
+        <div class="mb-12" style="display:flex;gap:10px;align-items:center;">
+          <div class="search-wrap" style="flex:1;min-width:0;position:relative;">
             <input type="text" id="savedCollectionSearch" placeholder="Buscar carta en todas las colecciones..."
-              autocomplete="off" />
+              autocomplete="off" style="width:100%;" />
             <div class="autocomplete-list" id="savedSearchAutocomplete"></div>
           </div>
-        </div>
-        <div class="row mb-12">
-          <button class="ghost" id="exportAllCollectionsTxt">Exportar colecciones TXT</button>
+          <button class="ghost" id="exportAllCollectionsTxt" style="white-space:nowrap;flex-shrink:0;">Exportar colecciones TXT</button>
         </div>
         <div id="savedCollectionsFull"></div>
         <div class="empty" id="savedCollectionsEmpty">No tenés colecciones guardadas. Andá a "Colección" y guardá una.
