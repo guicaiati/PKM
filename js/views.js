@@ -570,6 +570,15 @@ const Collection = (() => {
     if (nameSearch) items = items.filter(c => c.name.toLowerCase().includes(nameSearch));
 
     switch (sortBy) {
+      case 'type':
+        items.sort((a, b) => {
+          const typeA = (a.supertype || '') + ' ' + ((a.types && a.types[0]) || '');
+          const typeB = (b.supertype || '') + ' ' + ((b.types && b.types[0]) || '');
+          const comp = typeA.localeCompare(typeB);
+          if (comp !== 0) return comp;
+          return a.name.localeCompare(b.name);
+        });
+        break;
       case 'copies-desc': items.sort((a, b) => (b.count || 0) - (a.count || 0)); break;
       case 'copies-asc': items.sort((a, b) => (a.count || 0) - (b.count || 0)); break;
       case 'date': items.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0)); break;
