@@ -1,4 +1,4 @@
-/**
+﻿/**
  * views.js — Vistas y Controladores de Trainer's Ledger
  * Contiene:
  * - Scanner (Pestaña Buscar)
@@ -2062,7 +2062,6 @@ const Wizard = (() => {
       const basicCards = pokeCards.filter(c => c.subtypes && c.subtypes.includes('Basic'));
       const basicCount = sumCount(basicCards);
       const energyCount = sumCount(state.cards.filter(c => c.category === 'energy'));
-      const trainerCount = total - basicCount - energyCount;
 
       const typeSet = new Set();
       pokeCards.forEach(c => { if (c.types) c.types.forEach(t => typeSet.add(t)); });
@@ -2073,39 +2072,151 @@ const Wizard = (() => {
         if (!weakTo) return;
         const hasAnswer = state.cards.some(c => c.types && c.types.includes(weakTo));
         const verdict = hasAnswer ? 'ok' : 'bad';
-        const verdictText = hasAnswer ? 'Cubierto' : 'Débil — sin plan B';
+        const verdictText = hasAnswer ? 'Cubierto' : 'D\u00e9bil \u2014 sin plan B';
         threatRows.push({ type: t, weakTo, verdict, verdictText });
       });
 
       const goods = [];
       const bads = [];
 
-      if (basicCount >= 4) goods.push(`${basicCount} básicos — buena base para arrancar`);
-      else if (basicCount < 3) bads.push(`Solo ${basicCount} básicos — muy pocos, riesgo de mano muerta`);
-      else bads.push(`${basicCount} básicos — podrían ser más para consistencia`);
+      if (basicCount >= 4) goods.push(`${basicCount} b\u00e1sicos \u2014 buena base para arrancar`);
+      else if (basicCount < 3) bads.push(`Solo ${basicCount} b\u00e1sicos \u2014 muy pocos, riesgo de mano muerta`);
+      else bads.push(`${basicCount} b\u00e1sicos \u2014 podr\u00edan ser m\u00e1s para consistencia`);
 
-      if (energyCount >= 8 && energyCount <= 15) goods.push(`${energyCount} energías — cantidad equilibrada`);
-      else if (energyCount < 8) bads.push(`Solo ${energyCount} energías — muy pocas, riesgo de quedarse sin`);
-      else bads.push(`${energyCount} energías — muchas, podés recortar algunas`);
+      if (energyCount >= 8 && energyCount <= 15) goods.push(`${energyCount} energ\u00edas \u2014 cantidad equilibrada`);
+      else if (energyCount < 8) bads.push(`Solo ${energyCount} energ\u00edas \u2014 muy pocas, riesgo de quedarse sin`);
+      else bads.push(`${energyCount} energ\u00edas \u2014 muchas, pod\u00e9s recortar algunas`);
 
       const coveredCount = threatRows.filter(r => r.verdict === 'ok').length;
       const uncoveredCount = threatRows.filter(r => r.verdict === 'bad').length;
       if (coveredCount > uncoveredCount) goods.push(`${coveredCount} de ${threatRows.length} debilidades cubiertas`);
-      else if (uncoveredCount > 0) bads.push(`${uncoveredCount} debilidades sin cubrir — revisá tu plan B`);
+      else if (uncoveredCount > 0) bads.push(`${uncoveredCount} debilidades sin cubrir \u2014 revis\u00e1 tu plan B`);
 
-      const hasDraw = state.cards.some(c => (c.category || '').toLowerCase() === 'trainer' && (c.name || '').toLowerCase().includes('profesor') || (c.name || '').toLowerCase().includes('investigación'));
-      if (hasDraw) goods.push('Tenés robo (Profesor/Investigación)');
-      else bads.push('No hay cartas de robo potente — agregá Profesor/investigación');
+      const hasDraw = state.cards.some(c => (c.category || '').toLowerCase() === 'trainer' && (c.name || '').toLowerCase().includes('profesor') || (c.name || '').toLowerCase().includes('investigaci\u00f3n'));
+      if (hasDraw) goods.push('Ten\u00e9s robo (Profesor/Investigaci\u00f3n)');
+      else bads.push('No hay cartas de robo potente \u2014 agreg\u00e1 Profesor/investigaci\u00f3n');
 
-      return `<p class="hint">Cobertura contra los tipos más comunes del meta actual.</p>
+      // Sugerencias inteligentes: cartas de compra por tipo cubridor
+      const BUY_BY_TYPE = {
+        Fighting: [{ name: 'Medicham V', note: 'Atacante r\u00e1pido y barato' }, { name: 'Hawlucha', note: 'SV \u2014 muy econ\u00f3mico' }],
+        Water:    [{ name: 'Lumineon V', note: 'Buscador de Supporter esencial' }, { name: 'Greninja ex', note: 'Presi\u00f3n constante' }],
+        Psychic:  [{ name: 'Ralts', note: 'Base para l\u00ednea Gardevoir' }, { name: 'Mewtwo V', note: 'Atacante vers\u00e1til' }],
+        Grass:    [{ name: 'Wo-Chien ex', note: 'Control de herramientas' }, { name: 'Shaymin', note: 'Motor de banca' }],
+        Fire:     [{ name: 'Charizard ex', note: 'Obsidian Flames \u2014 tier 1' }, { name: 'Armarouge ex', note: 'Escala con energ\u00edas fuego' }],
+        Lightning:[{ name: 'Raichu V', note: 'Atacante consistente' }, { name: 'Jolteon ex', note: 'Velocidad + da\u00f1o' }],
+        Darkness: [{ name: 'Darkrai V', note: 'Escala con energ\u00edas oscuras' }, { name: 'Ting-Lu ex', note: 'Disrupci\u00f3n y da\u00f1o' }],
+        Metal:    [{ name: 'Arceus VSTAR', note: 'Motor universal + atacante' }],
+        Colorless:[{ name: 'Mew ex', note: 'Accede a ataques de cualquier Mew' }],
+      };
+      const BUY_DRAW = [
+        { name: "Professor's Research", note: '~$1 USD \u00b7 imprescindible en cualquier mazo' },
+        { name: 'Marnie', note: 'Roba y disrupta al rival' },
+      ];
+      const DRAW_NAMES = ["professor's research", "profesor investigaci\u00f3n", "profesor investigacion", 'marnie', 'cynthia', 'hop', 'sonia', 'colress', 'roxanne'];
+
+      const collectionCards = getAllCollectionCards();
+
+      function findOwnedOfType(type) {
+        const inDeck = new Set(state.cards.map(c => (c.name || '').toLowerCase()));
+        return collectionCards.filter(c => {
+          if (!c.name || inDeck.has(c.name.toLowerCase())) return false;
+          return c.types && c.types.includes(type);
+        });
+      }
+
+      function findRemovableFromDeck() {
+        const pokes = state.cards.filter(c => c.category === 'pokemon');
+        if (pokes.length <= 1) return null;
+        const maxCount = Math.max(...pokes.map(c => Number(c.count || 1)));
+        const candidates = pokes.filter(c => Number(c.count || 1) < maxCount || pokes.length > 3);
+        if (!candidates.length) return null;
+        return candidates.sort((a, b) => {
+          const aHp = Number((getCardDetails(a.name) || a).hp || 0);
+          const bHp = Number((getCardDetails(b.name) || b).hp || 0);
+          return aHp - bHp;
+        })[0];
+      }
+
+      function renderSuggestBlock(suggestions) {
+        if (!suggestions || !suggestions.length) return '';
+        const swaps = suggestions.filter(s => s.type === 'swap');
+        const buys  = suggestions.filter(s => s.type === 'buy');
+        let html = '<div class="suggest-block">';
+        if (swaps.length) {
+          html += '<div class="suggest-label">\ud83d\udca1 Con lo que ten\u00e9s</div>';
+          html += swaps.map(s =>
+            `<div class="suggest-chip swap">\u2194 Sac\u00e1 <strong>${escapeHtml(s.from)}</strong> \u00b7 Pon\u00e9 <strong>${escapeHtml(s.to)}</strong></div>`
+          ).join('');
+        }
+        if (buys.length) {
+          html += `<div class="suggest-label faint">${swaps.length ? '\u00d3 compr\u00e1' : '\ud83d\uded2 \u00daltima opci\u00f3n \u2014 compr\u00e1'}</div>`;
+          html += buys.map(s =>
+            `<div class="suggest-chip buy">\ud83d\uded2 <strong>${escapeHtml(s.card)}</strong>${s.note ? ` <span class="suggest-note">${escapeHtml(s.note)}</span>` : ''}</div>`
+          ).join('');
+        }
+        html += '</div>';
+        return html;
+      }
+
+      function getSuggestionsForBad(label) {
+        const suggestions = [];
+        if (label.includes('debilidades sin cubrir') || label.includes('D\u00e9bil')) {
+          const uncoveredTypes = threatRows.filter(r => r.verdict === 'bad').map(r => r.weakTo);
+          uncoveredTypes.forEach(coverType => {
+            const owned = findOwnedOfType(coverType);
+            if (owned.length) {
+              const removable = findRemovableFromDeck();
+              const toAdd = owned[0];
+              if (removable && toAdd) {
+                suggestions.push({ type: 'swap', from: removable.name, to: toAdd.name });
+              } else if (toAdd) {
+                suggestions.push({ type: 'swap', from: '(espacio libre)', to: toAdd.name });
+              }
+            }
+            const buyOpts = BUY_BY_TYPE[coverType] || [];
+            buyOpts.slice(0, 1).forEach(b => suggestions.push({ type: 'buy', card: b.name, note: b.note }));
+          });
+          return suggestions.slice(0, 4);
+        }
+        if (label.includes('robo') || label.includes('Profesor') || label.includes('investigaci\u00f3n')) {
+          const ownedDraw = collectionCards.filter(c => c.name && DRAW_NAMES.some(k => c.name.toLowerCase().includes(k)));
+          if (ownedDraw.length) {
+            const lowTrainers = state.cards.filter(c => c.category === 'trainer' && Number(c.count || 1) === 1);
+            suggestions.push({ type: 'swap', from: lowTrainers[0] ? lowTrainers[0].name : 'un Trainer de 1 copia', to: ownedDraw[0].name });
+          }
+          BUY_DRAW.slice(0, 1).forEach(b => suggestions.push({ type: 'buy', card: b.name, note: b.note }));
+          return suggestions;
+        }
+        if (label.includes('b\u00e1sicos')) {
+          const deckTypes = [...typeSet];
+          if (deckTypes.length) {
+            const primaryType = deckTypes[0];
+            const ownedBasics = collectionCards.filter(c => {
+              if (!c.name) return false;
+              const inDeck = state.cards.some(d => d.name.toLowerCase() === c.name.toLowerCase());
+              return !inDeck && c.types && c.types.includes(primaryType);
+            });
+            if (ownedBasics.length) {
+              const lowTrainers = state.cards.filter(c => c.category === 'trainer' && Number(c.count || 1) === 1);
+              suggestions.push({ type: 'swap', from: lowTrainers[0] ? lowTrainers[0].name : 'un Trainer de 1 copia', to: `${ownedBasics[0].name} (b\u00e1sico ${primaryType})` });
+            }
+          }
+          return suggestions;
+        }
+        return [];
+      }
+
+      const badItems = bads.map(label => ({ label, suggestions: getSuggestionsForBad(label) }));
+
+      return `<p class="hint">Cobertura contra los tipos m\u00e1s comunes del meta actual.</p>
         ${threatRows.map(r => `<div class="threat-row ${r.verdict}"><span>vs. ${r.weakTo}</span><span class="verdict">${r.verdictText}</span></div>`).join('')}
-        ${threatRows.length === 0 ? '<div class="empty">No hay Pokémon en el mazo para analizar.</div>' : ''}
+        ${threatRows.length === 0 ? '<div class="empty">No hay Pok\u00e9mon en el mazo para analizar.</div>' : ''}
         <p class="sg-subtitle" style="margin-top:20px;">Lo bueno</p>
-        ${goods.map(g => `<div class="threat-row ok"><span>${g}</span><span class="verdict">✓</span></div>`).join('')}
+        ${goods.map(g => `<div class="threat-row ok"><span>${g}</span><span class="verdict">\u2713</span></div>`).join('')}
         ${goods.length === 0 ? '<div class="empty">(nada destacable)</div>' : ''}
         <p class="sg-subtitle" style="margin-top:16px;">A mejorar</p>
-        ${bads.map(b => `<div class="threat-row bad"><span>${b}</span><span class="verdict">!</span></div>`).join('')}
-        ${bads.length === 0 ? '<div class="empty">Todo bien — mazo sólido</div>' : ''}`;
+        ${badItems.map(b => `<div class="threat-row bad"><span>${b.label}</span><span class="verdict">!</span></div>${renderSuggestBlock(b.suggestions)}`).join('')}
+        ${badItems.length === 0 ? '<div class="empty">Todo bien \u2014 mazo s\u00f3lido</div>' : ''}`;
     }
     if (n === 9) {
       return `<div class="status">Mazo completo — <strong>${totalDeckCount()} cartas</strong>.</div>
